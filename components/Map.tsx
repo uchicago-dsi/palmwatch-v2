@@ -41,7 +41,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   const activeUml = umlStore.currentUml;
 
   const getColor = (data: Record<string, any>) => {
-    const value = data[choroplethColumn];
+    const value = data?.[choroplethColumn];
     return colorFunction(value);
   };
   const { data, isLoading, isError } = useQuery<GeoJSON.FeatureCollection>(
@@ -54,7 +54,6 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     if (isLoading || isError) {
       return {};
     }
-
     const dataDict: { [key: string]: unknown } = {};
     for (const row of dataTable) {
       // @ts-ignore

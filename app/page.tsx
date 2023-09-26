@@ -4,6 +4,7 @@ import queryClient from "@/utils/getMillData";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import { BrandInfo } from "@/components/BrandInfo";
+import { MillInfo } from "@/components/MillInfo";
 
 export default function Home() {
   const data = queryClient.getFullMillInfo().objects();
@@ -17,10 +18,11 @@ export default function Home() {
             dataTable={data}
             geoIdColumn="UML ID"
             dataIdColumn="UML ID"
-            choroplethColumn="km_22_1"
+            choroplethColumn="km_22"
             choroplethScheme="forestLoss"
           />
-          <div className="max-w-[50%] p-4">
+          <div className="p-4 flex flex-row space-x-4">
+            <MillInfo />
             <BrandInfo />
           </div>
         </QueryProvider>

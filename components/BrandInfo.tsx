@@ -13,7 +13,7 @@ type BrandData = {
 export const BrandInfo: React.FC = () => {
   const uml = useActiveUmlStore((state) => state.currentUml);
   const { data, isLoading, isError } = useQuery<BrandData>(
-    [`brandInfo-${uml}`],
+    [`mill-${uml}`],
     async () => {
       return await fetch(`/api/mill/${uml}`).then((res) => res.json());
     }
@@ -36,7 +36,7 @@ export const BrandInfo: React.FC = () => {
 
   return (
     <div className="prose w-full">
-      <h3>Brand Usage: {uml}</h3>
+      <h3>Consumer Brand Usage</h3>
       <div className="overflow-x-auto max-h-96 card pt-0 shadow-xl bg-base-200 w-full">
         <table className="table table-pin-rows">
           <thead>

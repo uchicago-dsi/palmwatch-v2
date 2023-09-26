@@ -1,7 +1,7 @@
 import queryClient from "@/utils/getMillData";
 import { NextResponse } from "next/server";
 
-export function GET(req: Request, res: { params: { uml: string } }) {
+export function GET(_req: Request, res: { params: { uml: string } }) {
   const { uml } = res.params;
   if (!uml)
     return NextResponse.json(
@@ -9,6 +9,6 @@ export function GET(req: Request, res: { params: { uml: string } }) {
       { status: 400 }
     );
   const brands = queryClient.getBrandUsage(uml);
-  const impact = queryClient.getMillImpact(uml).objects();
-  return NextResponse.json({ brands, impact }, { status: 200 });
+  const info = queryClient.getUml(uml).objects();
+  return NextResponse.json({ brands, info }, { status: 200 });
 }
