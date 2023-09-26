@@ -29,7 +29,10 @@ class MillDataQuery {
       const year = d['report_year'];
       results[brand] = [...(results[brand] || []), +year];
     }
-    return results;
+    const sortedResults = Object.entries(results)
+      .sort(([k,v]) => v.length)
+      .map(([k, v]) => ({ brand: k, years: v.sort((a,b) => a-b) }))
+    return sortedResults;
   }
   
   getMillImpact(millId: string) {

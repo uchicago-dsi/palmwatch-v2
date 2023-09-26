@@ -9,9 +9,12 @@ import "@/app/styles/mapbox-geocoder.css";
 
 const noop = () => {};
 
-type GeocoderControlProps = Omit<GeocoderOptions, 'accessToken' | 'mapboxgl' | 'marker'> & {
+type GeocoderControlProps = Omit<
+  GeocoderOptions,
+  "accessToken" | "mapboxgl" | "marker"
+> & {
   mapboxAccessToken: string;
-  marker?: boolean | Omit<MarkerProps, 'longitude' | 'latitude'>;
+  marker?: boolean | Omit<MarkerProps, "longitude" | "latitude">;
 
   position: ControlPosition;
 
@@ -19,6 +22,18 @@ type GeocoderControlProps = Omit<GeocoderOptions, 'accessToken' | 'mapboxgl' | '
   onResults?: (e: object) => void;
   onResult?: (e: object) => void;
   onError?: (e: object) => void;
+  proximity?: object;
+  render?: (item: object) => string;
+  language?: string;
+  zoom?: number;
+  flyTo?: boolean;
+  placeholder?: string;
+  countries?: string;
+  types?: string;
+  minLength?: number;
+  limit?: number;
+  filter?: (item: object) => boolean;
+  origin?: string;
 };
 
 /* eslint-disable complexity,max-statements */

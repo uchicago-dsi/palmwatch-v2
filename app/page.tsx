@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import queryClient from "@/utils/getMillData";
-import { PalmwatchMapOuter } from "@/components/Map";
+import { PalmwatchMap } from "@/components/Map";
+import { QueryProvider } from "@/components/QueryProvider";
+import { BrandInfo } from "@/components/BrandInfo";
 
 export default function Home() {
   const data = queryClient.getFullMillInfo().objects();
@@ -9,17 +11,22 @@ export default function Home() {
   return (
     <main className="relative flex flex-col items-center justify-center">
       <div className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] h-[60vh] relative">
-        <PalmwatchMapOuter
-          geoDataUrl="/data/mill-catchment.geojson"
-          dataTable={data}
-          geoIdColumn="UML ID"
-          dataIdColumn="UML ID"
-          choroplethColumn="km_22_1"
-          choroplethScheme="forestLoss"
+        <QueryProvider>
+          <PalmwatchMap
+            geoDataUrl="/data/mill-catchment.geojson"
+            dataTable={data}
+            geoIdColumn="UML ID"
+            dataIdColumn="UML ID"
+            choroplethColumn="km_22_1"
+            choroplethScheme="forestLoss"
           />
+          <div className="max-w-[50%] p-4">
+            <BrandInfo />
+          </div>
+        </QueryProvider>
       </div>
       <p className="font-light text-gray-600 w-full max-w-lg text-center mt-6"></p>
-      <div className="w-full px-20 py-10 flex justify-between">
+      {/* <div className="w-full px-20 py-10 flex justify-between">
         <p>
           Built by UChicago{" "}
           <Link
@@ -50,7 +57,7 @@ export default function Home() {
           />
           <p className="font-light">Source</p>
         </Link>
-      </div>
+      </div> */}
     </main>
   );
 }

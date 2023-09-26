@@ -8,17 +8,14 @@ import Map, {
   AttributionControl,
 } from "react-map-gl";
 import React, { useMemo } from "react";
-import {
-  useQuery,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import bbox from "@turf/bbox";
 import { fitBounds } from "@math.gl/web-mercator";
 import GeocoderControl from "./Geocoder";
 import { colorFunctions } from "@/utils/colorFunction";
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useActiveUmlStore } from "@/stores/activeUml";
+import { Legend } from "./Legend";
 
 export type MapProps = {
   geoDataUrl: string;
@@ -28,17 +25,8 @@ export type MapProps = {
   choroplethColumn: string;
   choroplethScheme: keyof typeof colorFunctions;
 };
-const queryClient = new QueryClient();
 
-export const PalmwatchMapOuter: React.FC<MapProps> = (props) => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <PalmwatchMapInner {...props} />
-    </QueryClientProvider>
-  );
-};
-
-export const PalmwatchMapInner: React.FC<MapProps> = ({
+export const PalmwatchMap: React.FC<MapProps> = ({
   geoDataUrl,
   dataTable,
   geoIdColumn,
@@ -47,7 +35,11 @@ export const PalmwatchMapInner: React.FC<MapProps> = ({
   choroplethScheme,
 }) => {
   const { colorFunction, scale } = colorFunctions[choroplethScheme];
-  console.log(choroplethColumn);
+
+  const umlStore = useActiveUmlStore();
+  const setUml = umlStore.setUml;
+  const activeUml = umlStore.currentUml;
+
   const getColor = (data: Record<string, any>) => {
     const value = data[choroplethColumn];
     return colorFunction(value);
@@ -103,45 +95,61 @@ export const PalmwatchMapInner: React.FC<MapProps> = ({
       filled: true,
       extruded: false,
       wireframe: false,
+      pickable: true,
       beforeId: "bridge-minor-case",
+      getLineWidth: (d) =>
+        d?.properties?.[geoIdColumn] === activeUml ? 1000 : 1,
+      lineWidthUnits: "meters",
+      getLineColor: [0, 0, 0, 255],
+      lineWidthMinPixels: 0.5,
+      lineWidthMaxPixels: 5,
+      onClick: (info) => {
+        const id = info.object.properties![geoIdColumn] as string;
+        const data = dataDict?.[id] as any;
+        setUml(id);
+      },
       getFillColor: (d) => {
         const id = d.properties![geoIdColumn] as string;
         const data = dataDict?.[id] as any;
         const color = getColor(data);
-        return color as [number,number,number,number]
+        return color as [number, number, number, number];
       },
       updateTriggers: {
         getFillColor: [choroplethColumn, choroplethScheme],
+        getLineWidth: [activeUml],
       },
     }),
   ];
 
   return (
-    <Map
-      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-      mapStyle="mapbox://styles/dhalpern/cln0e32pu06ba01qxcgrp4gv9"
-      initialViewState={{
-        latitude: 0,
-        longitude: 0,
-        zoom: 1,
-        pitch: 0,
-        bearing: 0,
-        ...initialMapView,
-      }}
-      reuseMaps={true}
-    >
-      <GeocoderControl
-        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN!}
-        position="top-left"
-      />
-      <NavigationControl />
-      <AttributionControl
-        compact={true}
-        customAttribution={["© The University of Chicago"]}
-      />
+    <>
+      <Map
+        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+        mapStyle="mapbox://styles/dhalpern/cln0e32pu06ba01qxcgrp4gv9"
+        initialViewState={{
+          latitude: 0,
+          longitude: 0,
+          zoom: 1,
+          pitch: 0,
+          bearing: 0,
+          ...initialMapView,
+        }}
+        reuseMaps={true}
+      >
+        <GeocoderControl
+          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN!}
+          position="top-left"
+        />
+        <NavigationControl />
+        <AttributionControl
+          compact={true}
+          customAttribution={["© The University of Chicago"]}
+        />
 
-      <DeckGLOverlay layers={layers} interleaved={true} />
-    </Map>
+        <DeckGLOverlay layers={layers} interleaved={true} />
+      </Map>
+      <Legend colorStops={scale} />
+    </>
   );
 };
 function DeckGLOverlay(
