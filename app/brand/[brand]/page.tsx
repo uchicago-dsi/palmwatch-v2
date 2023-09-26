@@ -63,7 +63,9 @@ export default function Page({ params }: { params: { brand: string } }) {
           <p>Source PDFs for data</p>
           <ul>
             {disclosurePdfs.map((pdf) => (
-              <li>
+              <li
+                key={pdf.filename}
+              >
                 <a
                   className="link-primary"
                   href={`${pdf.filename}`}
