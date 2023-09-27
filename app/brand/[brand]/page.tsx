@@ -14,7 +14,7 @@ const cols = range(1, 23).map((i) => `km_${i}`);
 export default function Page({ params }: { params: { brand: string } }) {
   const brand = params.brand;
   const data = queryClient.getBrandInfo(brand, cols);
-  const disclosurePdfs = disclosures?.[brand as keyof typeof disclosures];
+  // const disclosurePdfs = disclosures?.[brand as keyof typeof disclosures];
 
   return (
     <main className="relative flex flex-col items-center justify-center w-[90%] max-w-[1400px] mx-auto">
@@ -57,7 +57,7 @@ export default function Page({ params }: { params: { brand: string } }) {
           </div>
         </div>
       </div>
-      {disclosurePdfs && (
+      {/* {disclosurePdfs && (
         <div className="p-4 card shadow-xl bg-base-200 my-4">
           <h2 className="text-2xl font-bold">Disclosure PDFs</h2>
           <p>Source PDFs for data</p>
@@ -79,7 +79,7 @@ export default function Page({ params }: { params: { brand: string } }) {
             ))}
           </ul>
         </div>
-      )}
+      )} */}
     </main>
   );
 }
