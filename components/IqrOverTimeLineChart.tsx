@@ -1,6 +1,7 @@
 "use client"
 import React, { PureComponent } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, ComposedChart } from 'recharts';
+import { DataProvider } from "./DataProvider";
 
 export type IqrOverTimeProps = {
   data: Array<Record<string, unknown>> | object[];
@@ -32,3 +33,13 @@ export const IqrOverTime: React.FC<IqrOverTimeProps> = ({data}) => {
       </ResponsiveContainer>
     );
   }
+  
+  export const ServerIqr: React.FC<{ dataUrl: string }> = ({ dataUrl }) => {
+    return (
+      <DataProvider<{ timeseries: any }> dataUrl={dataUrl}>
+        {(data) => {
+          return <IqrOverTime data={data.timeseries} />;
+        }}
+      </DataProvider>
+    );
+  };

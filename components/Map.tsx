@@ -16,6 +16,7 @@ import { colorFunctions } from "@/utils/colorFunction";
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useActiveUmlStore } from "@/stores/activeUml";
 import { Legend } from "./Legend";
+import { DataProvider } from "./DataProvider";
 
 export type MapProps = {
   geoDataUrl: string;
@@ -160,3 +161,17 @@ function DeckGLOverlay(
   overlay.setProps(props);
   return null;
 }
+
+
+export const ServerMap: React.FC<{ dataUrl: string } & MapProps> = ({
+  dataUrl,
+  ...props
+}) => {
+  return (
+    <DataProvider<{ umlInfo: MapProps["dataTable"] }> dataUrl={dataUrl}>
+      {(data) => {
+        return <PalmwatchMap {...props} dataTable={data.umlInfo} />;
+      }}
+    </DataProvider>
+  );
+};
