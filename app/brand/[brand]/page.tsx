@@ -2,11 +2,12 @@ import React from "react";
 import { ServerIqr } from "@/components/IqrOverTimeLineChart";
 import { ServerMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
-import { disclosures } from "@/config/disclosures";
+import brands from "@/config/brands";
 
 export default function Page({ params }: { params: { brand: string } }) {
   const brand = params.brand;
-  const disclosurePdfs = disclosures?.[brand as keyof typeof disclosures];
+  const brandInfo = brands[brand as keyof typeof brands];
+  const { disclosures, description, descriptionAttribution } = brandInfo;
 
   return (
     <main className="relative flex flex-col items-center justify-center w-[90%] max-w-[1400px] mx-auto">
@@ -15,7 +16,9 @@ export default function Page({ params }: { params: { brand: string } }) {
           <h1 className="text-4xl font-bold">{brand}</h1>
           <h2 className="text-xl">Palm Oil Usage</h2>
         </div>
-        <p>brand info...</p>
+        <div>
+          <p>{description} <i>(description via {descriptionAttribution}</i></p>
+        </div>
       </div>
       <div className="flex flex-row space-x-4 w-full">
         <div className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto  w-full">
@@ -47,12 +50,12 @@ export default function Page({ params }: { params: { brand: string } }) {
           </div>
         </div>
       </div>
-      {disclosurePdfs && (
+      {disclosures && (
         <div className="p-4 card shadow-xl bg-base-200 my-4">
           <h2 className="text-2xl font-bold">Disclosure PDFs</h2>
           <p>Source PDFs for data</p>
           <ul>
-            {disclosurePdfs.map((pdf) => (
+            {disclosures.map((pdf) => (
               <li key={pdf.filename}>
                 <a
                   className="link-primary"

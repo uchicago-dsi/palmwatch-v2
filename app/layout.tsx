@@ -28,7 +28,7 @@ export default function RootLayout({
         {/* align flex to top */}
         <div className="navbar bg-base-100 align-top justify-start items-start max-h-12 overflow-visible">
           <div className="flex-1">
-            <a className="btn btn-ghost normal-case text-xl">palmwatch</a>
+            <Link href="/" className="btn btn-ghost normal-case text-xl">palmwatch</Link>
           </div>
           <div className="flex-none">
             <div className="flex flex-row space-x-2">

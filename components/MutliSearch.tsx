@@ -25,7 +25,7 @@ export const MultiSearch: React.FC<{
   const handleSearch = useCallback(
     debounce((search: string) => {
       setCurrentListSearch(search);
-    }, 500),
+    }, 100),
     []
   );
 
@@ -59,7 +59,7 @@ export const MultiSearch: React.FC<{
             className="input input-bordered w-full max-w-xs"
           />
           {Boolean(menuOpen && currentListItems.length) && (
-            <div className="absolute z-[1] w-full bg-base-100 rounded-box shadow-lg">
+            <div className="absolute z-[1] w-full bg-base-100 rounded-box shadow-lg flex flex-col">
               {currentListItems.map((item) => (
                 <Link className="p-2" href={item.href} key={item.label}>
                   {item.label}
