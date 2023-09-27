@@ -2,11 +2,11 @@ import React from "react";
 import { ServerIqr } from "@/components/IqrOverTimeLineChart";
 import { ServerMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
-import { disclosures } from "@/config/disclosures";
+// import { disclosures } from "@/config/disclosures";
 
 export default async function Page({ params }: { params: { brand: string } }) {
   const brand = params.brand;
-  const disclosurePdfs = disclosures?.[brand as keyof typeof disclosures];
+  const disclosurePdfs = null// disclosures?.[brand as keyof typeof disclosures];
 
   return (
     <main className="relative flex flex-col items-center justify-center w-[90%] max-w-[1400px] mx-auto">
