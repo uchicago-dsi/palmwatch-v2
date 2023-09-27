@@ -89,7 +89,10 @@ class MillDataQuery {
   }
 
   getFullMillInfo() {
-    return this.uml
+    const t0 = performance.now()
+    const data = this.uml
+    console.log(`getFullMillInfo took ${performance.now() - t0}ms`)
+    return data
     // .join(this.millImpact, ['UML ID', 'UML ID'])
   }
   getSearchList() {

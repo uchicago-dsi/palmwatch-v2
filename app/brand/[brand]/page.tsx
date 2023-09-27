@@ -11,10 +11,14 @@ const range = (start: number, end: number) => {
 };
 const cols = range(1, 23).map((i) => `km_${i}`);
 
-export default function Page({ params }: { params: { brand: string } }) {
-  const brand = params.brand;
+const getData = async (brand: string) => {
   const data = queryClient.getBrandInfo(brand, cols);
-  // const disclosurePdfs = disclosures?.[brand as keyof typeof disclosures];
+  return data;
+};
+export default async function Page({ params }: { params: { brand: string } }) {
+  const brand = params.brand;
+  const data = await getData(brand);
+  const disclosurePdfs = disclosures?.[brand as keyof typeof disclosures];
 
   return (
     <main className="relative flex flex-col items-center justify-center w-[90%] max-w-[1400px] mx-auto">
