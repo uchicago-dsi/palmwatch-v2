@@ -12,7 +12,7 @@ type UmlData = JsonData<keyof typeof umlData>
 type CompanyData = JsonData<keyof typeof companyData>
 
 class MillDataQuery { 
-  companies = table(companyData);
+  companies = table(companyData).orderby('report_year');
   uml = table(umlData);
   millImpact = table(millImpactData);
 
@@ -37,48 +37,34 @@ class MillDataQuery {
   }
 
   getBrandInfo(brand: string, cols: string[], quantiles: number[] = [0.25, 0.5, 0.75]) {
-    const companies = this.companies.filter(escape((d: CompanyData) => d['consumer_brand'] === brand)).objects() as CompanyData[];
-    const results: {[key: string]: number[]} = {}
-    for (const d of companies) {
-      const umlId = d['uml_id'];
-      const year = d['report_year'];
-      results[umlId] = [...(results[umlId] || []), +year];
-    }
-    const sortedResults = this.sortObject(results, 'uml');
-    const umls = sortedResults.map(f => f.uml)
-    const years = sortedResults.map(f => f.years)
-    const filteredTable = table({
-      uml: umls,
-      years: years
-    })
-    const umlResult = filteredTable.join(this.uml, ['uml', 'UML ID'])
-    const timeseries: Record<string, number|string> = {}
-    const columnRollup = cols.reduce((acc, cur) => {
-      quantiles.forEach(q => {
-        const colName = `${cur}-${q}`
-        acc[colName] = op.quantile(cur, q)
+    let t0 = performance.now();
+    const companies = this.companies
+      .filter(escape((d: CompanyData) => d['consumer_brand'] === brand))
+      .groupby('uml_id')
+      .derive({
+        years: (d: CompanyData) => op.array_agg_distinct(d['report_year'])
       })
-      return acc
-    }, {} as Record<string, any>)
-    const rollup = umlResult.rollup(columnRollup).objects()
-    const output = cols.map((col,i) => {
-      const yearText = col.split('_')[1]
-      const year = parseInt(`20${yearText.length === 1 ? `0${yearText}` : yearText}}`)
-      const data = {
-        year,
+      .select('uml_id', 'years')
+      .join(this.uml, ['uml_id', 'UML ID'])
+      
+    const t1 = performance.now();
+    const count = companies.numRows()
+    const indices = quantiles.map(q => Math.floor(count - (q * count)))
+    const quantileResults: Record<string, any>[] = [] 
+
+    for (const col of cols) {
+      const sorted = companies.orderby(col).column(col)!
+      const tempResults: Record<string,any> = {
         col
       }
-      quantiles.forEach(q => {
-        const colName = `${col}-${q}`
-        // @ts-ignore
-        data[`q${q}`] = rollup[0][colName]
-      })
-      return data
-    })
-        
+      for (let i=0; i<indices.length;i++){
+        tempResults[`q${quantiles[i]}`] = sorted.get(indices[i])
+      }
+      quantileResults.push(tempResults)
+    }
     return {
-      umlInfo: umlResult.objects(),
-      timeseries: output
+      umlInfo: companies.objects(),
+      timeseries: quantileResults
     }
   }
   
