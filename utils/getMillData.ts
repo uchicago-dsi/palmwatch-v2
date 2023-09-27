@@ -37,7 +37,7 @@ class MillDataQuery {
   }
 
   getBrandInfo(brand: string, cols: string[], quantiles: number[] = [0.25, 0.5, 0.75]) {
-    let t0 = performance.now();
+    const t0 = performance.now()
     const companies = this.companies
       .filter(escape((d: CompanyData) => d['consumer_brand'] === brand))
       .groupby('uml_id')
@@ -47,21 +47,35 @@ class MillDataQuery {
       .select('uml_id', 'years')
       .join(this.uml, ['uml_id', 'UML ID'])
       
-    const t1 = performance.now();
     const count = companies.numRows()
-    const indices = quantiles.map(q => Math.floor(count - (q * count)))
+    const indices = quantiles.map(q => Math.floor(q * count))
     const quantileResults: Record<string, any>[] = [] 
-
     for (const col of cols) {
-      const sorted = companies.orderby(col).column(col)!
-      const tempResults: Record<string,any> = {
-        col
-      }
-      for (let i=0; i<indices.length;i++){
-        tempResults[`q${quantiles[i]}`] = sorted.get(indices[i])
-      }
-      quantileResults.push(tempResults)
+      const _yearSuffix = col.split("_")[1]
+      const year = parseInt(`20${_yearSuffix.length === 1 ? `0${_yearSuffix}` : _yearSuffix}`)
+      const _d = companies.select(col).rollup({
+        'q0.25': op.quantile(col, 0.25),
+        'q0.5': op.quantile(col, 0.5),
+        'q0.75': op.quantile(col, 0.75),
+      })
+      quantileResults.push({
+        ..._d.objects()[0],
+        year
+      })
+      // const _d = companies.select(col).orderby(col)
+      // const sorted = _d.column(col)!
+      // if (col === 'km_1'){
+      //   console.log(_d.objects())
+      // }
+      // const tempResults: Record<string,any> = {
+      //   year
+      // }
+      // for (let i=0; i<indices.length;i++){
+      //   tempResults[`q${quantiles[i]}`] = sorted.get(indices[i])
+      // }
+      // quantileResults.push(tempResults)
     }
+    console.log(`getBrandInfo took ${performance.now() - t0}ms`)
     return {
       umlInfo: companies.objects(),
       timeseries: quantileResults
