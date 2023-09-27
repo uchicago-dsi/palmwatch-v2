@@ -27,7 +27,6 @@ export default function Home() {
           </div>
         </QueryProvider>
       </div>
-      <p className="font-light text-gray-600 w-full max-w-lg text-center mt-6"></p>
       {/* <div className="w-full px-20 py-10 flex justify-between">
         <p>
           Built by UChicago{" "}

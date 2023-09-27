@@ -1,10 +1,8 @@
-import { DataProvider } from "@/components/DataProvider";
-import { IqrOverTime, IqrOverTimeOuter, ServerIqr } from "@/components/IqrOverTimeLineChart";
-import { PalmwatchMap, ServerMap } from "@/components/Map";
+import React from "react";
+import { ServerIqr } from "@/components/IqrOverTimeLineChart";
+import { ServerMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import { disclosures } from "@/config/disclosures";
-import queryClient from "@/utils/getMillData";
-import React from "react";
 
 export default async function Page({ params }: { params: { brand: string } }) {
   const brand = params.brand;
@@ -35,7 +33,6 @@ export default async function Page({ params }: { params: { brand: string } }) {
                 choroplethColumn="km_22"
                 choroplethScheme="forestLoss"
               />
-
             </QueryProvider>
           </div>
         </div>
