@@ -17,7 +17,7 @@ export default function Page({ params }: { params: { brand: string } }) {
           <h2 className="text-xl">Palm Oil Usage</h2>
         </div>
         <div>
-          <p>{description} <i>(description via {descriptionAttribution}</i></p>
+          <p>{description} <i>(description via {descriptionAttribution})</i></p>
         </div>
       </div>
       <div className="flex flex-row space-x-4 w-full">
