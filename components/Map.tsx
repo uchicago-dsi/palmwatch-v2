@@ -7,13 +7,13 @@ import Map, {
   useControl,
   AttributionControl,
 } from "react-map-gl";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import bbox from "@turf/bbox";
 import { fitBounds } from "@math.gl/web-mercator";
 import GeocoderControl from "./Geocoder";
 import { colorFunctions } from "@/utils/colorFunction";
-import 'mapbox-gl/dist/mapbox-gl.css';
+import "mapbox-gl/dist/mapbox-gl.css";
 import { useActiveUmlStore } from "@/stores/activeUml";
 import { Legend } from "./Legend";
 import { DataProvider } from "./DataProvider";
@@ -35,6 +35,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   choroplethColumn,
   choroplethScheme,
 }) => {
+  const mapRef = React.useRef<typeof Map>(null);
   const { colorFunction, scale } = colorFunctions[choroplethScheme];
 
   const umlStore = useActiveUmlStore();
@@ -75,6 +76,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       width: 800,
       height: 600,
       bounds,
+      padding: 100,
     });
     return {
       initialMapView: {
@@ -85,6 +87,18 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       dataDict,
     };
   }, [data]);
+
+  useEffect(() => {
+    // @ts-ignore
+    mapRef?.current?.flyTo({
+      center: [initialMapView?.longitude, initialMapView?.latitude],
+      zoom: initialMapView?.zoom,
+    });
+  }, [
+    initialMapView?.latitude,
+    initialMapView?.longitude,
+    initialMapView?.zoom,
+  ]);
 
   const layers = [
     new GeoJsonLayer({
@@ -134,6 +148,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           bearing: 0,
           ...initialMapView,
         }}
+        ref={mapRef}
         reuseMaps={true}
       >
         <GeocoderControl
@@ -161,7 +176,6 @@ function DeckGLOverlay(
   overlay.setProps(props);
   return null;
 }
-
 
 export const ServerMap: React.FC<{ dataUrl: string } & MapProps> = ({
   dataUrl,

@@ -1,39 +1,12 @@
-"use client";
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useActiveUmlStore } from "@/stores/activeUml";
-import { maxYear, minYear, yearRange } from "@/config/years";
+import { yearRange } from "@/config/years";
 
-type BrandData = {
-  brands: Array<{
-    brand: string;
-    years: number[];
-  }>;
-};
-export const BrandInfo: React.FC = () => {
-  const uml = useActiveUmlStore((state) => state.currentUml);
-  const { data, isLoading, isError } = useQuery<BrandData>(
-    [`mill-${uml}`],
-    async () => {
-      return await fetch(`/api/mill/${uml}`).then((res) => res.json());
-    }
-  );
+export type BrandData = Array<{
+  consumer_brand: string;
+  years: Array<string|number>
+}>;
 
-  if (!uml) {
-    return null;
-  }
-
-  if (isLoading || isError) {
-    return <p>Loading...</p>;
-  }
-  if (!data.brands.length) {
-    return (
-      <p>
-        No brand usage found for this mill from {minYear} to {maxYear}.
-      </p>
-    );
-  }
-
+export const BrandInfo: React.FC<{ data: BrandData }> = ({ data }) => {
   return (
     <div className="prose w-full">
       <h3>Consumer Brand Usage</h3>
@@ -48,12 +21,12 @@ export const BrandInfo: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {data.brands.map((brand) => (
-              <tr key={brand.brand}>
+            {data.map((brand) => (
+              <tr key={brand.consumer_brand}>
                 <>
-                  <td className="px-2">{brand.brand}</td>
+                  <td className="px-2">{brand.consumer_brand}</td>
                   {yearRange.map((year) => (
-                    <td key={year}>{brand.years.includes(year) ? "x" : ""}</td>
+                    <td key={year}>{brand.years.includes(`${year}`) ? "x" : ""}</td>
                   ))}
                 </>
               </tr>
