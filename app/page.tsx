@@ -5,9 +5,10 @@ import { MillInfo } from "@/components/MillInfo";
 import { BrandInfoClient } from "@/components/BrandInfoClient";
 import Link from "next/link";
 import { ScrollToButton } from "@/components/ScrollToButton";
-
+import path from 'path';
 export default async function Home() {
-  await queryClient.init();
+  const dataDir = path.join(process.cwd(), 'public', 'data');
+  await queryClient.init(dataDir);
   const data = queryClient.stringifyBigInts(
     queryClient.getFullMillInfo().objects()
   );

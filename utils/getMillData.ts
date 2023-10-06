@@ -3,85 +3,17 @@ import ColumnTable from "arquero/dist/types/table/column-table";
 
 type UmlData = any;
 type CompanyData = any;
-
-const umlColumns = [
-  "UML ID",
-  "Group Name",
-  "Parent Company",
-  "Mill Name",
-  "RSPO Status",
-  "RSPO Type",
-  "Date RSPO Certification Status",
-  "Latitude",
-  "Longitude",
-  "GPS coordinates",
-  "ISO",
-  "Country",
-  "Province",
-  "District",
-  "Confidence level",
-  "Alternative name",
-  "km_forest_area_00",
-  "ha_forest_area_00",
-  "km_0",
-  "ha_0",
-  "km_1",
-  "ha_1",
-  "km_2",
-  "ha_2",
-  "km_3",
-  "ha_3",
-  "km_4",
-  "ha_4",
-  "km_5",
-  "ha_5",
-  "km_6",
-  "ha_6",
-  "km_7",
-  "ha_7",
-  "km_8",
-  "ha_8",
-  "km_9",
-  "ha_9",
-  "km_10",
-  "ha_10",
-  "km_11",
-  "ha_11",
-  "km_12",
-  "ha_12",
-  "km_13",
-  "ha_13",
-  "km_14",
-  "ha_14",
-  "km_15",
-  "ha_15",
-  "km_16",
-  "ha_16",
-  "km_17",
-  "ha_17",
-  "km_18",
-  "ha_18",
-  "km_19",
-  "ha_19",
-  "km_20",
-  "ha_20",
-  "km_21",
-  "ha_21",
-  "km_22",
-  "ha_22",
-];
-
-const companiesColumns = ["consumer_brand", "report_year", "UML ID"];
 class MillDataQuery {
   companies?: ColumnTable;
   uml?: ColumnTable;
   initialized: boolean = false;
 
-  async init() {
+  async init(basePath:string = "./public/data/") {
+    console.log(basePath)
     if (this.initialized) return;
     const [uml, companies] = await Promise.all([
-      loadArrow("./public/data/uml.arrow", { columns: all() }),
-      loadArrow("./public/data/companies.arrow", { columns: all() }),
+      loadArrow(`${basePath}/uml.arrow`, { columns: all() }),
+      loadArrow(`${basePath}/companies.arrow`, { columns: all() }),
     ]);
 
     this.uml = uml;
@@ -238,5 +170,4 @@ class MillDataQuery {
 }
 
 const queryClient = new MillDataQuery();
-queryClient.init();
 export default queryClient;

@@ -4,12 +4,15 @@ import { BrandInfo } from "@/components/BrandInfo";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
+import path from "path";
 // years from 2001 to 2022
 const yearRange = Array.from({ length: 22 }, (_, i) => 2001 + i);
 
 export default async function Page({ params }: { params: { mill: string } }) {
   const millName = decodeURIComponent(params.mill);
-  await queryClient.init();
+  const dataDir = path.join(process.cwd(), 'public', 'data');
+  await queryClient.init(dataDir);
+
   const data = queryClient.stringifyBigInts(
     queryClient.getMillName(millName).objects()
   );

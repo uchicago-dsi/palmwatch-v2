@@ -1,6 +1,6 @@
 import queryClient from "@/utils/getMillData";
 import { NextResponse } from "next/server";
-
+import path from "path";
 const range = (start: number, end: number) => {
   const length = end - start;
   return Array.from({ length }, (_, i) => start + i);
@@ -14,8 +14,9 @@ export async function GET(_req: Request, res: { params: { brand: string } }) {
       { error: new Error("No brand provided") },
       { status: 400 }
     );
-
-  await queryClient.init();
+    const dataDir = path.join(process.cwd(), 'public', 'data');
+    await queryClient.init(dataDir);
+  
   const data = queryClient.getBrandInfo(brand, cols);
   return NextResponse.json({ ...data }, { status: 200 });
 }

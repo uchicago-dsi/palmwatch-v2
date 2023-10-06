@@ -24,10 +24,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const dataDir = path.join(process.cwd(), 'public', 'data');
-  const files = await fs.readdir(dataDir);
-  console.log('FILE LIST LAYOUT', files)
-
-  await queryClient.init();
+  await queryClient.init(dataDir);
   const searchList = queryClient.getSearchList();
   return (
     <html lang="en" data-theme="lemonade">
