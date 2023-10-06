@@ -1,6 +1,9 @@
-import companyData from "@/utils/company_columnar.json";
+import yearRange from "../public/data/year_meta.json";
+const minYear = Math.min(...yearRange)
+const maxYear = Math.max(...yearRange)
 
-const years = companyData.report_year
-export const minYear = Math.min(...years)
-export const maxYear = Math.max(...years)
-export const yearRange = Array.from({length: maxYear - minYear + 1}, (_, i) => i + minYear)
+export {
+  yearRange,
+  minYear,
+  maxYear
+}
