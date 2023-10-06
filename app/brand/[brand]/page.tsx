@@ -45,7 +45,7 @@ export default function Page({ params }: { params: { brand: string } }) {
           </h3>
           <div className="h-[60vh] relative w-full">
             <QueryProvider>
-              <ServerIqr dataUrl={`/api/brand/${brand}`} />
+              <ServerIqr dataUrl={`/api/brand/${brand}`} type="brand" />
             </QueryProvider>
           </div>
         </div>
