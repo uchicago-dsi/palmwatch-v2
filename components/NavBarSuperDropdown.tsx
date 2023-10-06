@@ -148,8 +148,8 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
                       </div>
                     )}
                   </div>
-                  {currentItems.map((column: any[]) => (
-                    <div className="flex flex-col space-y-1 flex-1">
+                  {currentItems.map((column: any[], idx: number) => (
+                    <div className="flex flex-col space-y-1 flex-1" key={idx}>
                       {column.map((option) => (
                         <div key={option.label}>
                           <Link

@@ -22,7 +22,7 @@ export default function Page() {
       <h2>Methodology</h2>
       <p>
         Public information coming from various consumer brands is matched with
-        data for the Global Forest Watch's Universal Mill List. A calculation in
+        data for the Global Forest Watch{`'`}s Universal Mill List. A calculation in
         which the previous two years of deforestation is used to calculate
         deforestation risk score.
       </p>
@@ -31,19 +31,19 @@ export default function Page() {
         <ul>
           <li>
             <b>Treeloss Sum</b> - Sum of treeloss over time, where land has gone
-            from "forest" to "non-forest" state.{" "}
+            from {`"`}forest{`"`} to {`"`}non-forest{`"`} state.{" "}
           </li>
           <li>
             <b>Land Area</b> - Pixels where there is mapped land compared to no
             ocean or no data.
           </li>
           <li>
-            <b>Forest Area</b> - Pixels where there is land was in a "forest"
+            <b>Forest Area</b> - Pixels where there is land was in a {`"`}forest{`"`}
             state in 2000.
           </li>
           <li>
             <b>Treeloss 2019</b> - Treeloss in 2019, where land has gone from
-            "forest" to "non-forest" state.
+            {`"`}forest{`"`} to {`"`}non-forest{`"`} state.
             <b></b>
           </li>
           <li>

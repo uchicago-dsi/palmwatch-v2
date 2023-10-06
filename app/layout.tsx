@@ -55,7 +55,7 @@ export default async function RootLayout({
             </div>
           </div>
         </div> */}
-        <NavBar searchList={searchList} >
+        <NavBar searchList={searchList} currentPage="">
         {children}
         </NavBar>
       </body>

@@ -148,6 +148,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           bearing: 0,
           ...initialMapView,
         }}
+        // @ts-ignore
         ref={mapRef}
         reuseMaps={true}
       >
