@@ -17,6 +17,8 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useActiveUmlStore } from "@/stores/activeUml";
 import { Legend } from "./Legend";
 import { DataProvider } from "./DataProvider";
+import { useTooltipStore } from "@/stores/tooltipStore";
+import { MapTooltip } from "./MapTooltip";
 
 export type MapProps = {
   geoDataUrl: string;
@@ -37,7 +39,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
 }) => {
   const mapRef = React.useRef<typeof Map>(null);
   const { colorFunction, scale } = colorFunctions[choroplethScheme];
-
+  const setData = useTooltipStore(state => state.setData);
+  console.log('rerender')
   const umlStore = useActiveUmlStore();
   const setUml = umlStore.setUml;
   const activeUml = umlStore.currentUml;
@@ -117,6 +120,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       getLineColor: [0, 0, 0, 255],
       lineWidthMinPixels: 0.5,
       lineWidthMaxPixels: 5,
+      onHover: ({x,y,object}) => object ? setData(x,y,object.properties['UML ID']) : setData(null,null,null),
       onClick: (info) => {
         const id = info.object.properties![geoIdColumn] as string;
         const data = dataDict?.[id] as any;
@@ -164,6 +168,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
 
         <DeckGLOverlay layers={layers} interleaved={true} />
       </Map>
+      <MapTooltip />
       <Legend colorStops={scale} />
     </>
   );

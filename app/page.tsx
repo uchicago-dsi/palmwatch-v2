@@ -3,13 +3,72 @@ import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import { MillInfo } from "@/components/MillInfo";
 import { BrandInfoClient } from "@/components/BrandInfoClient";
+import Link from "next/link";
+import { ScrollToButton } from "@/components/ScrollToButton";
 
 export default async function Home() {
-  await queryClient.init()
-  const data = queryClient.stringifyBigInts(queryClient.getFullMillInfo().objects());
+  await queryClient.init();
+  const data = queryClient.stringifyBigInts(
+    queryClient.getFullMillInfo().objects()
+  );
   return (
-    <main className="relative flex flex-col items-center justify-center">
-      <div className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] h-[60vh] relative">
+    <main className="flex flex-col items-center justify-center h-auto">
+      {/* fullheight hero div */}
+      <section className="relative w-full h-[100vh] overflow-hidden bg-black mb-4">
+        <video
+          autoPlay
+          muted
+          loop
+          className="absolute top-0 left-0 w-full h-full object-cover opacity-25"
+        >
+          <source src="cover-video.mp4" type="video/mp4"></source>
+          {/* <source src="path/to/video.webm" type="video/webm"></source> */}
+          {/* Your browser does not support the video tag. */}
+        </video>
+        <div className="relative z-[1] flex flex-col justify-center items-center h-full p-4 text-white">
+          <h1 className="text-6xl font-bold">PalmWatch</h1>
+          <h2 className="text-3xl">
+            Explore the impact of palm oil production on deforestation
+          </h2>
+          <div className="flex flex-col space-y-4 mt-10 items-center">
+            {/* search by consumer brand, mill, supplier, group */}
+            <p>Explore by</p>
+            <div className="flex flex-row space-x-4 mb-4">
+              <Link className="btn btn-outline btn-info" href="/brand">
+                Brands
+              </Link>
+              <Link className="btn btn-outline btn-info" href="/mill">
+                Mills
+              </Link>
+              <Link className="btn btn-outline btn-info" href="/group">
+                Groups
+              </Link>
+              <Link className="btn btn-outline btn-info" href="/supplier">
+                Suppliers
+              </Link>
+            </div>
+            {/* onclick scroll to #homepage-map div*/}
+            <ScrollToButton
+              className="btn btn-oultine btn-neutral mt-4"
+              target="homepage-map"
+            >
+              Explore the map now
+            </ScrollToButton>
+          </div>
+        </div>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.youtube.com/watch?v=YKJcN81mZgA"
+          className="absolute bottom-1 right-1 text-white/50 text-xs z-[1]"
+        >
+          Cover Video by Sum Mayyah Channel | Creative Commons Attribution
+        </a>
+      </section>
+      <div
+        id="homepage-map"
+        className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] h-[60vh] relative"
+      >
         <QueryProvider>
           <PalmwatchMap
             geoDataUrl="/data/mill-catchment.geojson"

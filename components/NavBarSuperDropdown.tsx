@@ -76,7 +76,8 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
     [options]
   );
   const { hasPages, items } = useMemo(
-    () => paginateOptions(alphabeticalOptions, columns, rows, searchTerm, "label"),
+    () =>
+      paginateOptions(alphabeticalOptions, columns, rows, searchTerm, "label"),
     [alphabeticalOptions, searchTerm]
   );
   useEffect(() => {
@@ -123,55 +124,55 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
           ></button>
           <div className="w-full absolute top-[100%] p-4 left-0 bg-neutral-100 shadow-xl pr-4">
             <div className={`flex flex-row overflow-x-auto space-x-4`}>
-                  <div className="p-4 flex-col justify-around border-r-2 border-r-neutral-400 space-y-4">
-                      <h3 className="text-lg text-bold">{label}</h3>
-                      <div>
-                      <Link href={path} className="btn-link">{label} Overview</Link></div>
-                      <InnerTextComponent onChange={setSearchTerm} label={label} />
-                    {hasPages && (
-                      <div>
-                        <button
-                          className="join-item btn"
-                          onClick={() => pageAction("prev")}
-                        >
-                          «
-                        </button>
-                        <button className="join-item btn">
-                          Page {currentPage + 1} / {pages}
-                        </button>
-                        <button
-                          className="join-item btn"
-                          onClick={() => pageAction("next")}
-                        >
-                          »
-                        </button>
-                      </div>
-                    )}
+              <div className="p-4 flex-col justify-around border-r-2 border-r-neutral-400 space-y-4">
+                <h3 className="text-lg text-bold">{label}</h3>
+                <div>
+                  <Link href={path} className="btn-link">
+                    {label} Overview
+                  </Link>
+                </div>
+                <InnerTextComponent onChange={setSearchTerm} label={label} />
+                {hasPages && (
+                  <div>
+                    <button
+                      className="join-item btn"
+                      onClick={() => pageAction("prev")}
+                    >
+                      «
+                    </button>
+                    <button className="join-item btn">
+                      Page {currentPage + 1} / {pages}
+                    </button>
+                    <button
+                      className="join-item btn"
+                      onClick={() => pageAction("next")}
+                    >
+                      »
+                    </button>
                   </div>
-                  {currentItems.map((column: any[], idx: number) => (
-                    <div className="flex flex-col space-y-1 flex-1" key={idx}>
-                      {column.map((option) => (
-                        <div key={option.label}>
-                          <Link
-                            className="btn-link"
-                            href={`${path}/${option.href}`}
-                          >
-                            <div className="flex flex-col">
-                              {Boolean(option.imgPath) && (
-                                <img
-                                  src={option.imgPath}
-                                  alt={option.label}
-                                  className="w-20 h-20"
-                                />
-                              )}
-                              <p>{option.label}</p>
-                            </div>
-                          </Link>
+                )}
+              </div>
+              {currentItems.map((column: any[], idx: number) => (
+                <div className="flex flex-col space-y-1 flex-1" key={idx}>
+                  {column.map((option) => (
+                    <div key={option.label}>
+                      <Link className="btn-link" href={option.href}>
+                        <div className="flex flex-col">
+                          {Boolean(option.imgPath) && (
+                            <img
+                              src={option.imgPath}
+                              alt={option.label}
+                              className="w-20 h-20"
+                            />
+                          )}
+                          <p>{option.label}</p>
                         </div>
-                      ))}
+                      </Link>
                     </div>
                   ))}
                 </div>
+              ))}
+            </div>
           </div>
         </>
       )}
@@ -179,10 +180,10 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
   );
 };
 
-const InnerTextComponent: React.FC<{ label: string, onChange: (s: string) => void }> = ({
-  onChange,
-  label
-}) => {
+const InnerTextComponent: React.FC<{
+  label: string;
+  onChange: (s: string) => void;
+}> = ({ onChange, label }) => {
   const [innerSearchTerm, setInnerSearchTerm] = React.useState("");
 
   const debounceOnChange = useCallback(
