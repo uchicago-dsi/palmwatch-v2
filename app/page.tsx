@@ -14,7 +14,7 @@ export default async function Home() {
   return (
     <main className="flex flex-col items-center justify-center h-auto">
       {/* fullheight hero div */}
-      <section className="relative w-full h-[100vh] overflow-hidden bg-black mb-4">
+      <section className="relative w-full h-[100vh] overflow-hidden bg-black">
         <video
           autoPlay
           muted
@@ -65,10 +65,23 @@ export default async function Home() {
           Cover Video by Sum Mayyah Channel | Creative Commons Attribution
         </a>
       </section>
-      <div
+
+      <section className="max-w-none w-full h-[100vh] flex flex-row bg-neutral-200 mb-4 prose space-x-4 justify-center items-center">
+        <div className="flex max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
+          <h3>How is palm oil produced?</h3>
+        </div>
+        <div className="flex max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
+          <h3>Why is supply chain transparency important?</h3>
+        </div>
+        <div className="flex max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
+          <h3>What can this site help me learn?</h3>
+        </div>
+      </section>
+      <section
         id="homepage-map"
         className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] h-[60vh] relative"
       >
+        <h3>Palm Oil Mill Deforestation Map</h3>
         <QueryProvider>
           <PalmwatchMap
             geoDataUrl="/data/mill-catchment.geojson"
@@ -83,7 +96,7 @@ export default async function Home() {
             <BrandInfoClient />
           </div>
         </QueryProvider>
-      </div>
+      </section>
       {/* <div className="w-full px-20 py-10 flex justify-between">
         <p>
           Built by UChicago{" "}

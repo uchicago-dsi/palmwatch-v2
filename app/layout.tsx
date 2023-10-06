@@ -21,6 +21,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const cwd = process.cwd();
+  console.log("layout", cwd)
+  
   await queryClient.init();
   const searchList = queryClient.getSearchList();
   return (

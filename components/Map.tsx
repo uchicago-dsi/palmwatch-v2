@@ -40,7 +40,6 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   const mapRef = React.useRef<typeof Map>(null);
   const { colorFunction, scale } = colorFunctions[choroplethScheme];
   const setData = useTooltipStore(state => state.setData);
-  console.log('rerender')
   const umlStore = useActiveUmlStore();
   const setUml = umlStore.setUml;
   const activeUml = umlStore.currentUml;

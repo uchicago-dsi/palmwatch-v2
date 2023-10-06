@@ -80,8 +80,8 @@ class MillDataQuery {
   async init() {
     if (this.initialized) return;
     const [uml, companies] = await Promise.all([
-      loadArrow("public/data/uml.arrow", { columns: all() }),
-      loadArrow("public/data/companies.arrow", { columns: all() }),
+      loadArrow("./public/data/uml.arrow", { columns: all() }),
+      loadArrow("./public/data/companies.arrow", { columns: all() }),
     ]);
 
     this.uml = uml;
@@ -142,8 +142,6 @@ class MillDataQuery {
         year,
       });
     }
-    console.log(quantileResults)
-    console.log(`getBrandInfo took ${performance.now() - t0}ms`);
     return {
       umlInfo: this.stringifyBigInts(companies.objects()),
       timeseries: quantileResults,
