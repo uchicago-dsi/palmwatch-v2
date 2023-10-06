@@ -4,6 +4,8 @@ import Link from "next/link";
 import queryClient from "@/utils/getMillData";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export const metadata = {
   title: "PalmWatch",
@@ -21,9 +23,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cwd = process.cwd();
-  console.log("layout", cwd)
-  
+  const dataDir = path.join(process.cwd(), 'public', 'data');
+  const files = await fs.readdir(dataDir);
+  console.log('FILE LIST LAYOUT', files)
+
   await queryClient.init();
   const searchList = queryClient.getSearchList();
   return (
