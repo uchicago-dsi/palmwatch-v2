@@ -46,7 +46,6 @@ class MillDataQuery {
     cols: string[],
     quantiles: number[] = [0.25, 0.5, 0.75]
   ) {
-    const t0 = performance.now();
     const companies = this.companies!.filter(
       escape((d: CompanyData) => d["consumer_brand"] === brand)
     )
@@ -55,6 +54,7 @@ class MillDataQuery {
         years: (d: CompanyData) => op.array_agg_distinct(d["report_year"]),
       })
       .select("UML ID", "years")
+      .dedupe("UML ID")
       .join(this.uml!, ["UML ID", "UML ID"]);
 
     const quantileResults: Record<string, any>[] = [];

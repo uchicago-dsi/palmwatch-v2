@@ -63,6 +63,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       // @ts-ignore
       dataDict[row[dataIdColumn] as string] = row;
     }
+
     const filteredData = {
       type: "FeatureCollection",
       features: data!.features.filter(
@@ -101,7 +102,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     initialMapView?.longitude,
     initialMapView?.zoom,
   ]);
-
+  
   const layers = [
     new GeoJsonLayer({
       id: "geojson",

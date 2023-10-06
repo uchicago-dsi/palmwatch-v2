@@ -33,7 +33,7 @@ export default function Page({ params }: { params: { brand: string } }) {
                 dataTable={[]}
                 geoIdColumn="UML ID"
                 dataIdColumn="UML ID"
-                choroplethColumn="km_22"
+                choroplethColumn="treeloss_km_2022"
                 choroplethScheme="forestLoss"
               />
             </QueryProvider>

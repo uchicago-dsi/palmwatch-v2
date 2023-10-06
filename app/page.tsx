@@ -35,16 +35,16 @@ export default async function Home() {
             {/* search by consumer brand, mill, supplier, group */}
             <p>Explore by</p>
             <div className="flex flex-row space-x-4 mb-4">
-              <Link className="btn btn-outline btn-info" href="/brand">
+              <Link className="btn btn-outline btn-info" href="/brands">
                 Brands
               </Link>
-              <Link className="btn btn-outline btn-info" href="/mill">
+              <Link className="btn btn-outline btn-info" href="/mills">
                 Mills
               </Link>
-              <Link className="btn btn-outline btn-info" href="/group">
+              <Link className="btn btn-outline btn-info" href="/groups">
                 Groups
               </Link>
-              <Link className="btn btn-outline btn-info" href="/supplier">
+              <Link className="btn btn-outline btn-info" href="/suppliers">
                 Suppliers
               </Link>
             </div>
