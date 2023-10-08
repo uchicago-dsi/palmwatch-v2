@@ -5,20 +5,26 @@ import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import path from "path";
+import { UmlData } from "@/utils/dataTypes";
 // years from 2001 to 2022
 const yearRange = Array.from({ length: 22 }, (_, i) => 2001 + i);
 
-export default async function Page({ params }: { params: { mill: string } }) {
-  const millName = decodeURIComponent(params.mill);
+export default async function Page({ params }: { params: { uml: string } }) {
+  const uml = decodeURIComponent(params.uml);
   const dataDir = path.join(process.cwd(), 'public', 'data');
   await queryClient.init(dataDir);
 
   const data = queryClient.stringifyBigInts(
-    queryClient.getMillName(millName).objects()
+    queryClient.getUml(uml).objects()
   );
-  const entry = data?.[0];
+  const entry = data?.[0] as UmlData | undefined;
+
+  if (!entry) {
+    return <div>Mill Not Found</div>;
+  }
   // @ts-ignore
   const umlId = entry?.["UML ID"];
+  const millName = entry?.["Mill Name"];
   const brandData = queryClient.getBrandUsage(umlId);
   const lineChartData = yearRange.map((year) => ({
     year,

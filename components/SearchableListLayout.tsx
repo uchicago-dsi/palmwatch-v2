@@ -64,6 +64,7 @@ export const SearchableListLayout: React.FC<{
 
   const displayRows = options.length > 32 ? manyRows || 16 : rows || 8;
   const displayColumns = columns || 4;
+  console.log(options)
   const alphabeticalOptions = useMemo(
     () =>
       options.sort((a, b) => {

@@ -7,15 +7,15 @@ const range = (start: number, end: number) => {
 };
 const cols = range(2001, 2023).map((i) => `treeloss_km_${i}`);
 
-export async function GET(_req: Request, res: { params: { brand: string } }) {
-  const { brand } = res.params;
-  if (!brand)
+export async function GET(_req: Request, res: { params: { group: string } }) {
+  const { group } = res.params;
+  if (!group)
     return NextResponse.json(
       { error: new Error("No brand provided") },
       { status: 400 }
     );
   const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
-  const data = queryClient.getBrandInfo(brand, cols);
+  const data = queryClient.getGroupInfo(group, cols);
   return NextResponse.json({ ...data }, { status: 200 });
 }

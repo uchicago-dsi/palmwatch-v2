@@ -10,7 +10,7 @@ export type ColorStop = {
 };
 
 export const forestLossColorFunction = (value?: number) => {
-  if (!value) return MISSING_COLOR;
+  if (value === undefined || value === null) return MISSING_COLOR;
   const color = forestLossColorBreaks.find((d) => value < d.value)?.color;
   return color || MISSING_COLOR;
 };

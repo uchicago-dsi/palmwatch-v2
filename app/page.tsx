@@ -41,11 +41,11 @@ export default async function Home() {
               <Link className="btn btn-outline btn-info" href="/mills">
                 Mills
               </Link>
-              <Link className="btn btn-outline btn-info" href="/groups">
-                Groups
-              </Link>
               <Link className="btn btn-outline btn-info" href="/suppliers">
                 Suppliers
+              </Link>
+              <Link className="btn btn-outline btn-info" href="/companies">
+                Companies
               </Link>
             </div>
             {/* onclick scroll to #homepage-map div*/}

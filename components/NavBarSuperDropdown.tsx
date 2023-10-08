@@ -8,6 +8,7 @@ interface NavBarSuperDropdownProps {
   label: string;
   options: Array<{ label: string; href: string; imgPath?: string }>;
   path: string;
+  showText?: boolean;
 }
 
 export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
@@ -15,6 +16,7 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
   label,
   options,
   path,
+  showText
 }) => {
   const { currentDropdown, setcurrentDropdown } = useDropdownStore();
   const isActive = currentDropdown === label;
@@ -35,6 +37,7 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
           >
             {icon}
           </svg>
+          {showText && <span className="ml-2">{label}</span>}
         </button>
       </li>
       {isActive && (
