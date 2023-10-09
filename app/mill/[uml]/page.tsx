@@ -6,52 +6,85 @@ import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import path from "path";
 import { UmlData } from "@/utils/dataTypes";
-// years from 2001 to 2022
-const yearRange = Array.from({ length: 22 }, (_, i) => 2001 + i);
+import { MillInfo } from "@/components/MillInfo";
+import { getStats } from "./pageConfig";
+import { StatsBlock } from "@/components/StatsBlock";
+import { sumForestLoss } from "@/utils/sumForestloss";
+import { fullYearRange } from "@/config/years";
 
 export default async function Page({ params }: { params: { uml: string } }) {
   const uml = decodeURIComponent(params.uml);
+
+  // data
   const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
-
   const data = queryClient.getUml(uml).objects();
   const entry = data?.[0] as UmlData | undefined;
 
   if (!entry) {
     return <div>Mill Not Found</div>;
   }
+
+  // rendering and stats
   // @ts-ignore
   const umlId = entry?.["UML ID"];
   const millName = entry?.["Mill Name"];
-  const brandData = queryClient.getBrandUsage(umlId) as BrandData
-  const lineChartData = yearRange.map((year) => ({
+  const brandData = queryClient.getBrandUsage(umlId) as BrandData;
+  const lineChartData = fullYearRange.map((year) => ({
     year,
     // @ts-ignore
     "Tree Loss (km2)": entry?.[`treeloss_km_${year}`],
   }));
+  const stats = getStats(
+    entry.treeloss_km_2022,
+    entry.risk_score_current,
+    entry.risk_score_past,
+    entry.risk_score_future
+  );
+  const totalForestLoss = sumForestLoss(entry);
 
   return (
     <main className="relative flex flex-col items-center justify-center w-[90%] max-w-[1400px] mx-auto">
-      <div className="p-4 flex flex-row space-x-4 my-8 w-full shadow-xl">
-        <div>
-          {/* @ts-ignore */}
-          <h1 className="text-4xl font-bold">{millName}</h1>
-          <h2 className="text-xl">Palm Oil Usage</h2>
-        </div>
-        <div></div>
-      </div>
+      <div className="p-4 flex flex-row space-x-4 my-8 w-full shadow-xl max-w-none">
+        <div className="flex flex-col w-full">
+          <div className="flex flex-row w-full max-w-none">
+            <div className="flex-1">
+              <h2 className="text-xl">Palm Oil Usage</h2>
+              <h1 className="text-4xl font-bold">{millName}</h1>
+            </div>
+            <div className="stats flex-1">
+              <div className="stat">
+                <div className="stat-title">Total Forest Loss</div>
+                <div className="stat-value">
+                  {totalForestLoss.toLocaleString()} km2
+                </div>
+                <div className="stat-desc">
+                  Cumulative forest loss from 2001 to 2022
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr className="mt-4 block" />
 
-      <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto h-[40vh] w-full">
-        <QueryProvider>
-          <PalmwatchMap
-            geoDataUrl="/data/mill-catchment.geojson"
-            dataTable={data}
-            geoIdColumn="UML ID"
-            dataIdColumn="UML ID"
-            choroplethColumn="treeloss_km_2020"
-            choroplethScheme="forestLoss"
-          />
-        </QueryProvider>
+          <StatsBlock stats={stats} />
+        </div>
+      </div>
+      <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
+        <h3 className="text-xl my-4 font-bold">
+          Palm Oil Mill Deforestation Map: Forest Loss in KM2 (2022)
+        </h3>
+        <div className="relative h-[40vh] w-full">
+          <QueryProvider>
+            <PalmwatchMap
+              geoDataUrl="/data/mill-catchment.geojson"
+              dataTable={data}
+              geoIdColumn="UML ID"
+              dataIdColumn="UML ID"
+              choroplethColumn="treeloss_km_2020"
+              choroplethScheme="forestLoss"
+            />
+          </QueryProvider>
+        </div>
       </div>
       <div className="flex flex-row space-x-4 w-full">
         <div className="p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto  w-full">
@@ -64,7 +97,9 @@ export default async function Page({ params }: { params: { uml: string } }) {
         </div>
       </div>
       <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
-        <code>{JSON.stringify(entry, null, 2)}</code>
+        <QueryProvider>
+          <MillInfo millOverride={uml} dataOverride={[entry]} />
+        </QueryProvider>
       </div>
     </main>
   );

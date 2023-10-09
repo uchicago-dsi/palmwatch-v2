@@ -43,8 +43,11 @@ export default async function Home() {
               <Link className="btn btn-outline btn-info" href="/suppliers">
                 Suppliers
               </Link>
-              <Link className="btn btn-outline btn-info" href="/companies">
-                Companies
+              <Link className="btn btn-outline btn-info" href="/groups">
+                Groups
+              </Link>
+              <Link className="btn btn-outline btn-info" href="/countries">
+                Countries
               </Link>
             </div>
             {/* onclick scroll to #homepage-map div*/}
@@ -79,56 +82,28 @@ export default async function Home() {
       </section>
       <section
         id="homepage-map"
-        className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] h-[60vh] relative"
+        className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] relative block"
       >
-        <h3>Palm Oil Mill Deforestation Map</h3>
+        <h3 className="text-xl my-4 font-bold">
+          Palm Oil Mill Deforestation Map
+        </h3>
         <QueryProvider>
-          <PalmwatchMap
-            geoDataUrl="/data/mill-catchment.geojson"
-            dataTable={data!}
-            geoIdColumn="UML ID"
-            dataIdColumn="UML ID"
-            choroplethColumn="treeloss_km_2022"
-            choroplethScheme="forestLoss"
-          />
-          <div className="p-4 flex flex-row space-x-4">
+          <div className="h-[80vh] relative w-full">
+            <PalmwatchMap
+              geoDataUrl="/data/mill-catchment.geojson"
+              dataTable={data!}
+              geoIdColumn="UML ID"
+              dataIdColumn="UML ID"
+              choroplethColumn="treeloss_km_2022"
+              choroplethScheme="forestLoss"
+            />
+          </div>
+          <div className="p-4 w-full flex flex-col space-y-4 lg:flex-row lg:space-x-4">
             <MillInfo />
             <BrandInfoClient />
           </div>
         </QueryProvider>
       </section>
-      {/* <div className="w-full px-20 py-10 flex justify-between">
-        <p>
-          Built by UChicago{" "}
-          <Link
-            href="https://datascience.uchicago.edu/"
-            className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-          >
-            DSI
-          </Link>{" "}
-          in partnership with{" "}
-          <Link
-            href="https://www.inclusivedevelopment.net/"
-            className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-          >
-            IDI
-          </Link>
-          .
-        </p>
-        <Link
-          href="https://github.com/vercel/examples/tree/main/storage/blob-starter"
-          className="flex items-center space-x-2"
-        >
-          <Image
-            src="/github.svg"
-            alt="GitHub Logo"
-            width={24}
-            height={24}
-            priority
-          />
-          <p className="font-light">Source</p>
-        </Link>
-      </div> */}
     </main>
   );
 }

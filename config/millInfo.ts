@@ -25,11 +25,13 @@ export const millInfoColumns = [
     column: "Group Name",
     label: "Group Name",
     formatter: undefined,
+    linkFormat: (value: string) => `/group/${value}`
   },
   {
     column: "Parent Company",
     label: "Parent Company",
     formatter: undefined,
+    linkFormat: (value: string) => `/supplier/${value}`
   },
   {
     column: "RSPO Status",
@@ -55,6 +57,7 @@ export const millInfoColumns = [
     column: "Country",
     label: "Country",
     formatter: undefined,
+    linkFormat: (value: string) => `/country/${value}`
   },
   {
     column: "Province",

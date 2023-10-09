@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useActiveUmlStore } from "@/stores/activeUml";
 import { maxYear, minYear, yearRange } from "@/config/years";
 import { BrandData, BrandInfo } from "./BrandInfo";
+import { Preloader } from "./Preloader";
 
 
 export const BrandInfoClient: React.FC = () => {
@@ -20,7 +21,7 @@ export const BrandInfoClient: React.FC = () => {
   }
 
   if (isLoading || isError) {
-    return <p>Loading...</p>;
+    return <Preloader/>
   }
   if (!data.brands.length) {
     return (

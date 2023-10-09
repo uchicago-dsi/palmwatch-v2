@@ -64,7 +64,6 @@ export const SearchableListLayout: React.FC<{
 
   const displayRows = options.length > 32 ? manyRows || 16 : rows || 8;
   const displayColumns = columns || 4;
-  console.log(options)
   const alphabeticalOptions = useMemo(
     () =>
       options.sort((a, b) => {
@@ -86,8 +85,10 @@ export const SearchableListLayout: React.FC<{
   useEffect(() => {
     setCurrentPage(0);
   }, [items]);
-  const currentItems = items[currentPage];
-  const pages = items.length;
+  const currentItems = items?.[currentPage];
+  const pages = items?.length;
+
+  if (!currentItems) return null;
 
   const pageAction = (action: "next" | "prev") => {
     setCurrentPage((page) => {
@@ -102,12 +103,12 @@ export const SearchableListLayout: React.FC<{
     });
   };
   return (
-    <div className={`flex flex-row overflow-x-auto space-x-4`}>
+    <div className={`flex flex-row overflow-x-auto space-x-4 prose max-w-none w-full`}>
       <div className="p-4 flex-col justify-around border-r-2 border-r-neutral-400 space-y-4">
-        <h3 className="text-lg text-bold">{label}</h3>
+        <h3 className="m-0">{label}</h3>
         {!!path && (
           <div>
-            <Link href={path} className="btn-link">
+            <Link href={path} className="btn-link m-0">
               {label} Overview
             </Link>
           </div>
@@ -134,10 +135,10 @@ export const SearchableListLayout: React.FC<{
         )}
       </div>
       {currentItems.map((column: any[], idx: number) => (
-        <div className="flex flex-col space-y-1 flex-1" key={idx}>
+        <div className="flex flex-col space-y-1 flex-1 m-0 p-0" key={idx}>
           {column.map((option) => (
             <div key={option.label}>
-              <Link className="btn-link" href={option.href}>
+              <Link className="btn-link m-0 p-0" href={option.href}>
                 <div className="flex flex-col">
                   {Boolean(option.imgPath) && (
                     <img
@@ -146,7 +147,7 @@ export const SearchableListLayout: React.FC<{
                       className="w-20 h-20"
                     />
                   )}
-                  <p>{option.label}</p>
+                  {option.label}
                 </div>
               </Link>
             </div>

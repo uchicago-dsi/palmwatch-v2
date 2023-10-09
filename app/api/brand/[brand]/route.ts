@@ -1,14 +1,15 @@
 import queryClient from "@/utils/getMillData";
 import { NextResponse } from "next/server";
 import path from "path";
-const range = (start: number, end: number) => {
-  const length = end - start;
-  return Array.from({ length }, (_, i) => start + i);
-};
-const cols = range(2001, 2023).map((i) => `treeloss_km_${i}`);
+import { unparse } from "papaparse";
+import { timestamp } from "@/utils/timestamp";
+import { readFileSync } from "fs";
+import { fullYearRangeColumns } from "@/config/years";
 
-export async function GET(_req: Request, res: { params: { brand: string } }) {
+
+export async function GET(req: Request, res: { params: { brand: string } }) {
   const { brand } = res.params;
+  const output = new URL(req.url).searchParams.get("output");
   if (!brand)
     return NextResponse.json(
       { error: new Error("No brand provided") },
@@ -16,6 +17,58 @@ export async function GET(_req: Request, res: { params: { brand: string } }) {
     );
   const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
-  const data = queryClient.getBrandInfo(brand, cols);
-  return NextResponse.json({ ...data }, { status: 200 });
+  const data = queryClient.getBrandInfo(brand, fullYearRangeColumns);
+  
+  switch (output) {
+    case "geo":
+      const geoDataRaw = await readFileSync(
+        path.join(dataDir, "mill-catchment.geojson"),
+        "utf8"
+      );
+      const geoData = JSON.parse(geoDataRaw);
+      const features = [];
+      for (const row of data.umlInfo) {
+        const feature = geoData.features.find(
+          // @ts-ignore
+          (f: any) => f.properties["UML ID"] === row["UML ID"]
+        );
+        if (feature) {
+          features.push({
+            type: "Feature",
+            geometry: feature.geometry,
+            properties: row,
+          });
+        }
+      }
+      return NextResponse.json(
+          { type: "FeatureCollection", features },
+        { status: 200, headers: {
+          "Content-Type": "application/json",
+          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.geojson"`,
+        } }
+      );
+    case "loss":
+      return new NextResponse(unparse(data.timeseries), {
+        headers: {
+          "Content-Type": "text/csv",
+          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
+        },
+      });
+    case "mills":
+      return new NextResponse(unparse(data.umlInfo), {
+        headers: {
+          "Content-Type": "text/csv",
+          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
+        },
+      });
+    case "suppliers":
+      return new NextResponse(unparse(data.suppliers), {
+        headers: {
+          "Content-Type": "text/csv",
+          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
+        },
+      });
+    default:
+      return NextResponse.json({ ...data }, { status: 200 });
+  }
 }

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Preloader } from "./Preloader";
 
 interface DataProviderProps<T> {
   dataUrl: string;
@@ -14,7 +15,7 @@ export const DataProvider = <T extends any>({
     return await fetch(dataUrl).then((res) => res.json());
   });
   if (!data) {
-    return <p>Loading...</p>;
+    return <Preloader/>
   }
   return <>{children(data)}</>;
 };

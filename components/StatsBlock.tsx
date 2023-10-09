@@ -9,7 +9,7 @@ interface StatsBlockProps {
 }
 export const StatsBlock: React.FC<StatsBlockProps> = ({ stats }) => {
   return (
-    <div className="stats">
+    <div className="stats stats-vertical lg:stats-horizontal">
       {stats.map(({ title, stat, className, description }) => (
         <div className="stat" key={title}>
           <div className="stat-title">{title}</div>

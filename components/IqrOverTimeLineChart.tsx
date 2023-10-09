@@ -35,33 +35,41 @@ export const IqrOverTime: React.FC<IqrOverTimeProps> = ({ data, type }) => {
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="year" />
-        <YAxis />
+        <YAxis label={{ value: "Square KM of Forest Loss Per Year", angle: -90, dx:-10 }}  />
         <Tooltip />
         <Legend />
         {type === 'brand' ? (<>
         
           <Area
+          isAnimationActive={false}
           type="monotone"
           dataKey="q0.25"
+          name="1st Quartile Mill (lowest 25%)"
           stackId="1"
           stroke="#acacac"
           fill="rgba(0, 0, 0, 0)"
-        />
+          />
         <Area
+            isAnimationActive={false}
+          name="3rd Quartile Mill (highest 25%)"
           type="monotone"
           dataKey="q0.75"
           stackId="1"
           stroke="#acacac"
           fill="#55555555"
-        />
+          />
+
         <Line
+          isAnimationActive={false}
+          name="Median Mill"
           type="monotone"
           dataKey="q0.5"
-          stroke="#8884d8"
+          stroke="rgb(248, 114, 114)"
           strokeWidth={5}
           activeDot={{ r: 8 }}
         /></>): (
           <Line
+          isAnimationActive={false}
           type="monotone"
           dataKey="Tree Loss (km2)"
           stroke="#ff0000"

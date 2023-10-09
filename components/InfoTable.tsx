@@ -33,11 +33,11 @@ interface InfoTable {
 }
 
 export const InfoTable: React.FC<InfoTable> = ({ data, columnMapping }) => {
-  const rawColumns = Object.keys(data[0]);
+  const rawColumns = Object.keys(columnMapping || data[0]);
   const columns = rawColumns.map((key) => columnMapping?.[key] || key);
 
   return (
-    <div className="overflow-x-auto h-96">
+    <div className="overflow-x-auto h-96 w-full">
       <table className="table table-pin-rows">
         <thead>
           <tr>

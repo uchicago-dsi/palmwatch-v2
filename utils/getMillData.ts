@@ -73,18 +73,18 @@ class MillDataQuery {
       });
     }
     const suppliers = companies
-      .groupby("Group Name")
+      .groupby("Parent Company")
       .derive({
         count: () => op.count(),
       })
-      .dedupe("Group Name")
-      .select(["Group Name", "Country", "count"])
+      .dedupe("Parent Company")
+      .select(["Parent Company", "Country", "count"])
       .orderby(desc("count"))
       .objects();
     return {
       umlInfo: companies.objects(),
       timeseries: quantileResults,
-      suppliers
+      suppliers,
     };
   }
   getBrandStats(brand: string) {
@@ -194,10 +194,10 @@ class MillDataQuery {
       href: `/mill/${d["UML ID"]}`,
     }));
 
-    const suppliers = this.uml!.select("Group Name")
+    const groups = this.uml!.select("Group Name")
       .dedupe("Group Name")
       .objects() as UmlData[];
-    const suppliersList = suppliers.map((d) => ({
+    const groupsList = groups.map((d) => ({
       label: d["Group Name"],
       href: `/supplier/${d["Group Name"]}`,
     }));
@@ -223,8 +223,8 @@ class MillDataQuery {
     const result = {
       Brands: brandList,
       Mills: millList,
-      Suppliers: suppliersList,
-      Companies: comapniesList,
+      Suppliers: comapniesList,
+      Groups: groupsList,
       Countries: countryList,
     } as const;
 
@@ -257,7 +257,7 @@ class MillDataQuery {
   }
   @cache("getUniqueCounts")
   getUniqueCounts() {
-    const companyCount = this.companies!.select("consumer_brand")
+    const brandCount = this.companies!.select("consumer_brand")
       .dedupe("consumer_brand")
       .count()
       .objects()[0];
@@ -270,14 +270,21 @@ class MillDataQuery {
       .dedupe("Group Name")
       .count()
       .objects()[0];
+    const companyCount = this.uml!.select("Parent Company")
+      .dedupe("Parent Company")
+      .count()
+      .objects()[0];
+
     return {
-      companyCount:
-        "count" in companyCount ? (companyCount["count"] as number) : null,
+      brandCount:
+        "count" in brandCount ? (brandCount["count"] as number) : null,
       countryCount:
         "count" in countryCount ? (countryCount["count"] as number) : null,
       millCount: "count" in millCount ? (millCount["count"] as number) : null,
       groupCount:
         "count" in groupCount ? (groupCount["count"] as number) : null,
+      companyCount:
+        "count" in companyCount ? (companyCount["count"] as number) : null,
     };
   }
 
@@ -363,8 +370,6 @@ class MillDataQuery {
     //     aferageCurrentRisk: (d: any) => op.mean(d.risk_score_current)
     //   })
     // console.log(ranked.objects().slice(0, 10));
-    const t1 = performance.now();
-    console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
   }
   // getCountOfMillsPerBrand(){
   //   const companies = this.companies!

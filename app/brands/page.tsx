@@ -5,17 +5,17 @@ import { query } from "arquero";
 import React from "react";
 
 const getStatConfig = (
-  companyCount: number | null,
+  brandCount: number | null,
   countryCount: number | null,
   millCount: number | null,
-  groupCount: number | null
+  companyCount: number | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
   const stats = [];
-  if (companyCount !== null) {
+  if (brandCount !== null) {
     stats.push({
       title: "Brands",
-      stat: formatter.format(companyCount),
+      stat: formatter.format(brandCount),
       className: "text-error",
     });
   }
@@ -33,10 +33,10 @@ const getStatConfig = (
       className: "text-error",
     });
   }
-  if (groupCount !== null) {
+  if (companyCount !== null) {
     stats.push({
       title: "Suppliers",
-      stat: formatter.format(groupCount),
+      stat: formatter.format(companyCount),
       className: "text-error",
     });
   }
@@ -45,13 +45,13 @@ const getStatConfig = (
 export default async function Page() {
   await queryClient.init();
   const options = queryClient.getSearchList().Brands;
-  const { companyCount, countryCount, millCount, groupCount } =
+  const { brandCount, companyCount, countryCount, millCount, groupCount } =
     queryClient.getUniqueCounts();
   const statConfig = getStatConfig(
-    companyCount,
+    brandCount,
     countryCount,
     millCount,
-    groupCount
+    companyCount
   );
 
   queryClient.getMedianBrandImpacts()
