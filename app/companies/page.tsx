@@ -4,7 +4,7 @@ import React from "react";
 
 export default async function Page() {
   await queryClient.init();
-  const options = queryClient.getSearchList().Groups;
+  const options = queryClient.getSearchList().Companies;
 
   return (
     <main className="max-w-3xl mx-auto">

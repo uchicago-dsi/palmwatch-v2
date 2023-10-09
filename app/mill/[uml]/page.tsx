@@ -1,6 +1,6 @@
 import React from "react";
 import queryClient from "@/utils/getMillData";
-import { BrandInfo } from "@/components/BrandInfo";
+import { BrandData, BrandInfo } from "@/components/BrandInfo";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
@@ -11,12 +11,10 @@ const yearRange = Array.from({ length: 22 }, (_, i) => 2001 + i);
 
 export default async function Page({ params }: { params: { uml: string } }) {
   const uml = decodeURIComponent(params.uml);
-  const dataDir = path.join(process.cwd(), 'public', 'data');
+  const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
 
-  const data = queryClient.stringifyBigInts(
-    queryClient.getUml(uml).objects()
-  );
+  const data = queryClient.getUml(uml).objects();
   const entry = data?.[0] as UmlData | undefined;
 
   if (!entry) {
@@ -25,7 +23,7 @@ export default async function Page({ params }: { params: { uml: string } }) {
   // @ts-ignore
   const umlId = entry?.["UML ID"];
   const millName = entry?.["Mill Name"];
-  const brandData = queryClient.getBrandUsage(umlId);
+  const brandData = queryClient.getBrandUsage(umlId) as BrandData
   const lineChartData = yearRange.map((year) => ({
     year,
     // @ts-ignore

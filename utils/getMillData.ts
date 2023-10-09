@@ -36,9 +36,7 @@ class MillDataQuery {
       })
       .select("consumer_brand", "years");
 
-    return this.stringifyBigInts(
-      data.objects().filter(this.filterUniqueByKey("consumer_brand"))
-    );
+    return data.objects().filter(this.filterUniqueByKey("consumer_brand"));
   }
 
   getBrandInfo(
@@ -74,11 +72,51 @@ class MillDataQuery {
         year,
       });
     }
+    const suppliers = companies
+      .groupby("Group Name")
+      .derive({
+        count: () => op.count(),
+      })
+      .dedupe("Group Name")
+      .select(["Group Name", "Country", "count"])
+      .orderby(desc("count"))
+      .objects();
     return {
-      umlInfo: this.stringifyBigInts(companies.objects()),
+      umlInfo: companies.objects(),
       timeseries: quantileResults,
+      suppliers
     };
   }
+  getBrandStats(brand: string) {
+    const companyMills = this.companies!.select(["consumer_brand", "UML ID"])
+      .filter(escape((d: CompanyData) => d["consumer_brand"] === brand))
+      .select("UML ID")
+      .dedupe("UML ID")
+      .join(this.uml!, ["UML ID", "UML ID"]);
+
+    const averageCurrentRisk = companyMills
+      .rollup({
+        mean: (d: UmlData) => op.mean(d["risk_score_current"]),
+      })
+      .objects() as { mean: number }[];
+    const uniqueMills = companyMills.count().objects() as { count: number }[];
+    const uniqueCountries = companyMills
+      .dedupe("Country")
+      .count()
+      .objects() as { count: number }[];
+    const uniqueSuppliers = companyMills
+      .dedupe("Group Name")
+      .count()
+      .objects() as { count: number }[];
+
+    return {
+      averageCurrentRisk: Math.round(averageCurrentRisk[0].mean * 100) / 100,
+      uniqueMills: uniqueMills[0].count,
+      uniqueCountries: uniqueCountries[0].count,
+      uniqueSuppliers: uniqueSuppliers[0].count,
+    };
+  }
+
   getGroupInfo(
     group: string,
     cols: string[],
@@ -108,7 +146,7 @@ class MillDataQuery {
       });
     }
     return {
-      umlInfo: this.stringifyBigInts(data.objects()),
+      umlInfo: data.objects(),
       timeseries: quantileResults,
     };
   }
@@ -242,7 +280,7 @@ class MillDataQuery {
         "count" in groupCount ? (groupCount["count"] as number) : null,
     };
   }
-  
+
   @cache("getMedianBrandImpacts")
   getMedianBrandImpacts() {
     const t0 = performance.now();

@@ -1,4 +1,5 @@
 import { SearchableListLayout } from "@/components/SearchableListLayout";
+import { StatsBlock } from "@/components/StatsBlock";
 import queryClient from "@/utils/getMillData";
 import { query } from "arquero";
 import React from "react";
@@ -34,7 +35,7 @@ const getStatConfig = (
   }
   if (groupCount !== null) {
     stats.push({
-      title: "Groups",
+      title: "Suppliers",
       stat: formatter.format(groupCount),
       className: "text-error",
     });
@@ -60,15 +61,7 @@ export default async function Page() {
       <section className="prose flex flex-col py-4">
         <h1 className="p-0 m-0">Consumer Brands</h1>
         <div className="stats shadow">
-          {statConfig.map(({ title, stat, className }) => (
-            <div className="stat" key={title}>
-              {/* <div className="stat-figure">
-                <svg></svg>
-              </div> */}
-              <div className="stat-title">{title}</div>
-              <div className={`stat-value ${className}`}>{stat}</div>
-            </div>
-          ))}
+          <StatsBlock stats={statConfig} />
         </div>
         <h3>Brand Search</h3>
         <p>

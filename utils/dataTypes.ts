@@ -79,7 +79,7 @@ export type UmlData = {
 
 export type CompanyData = {
   consumer_brand: string;
-  report_year: bigint;
+  report_year: number;
   "UML ID": string;
 };
 export type MillImpactData = any;

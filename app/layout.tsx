@@ -26,6 +26,7 @@ export default async function RootLayout({
   const dataDir = path.join(process.cwd(), 'public', 'data');
   await queryClient.init(dataDir);
   const searchList = queryClient.getSearchList();
+  
   return (
     <html lang="en" data-theme="lemonade">
       <body className={inter.variable}>

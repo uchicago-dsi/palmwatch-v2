@@ -20,7 +20,7 @@ import { BrandSchema } from "./types";
 const brands: {[key:string]: BrandSchema} = {
   "Colgate-Palmolive": ColgatePalmolive,
   "Ferrero": Ferrero,
-  "FrielsandCampina": FrieslandCampina,
+  "FrieslandCampina": FrieslandCampina,
   "General Mills": GeneralMills,
   "Hershey": Hershey,
   "Johnson & Johnson": JohnsonAndJohnson,

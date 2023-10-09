@@ -5,13 +5,12 @@ import { MillInfo } from "@/components/MillInfo";
 import { BrandInfoClient } from "@/components/BrandInfoClient";
 import Link from "next/link";
 import { ScrollToButton } from "@/components/ScrollToButton";
-import path from 'path';
+import path from "path";
 export default async function Home() {
-  const dataDir = path.join(process.cwd(), 'public', 'data');
+  const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
-  const data = queryClient.stringifyBigInts(
-    queryClient.getFullMillInfo().objects()
-  );
+  const data = queryClient.getFullMillInfo().objects();
+
   return (
     <main className="flex flex-col items-center justify-center h-auto">
       {/* fullheight hero div */}

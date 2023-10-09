@@ -16,9 +16,9 @@ export async function GET(_req: Request, res: { params: { uml: string } }) {
   const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
 
-  const info = queryClient.stringifyBigInts(queryClient.getUml(uml).objects());
+  const info = queryClient.getUml(uml).objects();
   const brands = millOnly
     ? []
-    : queryClient.stringifyBigInts(queryClient.getBrandUsage(uml));
+    : queryClient.getBrandUsage(uml)
   return NextResponse.json({ brands, info }, { status: 200 });
 }
