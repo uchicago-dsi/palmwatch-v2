@@ -130,9 +130,10 @@ class MillDataQuery {
     return this.getSummaryStats(supplierMills);
   }
   getFullData(data: ColumnTable) {
-    const joinedData = data.select("UML ID")
-      .join_right(this.companies!, ["UML ID", "UML ID"])
-    
+    const joinedData = data
+      .select("UML ID")
+      .join_right(this.companies!, ["UML ID", "UML ID"]);
+
     const summaryStats = this.getSummaryStats(data);
     const brandUsage = this.getBrandUsage(joinedData);
     const timeseries = this.getQuantileTimeseries(data);
@@ -148,7 +149,7 @@ class MillDataQuery {
       brandUsage: brandUsage.objects(),
       mills: data.objects(),
       timeseries,
-      totalForestLoss
+      totalForestLoss,
     };
   }
   getSupplierData(supplier: string) {
@@ -157,14 +158,14 @@ class MillDataQuery {
     ).dedupe("UML ID");
     return this.getFullData(supplierMills);
   }
-  
-  getGroupData(group: string){
+
+  getGroupData(group: string) {
     const groupMills = this.uml!.filter(
       escape((d: UmlData) => d["Group Name"] === group)
     ).dedupe("UML ID");
     return this.getFullData(groupMills);
   }
-  getCountryData(country: string){
+  getCountryData(country: string) {
     const groupMills = this.uml!.filter(
       escape((d: UmlData) => d["Country"] === country)
     ).dedupe("UML ID");
@@ -217,10 +218,9 @@ class MillDataQuery {
     minLng: number,
     maxLat: number,
     maxLng: number
-  ){
+  ) {
     const mills = this.getMillsInBbox(minLat, minLng, maxLat, maxLng);
     return this.getFullData(mills);
-
   }
   getMillsInBbox(
     minLat: number,
@@ -383,6 +383,59 @@ class MillDataQuery {
     //     aferageCurrentRisk: (d: any) => op.mean(d.risk_score_current)
     //   })
     // console.log(ranked.objects().slice(0, 10));
+  }
+  getRankingOfBrandsByCurrentImpactScore() {
+    const brandImpacts = this.companies!.join(this.uml!, ["UML ID", "UML ID"]);
+    const grouped = brandImpacts
+      .dedupe("consumer_brand", "UML ID")
+      .groupby("consumer_brand")
+      .rollup({
+        averageCurrentRisk: (d: UmlData) =>
+          op.round(op.mean(d.risk_score_current) * 100) / 100,
+        averageFutureRisk: (d: UmlData) =>
+          op.round(op.mean(d.risk_score_future) * 100) / 100,
+        averagePastRisk: (d: UmlData) =>
+          op.round(op.mean(d.risk_score_past) * 100) / 100,
+        totalForestLoss: (d: UmlData) =>
+          op.round(op.sum(d.sum_of_treeloss_km as any)),
+      })
+      .orderby(desc("averageCurrentRisk"));
+    return grouped.objects();
+  }
+  @cache("millSummaryStats")
+  getMillSummaryStats() {
+    const millStats = this.uml!.dedupe("UML ID")
+      .rollup({
+        count: () => op.count(),
+        totalForestLoss: (d: UmlData) => op.sum(d.sum_of_treeloss_km as any),
+        totalArea: (d: UmlData) => op.sum(d.km_area as any),
+        totalForestArea: (d: UmlData) => op.sum(d.km_forest_area_00 as any),
+      })
+      .objects()[0] as {
+      count: number;
+      totalForestLoss: number;
+      totalArea: number;
+      totalForestArea: number;
+    };
+    const timeseries = this.getQuantileTimeseries(this.uml!);
+    const uniqueCounts = this.getUniqueCounts();
+
+    const notRspoCertified = this.uml!.filter(
+      escape((d: UmlData) => d["RSPO Status"] === "Not RSPO Certified")
+    )
+      .rollup({
+        count: () => op.count(),
+      })
+      .objects()[0] as { count: number };
+    // @ts-ignore
+    const rspoCertified = uniqueCounts.millCount - notRspoCertified.count;
+    return {
+      ...millStats,
+      ...uniqueCounts,
+      notRspoCertified: notRspoCertified.count,
+      rspoCertified,
+      timeseries,
+    };
   }
   getRankingOfMillsCurrentImpactScore() {}
 

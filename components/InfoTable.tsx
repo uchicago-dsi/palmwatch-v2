@@ -1,4 +1,3 @@
-"use client"
 import React from "react";
 import { DataProvider } from "./DataProvider";
 
@@ -30,14 +29,14 @@ export const ServerInfotable: React.FC<ServerInfoTableProps> = ({
 interface InfoTable {
   data: Record<string, any>[];
   columnMapping?: Record<string, string>;
+  fullHeight?: boolean;
 }
 
-export const InfoTable: React.FC<InfoTable> = ({ data, columnMapping }) => {
+export const InfoTable: React.FC<InfoTable> = ({ data, columnMapping, fullHeight }) => {
   const rawColumns = Object.keys(columnMapping || data[0]);
   const columns = rawColumns.map((key) => columnMapping?.[key] || key);
-
   return (
-    <div className="overflow-x-auto h-96 w-full">
+    <div className={`overflow-x-auto ${fullHeight ? 'h-full' : 'h-96'} w-full`}>
       <table className="table table-pin-rows">
         <thead>
           <tr>

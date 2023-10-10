@@ -32,8 +32,8 @@ function getBounds(
     width,
     height,
   });
-  const [minX, maxY] = viewport.unproject([0, 0]);
-  const [maxX, minY] = viewport.unproject([width, height]);
+  const [minX, maxY] = viewport.unproject([width*.2, height*.2]);
+  const [maxX, minY] = viewport.unproject([width*.8, height*.8]);
   return {
     minX,
     minY,
@@ -90,7 +90,7 @@ function BboxInner() {
         dataTable={data?.mills || []}
         geoIdColumn="UML ID"
         dataIdColumn="UML ID"
-        choroplethColumn="treeloss_km_2020"
+        choroplethColumn="treeloss_km_2022"
         choroplethScheme="forestLoss"
         onMapMove={setViewState}
         noFlyMap
@@ -98,6 +98,7 @@ function BboxInner() {
     </div>
       <StatsBlock stats={stats} />
       <InfoTable
+      
         data={data?.mills || []}
         columnMapping={{
           "Mill Name": "Name",

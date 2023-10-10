@@ -1,47 +1,11 @@
+import { InfoTable } from "@/components/InfoTable";
 import { SearchableListLayout } from "@/components/SearchableListLayout";
 import { StatsBlock } from "@/components/StatsBlock";
 import queryClient from "@/utils/getMillData";
-import { query } from "arquero";
-import React from "react";
 
-const getStatConfig = (
-  brandCount: number | null,
-  countryCount: number | null,
-  millCount: number | null,
-  companyCount: number | null
-) => {
-  const formatter = new Intl.NumberFormat("en-US", {});
-  const stats = [];
-  if (brandCount !== null) {
-    stats.push({
-      title: "Brands",
-      stat: formatter.format(brandCount),
-      className: "text-error",
-    });
-  }
-  if (millCount !== null) {
-    stats.push({
-      title: "Mills",
-      stat: formatter.format(millCount),
-      className: "text-error",
-    });
-  }
-  if (countryCount !== null) {
-    stats.push({
-      title: "Countries",
-      stat: formatter.format(countryCount),
-      className: "text-error",
-    });
-  }
-  if (companyCount !== null) {
-    stats.push({
-      title: "Suppliers",
-      stat: formatter.format(companyCount),
-      className: "text-error",
-    });
-  }
-  return stats;
-};
+import React from "react";
+import { getStatConfig } from "./pageConfig";
+
 export default async function Page() {
   await queryClient.init();
   const options = queryClient.getSearchList().Brands;
@@ -53,16 +17,24 @@ export default async function Page() {
     millCount,
     companyCount
   );
-
-  queryClient.getMedianBrandImpacts()
+  const rankedTable = queryClient.getRankingOfBrandsByCurrentImpactScore();
 
   return (
-    <main className="max-w-3xl mx-auto">
-      <section className="prose flex flex-col py-4">
+    <main className="mx-auto">
+      <section className="prose flex flex-col py-4 max-w-none space-y-4">
         <h1 className="p-0 m-0">Consumer Brands</h1>
-        <div className="stats shadow">
-          <StatsBlock stats={statConfig} />
-        </div>
+        <StatsBlock stats={statConfig} />
+        <InfoTable
+          data={rankedTable}
+          columnMapping={{
+            consumer_brand: "Brand",
+            averageCurrentRisk: "Average Current Risk Score",
+            averageFutureRisk: "Average Future Risk Score",
+            averagePastRisk: "Average Past Risk Score",
+            totalForestLoss: "Total Forest Loss (km2)",
+          }}
+          fullHeight
+        />
         <h3>Brand Search</h3>
         <p>
           Search below for consumer brands, and learn more about the Palm Oil
