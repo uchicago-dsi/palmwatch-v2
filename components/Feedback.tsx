@@ -1,10 +1,13 @@
 "use client";
 import React from "react";
-
+import { usePathname } from "next/navigation";
 export const Feedback = () => {
+  const path = usePathname();
   const modal = React.useRef(null);
   const [showTooltip, setShowTooltip] = React.useState(false);
-  const currUrl = typeof window !== "undefined" ? window.location.href : "";
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const currUrl = `${baseUrl}${path}`;
+
   const copyCurrUrlToClipboard = () => {
     navigator.clipboard.writeText(currUrl);
     setShowTooltip(true);
