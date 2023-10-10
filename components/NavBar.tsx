@@ -11,7 +11,6 @@ interface NavbarProps {
   currentPage: string;
 }
 
-
 export const NavBar: React.FC<NavbarProps> = ({
   searchList,
   children,
@@ -49,6 +48,7 @@ export const NavBar: React.FC<NavbarProps> = ({
               <li>
                 <Link href="/" className="font-bold">
                   PalmWatch
+                  <i className="text-accent inline">beta</i>
                 </Link>
               </li>
             </ul>

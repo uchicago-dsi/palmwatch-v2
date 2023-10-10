@@ -6,6 +6,7 @@ import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { promises as fs } from 'fs';
 import path from 'path';
+import { Feedback } from "@/components/Feedback";
 
 export const metadata = {
   title: "PalmWatch",
@@ -33,6 +34,7 @@ export default async function RootLayout({
         <NavBar searchList={searchList} currentPage="">
         {children}
         </NavBar>
+        <Feedback />
       </body>
     </html>
   );
