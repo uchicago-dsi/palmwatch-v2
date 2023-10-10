@@ -12,84 +12,51 @@ import { StatsBlock } from "@/components/StatsBlock";
 import { sumForestLoss } from "@/utils/sumForestloss";
 import { fullYearRange } from "@/config/years";
 import { BarShareChartForests } from "@/components/BarShareChartForests";
+import { InfoTable } from "@/components/InfoTable";
 
-export default async function Page({ params }: { params: { uml: string } }) {
-  const uml = decodeURIComponent(params.uml);
+export default async function Page({
+  params,
+}: {
+  params: { group: string };
+}) {
+  const group = decodeURIComponent(params.group);
 
   // data
   const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
-  const data = queryClient.getUml(uml).objects();
-  const medianMillData = queryClient.getMedianMill()?.[0];
-  const entry = data?.[0] as UmlData | undefined;
 
-  if (!entry) {
-    return <div>Mill Not Found</div>;
-  }
+  const {
+    mills,
+    uniqueCountries,
+    uniqueMills,
+    brandUsage,
+    averageCurrentRisk,
+    timeseries,
+    totalForestLoss,
+  } = queryClient.getGroupData(group);
 
-  // reshape stats
-  // @ts-ignore
-  const umlId = entry?.["UML ID"];
-  const millName = entry?.["Mill Name"];
-  const brandData = queryClient.getBrandUsageByUml(umlId) as BrandData;
-  const lineChartData = fullYearRange.map((year) => ({
-    year,
-    // @ts-ignore
-    "Mill Tree Loss (km2)": entry?.[`treeloss_km_${year}`],
-    // @ts-ignore
-    "Overall Median Mill Tree Loss (km2)": medianMillData?.[`median${year}`],
-  }));
-
-  // format
   const stats = getStats(
-    entry.treeloss_km_2022,
-    entry.risk_score_current,
-    entry.risk_score_past,
-    entry.risk_score_future
+    uniqueMills,
+    uniqueCountries,
+    averageCurrentRisk,
+    totalForestLoss
   );
-  const totalForestLoss = sumForestLoss(entry);
+
   return (
     <main className="relative flex flex-col items-center justify-center w-[90%] max-w-full mx-auto">
       <div className="p-4 flex flex-row my-0 w-full shadow-xl">
         <div className="flex flex-col w-full">
           <div className="flex-1">
             <h2 className="text-xl">Palm Oil Impact</h2>
-            <h1 className="text-4xl font-bold">{millName}</h1>
-            <div className="stats flex-1 w-full mt-4">
-              <div className="stat">
-                <div className="stat-title">Total Forest Loss</div>
-                <div className="stat-value">
-                  {totalForestLoss.toLocaleString()} km2
-                </div>
-                <div className="stat-desc">
-                  Cumulative forest loss from 2001 to 2022
-                </div>
-              </div>
-              <div className="stat">
-                <div className="stat-title">Catchment Area</div>
-                <div className="stat-value">
-                  {entry["km_area"].toLocaleString()} km2
-                </div>
-                <div className="stat-desc">
-                  Overall area assigned to this mill
-                </div>
-              </div>
-              <div className="stat">
-                <div className="stat-title">RSPO Certification</div>
-                <div className="stat-value">{entry["RSPO Status"]}</div>
-                <div className="stat-desc">
-                  Overall area assigned to this mill
-                </div>
-              </div>
-            </div>
+            <h1 className="text-4xl font-bold">{group}</h1>
           </div>
           <hr className="mt-4 block" />
 
           <StatsBlock stats={stats} />
-          <BarShareChartForests
+          {/* <BarShareChartForests
             entry={entry}
-            totalForestLoss={totalForestLoss}
-          />
+            totalForestLoss={totlaForestLoss}
+          /> */}
         </div>
       </div>
       <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
@@ -100,7 +67,7 @@ export default async function Page({ params }: { params: { uml: string } }) {
           <QueryProvider>
             <PalmwatchMap
               geoDataUrl="/data/mill-catchment.geojson"
-              dataTable={data}
+              dataTable={mills}
               geoIdColumn="UML ID"
               dataIdColumn="UML ID"
               choroplethColumn="treeloss_km_2020"
@@ -111,19 +78,27 @@ export default async function Page({ params }: { params: { uml: string } }) {
       </div>
       <div className="flex flex-row space-x-4 w-full">
         <div className="p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto  w-full">
-          <BrandInfo data={brandData} />
+          <BrandInfo data={brandUsage as BrandData} />
         </div>
         <div className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full prose">
           <div className="h-[40vh] relative w-full">
             <h3 className="ml-4 my-4">Forest Loss Over Time (km2)</h3>
-            <IqrOverTime type="mill" data={lineChartData} showMedian={true} />
+            <IqrOverTime type="brand" data={timeseries} />
           </div>
         </div>
       </div>
       <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
-        <QueryProvider>
-          <MillInfo millOverride={uml} dataOverride={[entry]} />
-        </QueryProvider>
+        <InfoTable
+          data={mills}
+          columnMapping={{
+            "Mill Name": "Name",
+            risk_score_current: "Current Risk",
+            Country: "Country",
+            Province: "Province",
+            District: "District",
+            "Parent Company": "Parent Company",
+          }}
+        />
       </div>
     </main>
   );

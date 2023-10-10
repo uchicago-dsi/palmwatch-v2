@@ -47,7 +47,9 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
             className="w-full h-[100vh] absolute top-[100%] left-0 bg-black opacity-30 shadow-xl"
           ></button>
           <div className="w-full absolute top-[100%] p-4 left-0 bg-neutral-100 shadow-xl pr-4">
-            <SearchableListLayout label={label} options={options} path={path} />
+            <SearchableListLayout label={label} options={options} path={path} 
+              setcurrentDropdown={setcurrentDropdown}
+            />
           </div>
         </>
       )}

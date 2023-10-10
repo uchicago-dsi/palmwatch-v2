@@ -20,7 +20,7 @@ export const NavBar: React.FC<NavbarProps> = ({
   return (
     <div className="drawer">
       <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col">
+      <div className="drawer-content flex flex-col max-w-full overflow-hidden">
         {/* Navbar */}
         <div className="w-full navbar bg-base-300 relative z-10">
           <div className="flex-none lg:hidden">

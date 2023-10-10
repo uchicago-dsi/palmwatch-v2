@@ -19,6 +19,6 @@ export async function GET(_req: Request, res: { params: { uml: string } }) {
   const info = queryClient.getUml(uml).objects();
   const brands = millOnly
     ? []
-    : queryClient.getBrandUsage(uml)
+    : queryClient.getBrandUsageByUml(uml)
   return NextResponse.json({ brands, info }, { status: 200 });
 }

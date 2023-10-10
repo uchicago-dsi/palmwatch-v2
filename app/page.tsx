@@ -25,7 +25,7 @@ export default async function Home() {
           {/* <source src="path/to/video.webm" type="video/webm"></source> */}
           {/* Your browser does not support the video tag. */}
         </video>
-        <div className="relative z-[1] flex flex-col justify-center items-center h-full p-4 text-white">
+        <div className="relative z-[0] flex flex-col justify-center items-center h-full p-4 text-white">
           <h1 className="text-6xl font-bold">PalmWatch</h1>
           <h2 className="text-3xl">
             Explore the impact of palm oil production on deforestation
@@ -33,7 +33,7 @@ export default async function Home() {
           <div className="flex flex-col space-y-4 mt-10 items-center">
             {/* search by consumer brand, mill, supplier, group */}
             <p>Explore by</p>
-            <div className="flex flex-row space-x-4 mb-4">
+            <div className="flex flex-col space-y-4 mb-4 lg:flex-row lg:space-y-0 lg:space-x-4">
               <Link className="btn btn-outline btn-info" href="/brands">
                 Brands
               </Link>
@@ -69,14 +69,14 @@ export default async function Home() {
         </a>
       </section>
 
-      <section className="max-w-none w-full h-[100vh] flex flex-row bg-neutral-200 mb-4 prose space-x-4 justify-center items-center">
-        <div className="flex max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
+      <section className="max-w-none w-full  flex flex-col space-y-4 bg-neutral-200 mb-4 prose justify-center items-center lg:h-[100vh] lg:flex-row lg:space-x-4 lg:space-y-0">
+        <div className="flex w-full m-4 lg:m-0 lg:max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
           <h3>How is palm oil produced?</h3>
         </div>
-        <div className="flex max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
+        <div className="flex w-full m-4 lg:m-0 lg:max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
           <h3>Why is supply chain transparency important?</h3>
         </div>
-        <div className="flex max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
+        <div className="flex w-full m-4 lg:m-0 lg:max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
           <h3>What can this site help me learn?</h3>
         </div>
       </section>
@@ -87,6 +87,7 @@ export default async function Home() {
         <h3 className="text-xl my-4 font-bold">
           Palm Oil Mill Deforestation Map
         </h3>
+        <p>TODO: Map Explanation</p>
         <QueryProvider>
           <div className="h-[80vh] relative w-full">
             <PalmwatchMap

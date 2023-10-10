@@ -17,9 +17,10 @@ import { DataProvider } from "./DataProvider";
 export type IqrOverTimeProps = {
   data: Array<Record<string, unknown>> | object[];
   type: "brand" | "mill";
+  showMedian?: boolean;
 };
 
-export const IqrOverTime: React.FC<IqrOverTimeProps> = ({ data, type }) => {
+export const IqrOverTime: React.FC<IqrOverTimeProps> = ({ data, type, showMedian }) => {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ComposedChart
@@ -38,6 +39,16 @@ export const IqrOverTime: React.FC<IqrOverTimeProps> = ({ data, type }) => {
         <YAxis label={{ value: "Square KM of Forest Loss Per Year", angle: -90, dx:-10 }}  />
         <Tooltip />
         <Legend />
+        {showMedian ? 
+        <Line 
+          isAnimationActive={false}
+          type="monotone"
+          dataKey="Overall Median Mill Tree Loss (km2)"
+          stroke="darkgray"
+          strokeWidth={2}
+          activeDot={{ r: 4 }}
+        />
+        : null}
         {type === 'brand' ? (<>
         
           <Area
@@ -71,7 +82,7 @@ export const IqrOverTime: React.FC<IqrOverTimeProps> = ({ data, type }) => {
           <Line
           isAnimationActive={false}
           type="monotone"
-          dataKey="Tree Loss (km2)"
+          dataKey="Mill Tree Loss (km2)"
           stroke="#ff0000"
           strokeWidth={5}
           activeDot={{ r: 8 }}

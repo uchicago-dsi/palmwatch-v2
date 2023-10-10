@@ -37,7 +37,7 @@ export const MENU_ITEMS: Array<{
     icon: (
       <path
         d="m100 88.75v-2.5h-7.5v-75h-55v32.5h-30v42.5h-7.5v2.5zm-57.5-60h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm-37.5 12.5h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm-37.5 12.5h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm-37.5 12.5h7.5v7.5h-7.5zm37.5 0h7.5v7.5h-7.5zm-22.5 2.5h15v17.5h-15zm-45-20h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm-12.5 12.5h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm-12.5 12.5h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm17.5-57.5h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5zm12.5 0h7.5v7.5h-7.5z"
-        fill-rule="evenodd"
+        fillRule="evenodd"
       />
     ),
     path: "/groups",

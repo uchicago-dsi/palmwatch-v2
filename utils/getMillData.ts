@@ -1,6 +1,10 @@
 import { load, loadArrow, all, desc, op, table, escape } from "arquero";
 import ColumnTable from "arquero/dist/types/table/column-table";
 import { CompanyData, UmlData } from "./dataTypes";
+import { fullYearRange, fullYearRangeColumns } from "@/config/years";
+import Column from "arquero/dist/types/table/column";
+import { constants } from "fs/promises";
+
 class MillDataQuery {
   companies?: ColumnTable;
   uml?: ColumnTable;
@@ -18,25 +22,37 @@ class MillDataQuery {
     this.companies = companies;
     this.initialized = true;
   }
+
   getMillName(name: string) {
     return this.uml!.filter(escape((d: UmlData) => d["Mill Name"] === name));
   }
+
   getUml(umlId: string) {
     return this.uml!.filter(escape((d: UmlData) => d["UML ID"] === umlId));
   }
-
-  getBrandUsage(umlId: string) {
-    const data = this.companies!.filter(
-      escape((d: CompanyData) => d["UML ID"] === umlId)
-    )
+  getBrandUsage(table: ColumnTable) {
+    return table
       .orderby("report_year")
       .groupby("consumer_brand")
       .derive({
         years: (d: CompanyData) => op.array_agg_distinct(d["report_year"]),
       })
-      .select("consumer_brand", "years");
+      .select("consumer_brand", "years")
+      .dedupe("consumer_brand");
+  }
 
-    return data.objects().filter(this.filterUniqueByKey("consumer_brand"));
+  getBrandUsageByUml(umlId: string) {
+    const data = this.companies!.filter(
+      escape((d: CompanyData) => d["UML ID"] === umlId)
+    );
+    return this.getBrandUsage(data).objects();
+  }
+
+  getBrandUsageBySupplier(supplier: string) {
+    const data = this.uml!.filter(
+      escape((d: UmlData) => d["Parent Company"] === supplier)
+    ).join(this.companies!, ["UML ID", "UML ID"]);
+    return this.getBrandUsage(data).objects();
   }
 
   getBrandInfo(
@@ -55,23 +71,11 @@ class MillDataQuery {
       .dedupe("UML ID")
       .join(this.uml!, ["UML ID", "UML ID"]);
 
-    const quantileResults: Record<string, any>[] = [];
-    for (const col of cols) {
-      const colParts = col.split("_");
-      const year = parseInt(colParts.at(-1) || "0");
-      const quantileRollup = quantiles.reduce(
-        (acc, q) => ({
-          ...acc,
-          [`q${q}`]: op.quantile(col, q),
-        }),
-        {}
-      );
-      const _d = companies.select(col).rollup(quantileRollup);
-      quantileResults.push({
-        ..._d.objects()[0],
-        year,
-      });
-    }
+    const quantileResults = this.getQuantileTimeseries(
+      companies,
+      cols,
+      quantiles
+    );
     const suppliers = companies
       .groupby("Parent Company")
       .derive({
@@ -87,27 +91,20 @@ class MillDataQuery {
       suppliers,
     };
   }
-  getBrandStats(brand: string) {
-    const companyMills = this.companies!.select(["consumer_brand", "UML ID"])
-      .filter(escape((d: CompanyData) => d["consumer_brand"] === brand))
-      .select("UML ID")
-      .dedupe("UML ID")
-      .join(this.uml!, ["UML ID", "UML ID"]);
 
-    const averageCurrentRisk = companyMills
+  getSummaryStats(table: ColumnTable) {
+    const averageCurrentRisk = table
       .rollup({
         mean: (d: UmlData) => op.mean(d["risk_score_current"]),
       })
       .objects() as { mean: number }[];
-    const uniqueMills = companyMills.count().objects() as { count: number }[];
-    const uniqueCountries = companyMills
-      .dedupe("Country")
-      .count()
-      .objects() as { count: number }[];
-    const uniqueSuppliers = companyMills
-      .dedupe("Group Name")
-      .count()
-      .objects() as { count: number }[];
+    const uniqueMills = table.count().objects() as { count: number }[];
+    const uniqueCountries = table.dedupe("Country").count().objects() as {
+      count: number;
+    }[];
+    const uniqueSuppliers = table.dedupe("Group Name").count().objects() as {
+      count: number;
+    }[];
 
     return {
       averageCurrentRisk: Math.round(averageCurrentRisk[0].mean * 100) / 100,
@@ -116,18 +113,69 @@ class MillDataQuery {
       uniqueSuppliers: uniqueSuppliers[0].count,
     };
   }
+  getBrandStats(brand: string) {
+    const companyMills = this.companies!.select(["consumer_brand", "UML ID"])
+      .filter(escape((d: CompanyData) => d["consumer_brand"] === brand))
+      .select("UML ID")
+      .dedupe("UML ID")
+      .join(this.uml!, ["UML ID", "UML ID"]);
 
-  getGroupInfo(
-    group: string,
-    cols: string[],
+    return this.getSummaryStats(companyMills);
+  }
+
+  getSupplierStats(supplier: string) {
+    const supplierMills = this.uml!.filter(
+      escape((d: UmlData) => d["Parent Company"] === supplier)
+    ).dedupe("UML ID");
+    return this.getSummaryStats(supplierMills);
+  }
+  getFullData(data: ColumnTable) {
+    const joinedData = data.select("UML ID")
+      .join_right(this.companies!, ["UML ID", "UML ID"])
+    
+    const summaryStats = this.getSummaryStats(data);
+    const brandUsage = this.getBrandUsage(joinedData);
+    const timeseries = this.getQuantileTimeseries(data);
+    const totalForestLoss = data
+      .dedupe("UML ID")
+      .rollup({
+        totlaForestLoss: (d: UmlData) => op.sum(d.sum_of_treeloss_km as any),
+      })
+      // @ts-ignore
+      .objects()[0].totlaForestLoss;
+    return {
+      ...summaryStats,
+      brandUsage: brandUsage.objects(),
+      mills: data.objects(),
+      timeseries,
+      totalForestLoss
+    };
+  }
+  getSupplierData(supplier: string) {
+    const supplierMills = this.uml!.filter(
+      escape((d: UmlData) => d["Parent Company"] === supplier)
+    ).dedupe("UML ID");
+    return this.getFullData(supplierMills);
+  }
+  
+  getGroupData(group: string){
+    const groupMills = this.uml!.filter(
+      escape((d: UmlData) => d["Group Name"] === group)
+    ).dedupe("UML ID");
+    return this.getFullData(groupMills);
+  }
+  getCountryData(country: string){
+    const groupMills = this.uml!.filter(
+      escape((d: UmlData) => d["Country"] === country)
+    ).dedupe("UML ID");
+    return this.getFullData(groupMills);
+  }
+
+  getQuantileTimeseries(
+    data: ColumnTable,
+    cols: string[] = fullYearRangeColumns,
     quantiles: number[] = [0.25, 0.5, 0.75]
   ) {
-    const data = this.uml!.filter(
-      escape((d: UmlData) => d["Group Name"] === group)
-    )
-      .groupby("UML ID")
-      .dedupe("UML ID");
-
     const quantileResults: Record<string, any>[] = [];
     for (const col of cols) {
       const colParts = col.split("_");
@@ -145,12 +193,35 @@ class MillDataQuery {
         year,
       });
     }
+    return quantileResults;
+  }
+  getGroupInfo(
+    group: string,
+    cols: string[],
+    quantiles: number[] = [0.25, 0.5, 0.75]
+  ) {
+    const data = this.uml!.filter(
+      escape((d: UmlData) => d["Group Name"] === group)
+    )
+      .groupby("UML ID")
+      .dedupe("UML ID");
+
+    const quantileResults = this.getQuantileTimeseries(data, cols, quantiles);
     return {
       umlInfo: data.objects(),
       timeseries: quantileResults,
     };
   }
+  getDataInBbox(
+    minLat: number,
+    minLng: number,
+    maxLat: number,
+    maxLng: number
+  ){
+    const mills = this.getMillsInBbox(minLat, minLng, maxLat, maxLng);
+    return this.getFullData(mills);
 
+  }
   getMillsInBbox(
     minLat: number,
     minLng: number,
@@ -199,7 +270,7 @@ class MillDataQuery {
       .objects() as UmlData[];
     const groupsList = groups.map((d) => ({
       label: d["Group Name"],
-      href: `/supplier/${d["Group Name"]}`,
+      href: `/group/${d["Group Name"]}`,
     }));
 
     const companies = this.uml!.select("Parent Company")
@@ -208,7 +279,7 @@ class MillDataQuery {
 
     const comapniesList = companies.map((d) => ({
       label: d["Parent Company"] || "",
-      href: `/company/${d["Parent Company"]}`,
+      href: `/supplier/${d["Parent Company"]}`,
     }));
 
     const countries = this.uml!.select("Country")
@@ -255,6 +326,14 @@ class MillDataQuery {
       })
     );
   }
+
+  @cache("medianMill")
+  getMedianMill() {
+    const t0 = performance.now();
+    const uml = this.uml!.rollup(this.rollups.medianAllYears);
+    return uml.objects();
+  }
+
   @cache("getUniqueCounts")
   getUniqueCounts() {
     const brandCount = this.companies!.select("consumer_brand")
@@ -290,79 +369,13 @@ class MillDataQuery {
 
   @cache("getMedianBrandImpacts")
   getMedianBrandImpacts() {
-    const t0 = performance.now();
     const brandImpacts = this.companies!.join(this.uml!, ["UML ID", "UML ID"]);
 
     const grouped = brandImpacts
       .dedupe("consumer_brand", "UML ID")
       .groupby(["consumer_brand", "UML ID"])
-      .rollup({
-        sum2001: (d: UmlData) =>
-          op.sum(d.treeloss_km_2001 as unknown as string),
-        sum2002: (d: UmlData) =>
-          op.sum(d.treeloss_km_2002 as unknown as string),
-        sum2003: (d: UmlData) =>
-          op.sum(d.treeloss_km_2003 as unknown as string),
-        sum2004: (d: UmlData) =>
-          op.sum(d.treeloss_km_2004 as unknown as string),
-        sum2005: (d: UmlData) =>
-          op.sum(d.treeloss_km_2005 as unknown as string),
-        sum2006: (d: UmlData) =>
-          op.sum(d.treeloss_km_2006 as unknown as string),
-        sum2007: (d: UmlData) =>
-          op.sum(d.treeloss_km_2007 as unknown as string),
-        sum2008: (d: UmlData) =>
-          op.sum(d.treeloss_km_2008 as unknown as string),
-        sum2009: (d: UmlData) =>
-          op.sum(d.treeloss_km_2009 as unknown as string),
-        sum2010: (d: UmlData) =>
-          op.sum(d.treeloss_km_2010 as unknown as string),
-        sum2011: (d: UmlData) =>
-          op.sum(d.treeloss_km_2011 as unknown as string),
-        sum2012: (d: UmlData) =>
-          op.sum(d.treeloss_km_2012 as unknown as string),
-        sum2013: (d: UmlData) =>
-          op.sum(d.treeloss_km_2013 as unknown as string),
-        sum2014: (d: UmlData) =>
-          op.sum(d.treeloss_km_2014 as unknown as string),
-        sum2015: (d: UmlData) =>
-          op.sum(d.treeloss_km_2015 as unknown as string),
-        sum2016: (d: UmlData) =>
-          op.sum(d.treeloss_km_2016 as unknown as string),
-        sum2017: (d: UmlData) =>
-          op.sum(d.treeloss_km_2017 as unknown as string),
-        sum2018: (d: UmlData) =>
-          op.sum(d.treeloss_km_2018 as unknown as string),
-        sum2019: (d: UmlData) =>
-          op.sum(d.treeloss_km_2019 as unknown as string),
-        sum2020: (d: UmlData) =>
-          op.sum(d.treeloss_km_2020 as unknown as string),
-        sum2021: (d: UmlData) =>
-          op.sum(d.treeloss_km_2021 as unknown as string),
-      })
-      .rollup({
-        mean2001: (d: any) => op.mean(d.sum2001),
-        mean2002: (d: any) => op.mean(d.sum2002),
-        mean2003: (d: any) => op.mean(d.sum2003),
-        mean2004: (d: any) => op.mean(d.sum2004),
-        mean2005: (d: any) => op.mean(d.sum2005),
-        mean2006: (d: any) => op.mean(d.sum2006),
-        mean2007: (d: any) => op.mean(d.sum2007),
-        mean2008: (d: any) => op.mean(d.sum2008),
-        mean2009: (d: any) => op.mean(d.sum2009),
-        mean2010: (d: any) => op.mean(d.sum2010),
-        mean2011: (d: any) => op.mean(d.sum2011),
-        mean2012: (d: any) => op.mean(d.sum2012),
-        mean2013: (d: any) => op.mean(d.sum2013),
-        mean2014: (d: any) => op.mean(d.sum2014),
-        mean2015: (d: any) => op.mean(d.sum2015),
-        mean2016: (d: any) => op.mean(d.sum2016),
-        mean2017: (d: any) => op.mean(d.sum2017),
-        mean2018: (d: any) => op.mean(d.sum2018),
-        mean2019: (d: any) => op.mean(d.sum2019),
-        mean2020: (d: any) => op.mean(d.sum2020),
-        mean2021: (d: any) => op.mean(d.sum2021),
-      });
+      .rollup(this.rollups.sumAllYears)
+      .rollup(this.rollups.meanAllSums);
 
     // const ranked = brandImpacts.groupby("consumer_brand")
     //   // .filter
@@ -371,13 +384,82 @@ class MillDataQuery {
     //   })
     // console.log(ranked.objects().slice(0, 10));
   }
-  // getCountOfMillsPerBrand(){
-  //   const companies = this.companies!
-  //     .join(this.uml!, ["UML ID", "UML ID"])
-  //     .select
-  //   .groupby("consumer_brand").count();
-  // }
   getRankingOfMillsCurrentImpactScore() {}
+
+  rollups = {
+    sumAllYears: {
+      sum2001: (d: any) => op.sum(d.treeloss_km_2001),
+      sum2002: (d: any) => op.sum(d.treeloss_km_2002),
+      sum2003: (d: any) => op.sum(d.treeloss_km_2003),
+      sum2004: (d: any) => op.sum(d.treeloss_km_2004),
+      sum2005: (d: any) => op.sum(d.treeloss_km_2005),
+      sum2006: (d: any) => op.sum(d.treeloss_km_2006),
+      sum2007: (d: any) => op.sum(d.treeloss_km_2007),
+      sum2008: (d: any) => op.sum(d.treeloss_km_2008),
+      sum2009: (d: any) => op.sum(d.treeloss_km_2009),
+      sum2010: (d: any) => op.sum(d.treeloss_km_2010),
+      sum2011: (d: any) => op.sum(d.treeloss_km_2011),
+      sum2012: (d: any) => op.sum(d.treeloss_km_2012),
+      sum2013: (d: any) => op.sum(d.treeloss_km_2013),
+      sum2014: (d: any) => op.sum(d.treeloss_km_2014),
+      sum2015: (d: any) => op.sum(d.treeloss_km_2015),
+      sum2016: (d: any) => op.sum(d.treeloss_km_2016),
+      sum2017: (d: any) => op.sum(d.treeloss_km_2017),
+      sum2018: (d: any) => op.sum(d.treeloss_km_2018),
+      sum2019: (d: any) => op.sum(d.treeloss_km_2019),
+      sum2020: (d: any) => op.sum(d.treeloss_km_2020),
+      sum2021: (d: any) => op.sum(d.treeloss_km_2021),
+      sum2022: (d: any) => op.sum(d.treeloss_km_2022),
+    },
+    medianAllYears: {
+      median2001: (d: any) => op.median(d.treeloss_km_2001),
+      median2002: (d: any) => op.median(d.treeloss_km_2002),
+      median2003: (d: any) => op.median(d.treeloss_km_2003),
+      median2004: (d: any) => op.median(d.treeloss_km_2004),
+      median2005: (d: any) => op.median(d.treeloss_km_2005),
+      median2006: (d: any) => op.median(d.treeloss_km_2006),
+      median2007: (d: any) => op.median(d.treeloss_km_2007),
+      median2008: (d: any) => op.median(d.treeloss_km_2008),
+      median2009: (d: any) => op.median(d.treeloss_km_2009),
+      median2010: (d: any) => op.median(d.treeloss_km_2010),
+      median2011: (d: any) => op.median(d.treeloss_km_2011),
+      median2012: (d: any) => op.median(d.treeloss_km_2012),
+      median2013: (d: any) => op.median(d.treeloss_km_2013),
+      median2014: (d: any) => op.median(d.treeloss_km_2014),
+      median2015: (d: any) => op.median(d.treeloss_km_2015),
+      median2016: (d: any) => op.median(d.treeloss_km_2016),
+      median2017: (d: any) => op.median(d.treeloss_km_2017),
+      median2018: (d: any) => op.median(d.treeloss_km_2018),
+      median2019: (d: any) => op.median(d.treeloss_km_2019),
+      median2020: (d: any) => op.median(d.treeloss_km_2020),
+      median2021: (d: any) => op.median(d.treeloss_km_2021),
+      median2022: (d: any) => op.median(d.treeloss_km_2022),
+    },
+    meanAllSums: {
+      mean2001: (d: any) => op.mean(d.sum2001),
+      mean2002: (d: any) => op.mean(d.sum2002),
+      mean2003: (d: any) => op.mean(d.sum2003),
+      mean2004: (d: any) => op.mean(d.sum2004),
+      mean2005: (d: any) => op.mean(d.sum2005),
+      mean2006: (d: any) => op.mean(d.sum2006),
+      mean2007: (d: any) => op.mean(d.sum2007),
+      mean2008: (d: any) => op.mean(d.sum2008),
+      mean2009: (d: any) => op.mean(d.sum2009),
+      mean2010: (d: any) => op.mean(d.sum2010),
+      mean2011: (d: any) => op.mean(d.sum2011),
+      mean2012: (d: any) => op.mean(d.sum2012),
+      mean2013: (d: any) => op.mean(d.sum2013),
+      mean2014: (d: any) => op.mean(d.sum2014),
+      mean2015: (d: any) => op.mean(d.sum2015),
+      mean2016: (d: any) => op.mean(d.sum2016),
+      mean2017: (d: any) => op.mean(d.sum2017),
+      mean2018: (d: any) => op.mean(d.sum2018),
+      mean2019: (d: any) => op.mean(d.sum2019),
+      mean2020: (d: any) => op.mean(d.sum2020),
+      mean2021: (d: any) => op.mean(d.sum2021),
+      mean2022: (d: any) => op.mean(d.sum2022),
+    },
+  };
 }
 
 const queryClient = new MillDataQuery();

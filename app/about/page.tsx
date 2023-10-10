@@ -1,3 +1,49 @@
+const FAQ = [
+  {
+    title: "What variables are available in this data?",
+    content: "hello",
+  },
+  {
+    title: "How is the risk score calculated?",
+    content: <ul>
+
+<li>
+            <b>Current Risk Score</b> Calculated risk score based on most recent
+            2 years worth of data. Calculation: Average treeloss area over the
+            specified years (currently 2021-2022). Convert averages to z-score.
+            Convert to risk score (1-5) where 1: z{"<"}-1, 2: -1
+            {"<"}=z{"<"}-.5, 3: -.5{"<"}=z{"<"}.5, 4: .5{"<"}=z{"<"}1, 5: z{">"}
+            =1
+            <b></b>
+          </li>
+          <li>
+            <b>Past Risk Score</b> Calculated risk score based on past treeloss.
+            Calculation: Convert treeloss sum proportion of forest to z-score.
+            Convert averages to z-score. Convert to risk score (1-5) where 1: z
+            {"<"}-1, 2: -1{"<"}=z{"<"}
+            -.5, 3: -.5{"<"}=z{"<"}.5, 4: .5{"<"}=z{"<"}1, 5: z{">"}=1
+            <b></b>
+          </li>
+          <li>
+            <b>Future Risk Score</b> - Calculated risk score based on future
+            treeloss. Calculation: Convert remaining proportion of forest to
+            z-score.. Convert averages to z-score. Convert to risk score (1-5)
+            where 1: z{"<"}-1, 2: -1{"<"}=z{"<"}-.5, 3: -.5{"<"}=z{"<"}.5, 4: .5
+            {"<"}=z
+            {"<"}1, 5: z{">"}=1
+          </li>
+    </ul>
+  },
+  {
+    title: "Where is the data from?",
+    content: "hello",
+  },
+  {
+    title: "How are catchment areas assigned?",
+    content: "hello",
+  },
+];
+
 export default function Page() {
   return (
     <div className="prose max-w-3xl mx-auto py-4">
@@ -22,9 +68,9 @@ export default function Page() {
       <h2>Methodology</h2>
       <p>
         Public information coming from various consumer brands is matched with
-        data for the Global Forest Watch{`'`}s Universal Mill List. A calculation in
-        which the previous two years of deforestation is used to calculate
-        deforestation risk score.
+        data for the Global Forest Watch{`'`}s Universal Mill List. A
+        calculation in which the previous two years of deforestation is used to
+        calculate deforestation risk score.
       </p>
       <h2>Variables</h2>
       <p>
@@ -38,7 +84,8 @@ export default function Page() {
             ocean or no data.
           </li>
           <li>
-            <b>Forest Area</b> - Pixels where there is land was in a {`"`}forest{`"`}
+            <b>Forest Area</b> - Pixels where there is land was in a {`"`}forest
+            {`"`}
             state in 2000.
           </li>
           <li>
@@ -64,32 +111,21 @@ export default function Page() {
             Fraction of forest that has not experienced loss.
             <b></b>
           </li>
-          <li>
-            <b>Current Risk Score</b> Calculated risk score based on most recent
-            2 years worth of data. Calculation: Average treeloss area over the
-            specified years (currently 2018-2019). Convert averages to z-score.
-            Convert to risk score (1-5) where 1: z{"<"}-1, 2: -1
-            {"<"}=z{"<"}-.5, 3: -.5{"<"}=z{"<"}.5, 4: .5{"<"}=z{"<"}1, 5: z{">"}
-            =1
-            <b></b>
-          </li>
-          <li>
-            <b>Past Risk Score</b> Calculated risk score based on past treeloss.
-            Calculation: Convert treeloss sum proportion of forest to z-score.
-            Convert averages to z-score. Convert to risk score (1-5) where 1: z
-            {"<"}-1, 2: -1{"<"}=z{"<"}
-            -.5, 3: -.5{"<"}=z{"<"}.5, 4: .5{"<"}=z{"<"}1, 5: z{">"}=1
-            <b></b>
-          </li>
-          <li>
-            <b>Future Risk Score</b> - Calculated risk score based on future
-            treeloss. Calculation: Convert remaining proportion of forest to
-            z-score.. Convert averages to z-score. Convert to risk score (1-5)
-            where 1: z{"<"}-1, 2: -1{"<"}=z{"<"}-.5, 3: -.5{"<"}=z{"<"}.5, 4: .5
-            {"<"}=z
-            {"<"}1, 5: z{">"}=1
-          </li>
         </ul>
+        <div>
+          <h3>FAQ</h3>
+          {FAQ.map((item, index) => (
+            <div key={index} className="collapse bg-base-200 my-4 shadow-xl">
+              <input type="radio" name={`faq-accordion`} />
+              <div className="collapse-title text-xl font-medium">
+                {item.title}
+              </div>
+              <div className="collapse-content">
+                <p>{item.content}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </p>
     </div>
   );

@@ -30,3 +30,36 @@ export const forestLossColorBreaks = [
     tooltip: 'Fifth Quartile (80th - 100th Percentile) of all mills in 2022'
   }
 ]
+
+export const riskScoreScheme = [
+  {
+    value: 1,
+    color: [94,60,153],
+    label: '1',
+    tooltip: ''
+  },
+  {
+    value: 2,
+    color: [178,171,210],
+    label: '2',
+    tooltip: ''
+  },
+  {
+    value: 3,
+    color: [247,247,247],
+    label: '3',
+    tooltip: ''
+  },
+  {
+    value: 4,
+    color: [253,184,99],
+    label: '4',
+    tooltip: ''
+  },
+  {
+    value: 5,
+    color: [230,97,1],
+    label: '5',
+    tooltip: ''
+  }
+]

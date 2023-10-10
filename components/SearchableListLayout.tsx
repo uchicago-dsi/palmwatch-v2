@@ -58,7 +58,16 @@ export const SearchableListLayout: React.FC<{
   rows?: number;
   manyRows?: number;
   columns?: number;
-}> = ({ label, path, options, rows, columns, manyRows }) => {
+  setcurrentDropdown?: (label: string) => void;
+}> = ({
+  label,
+  path,
+  options,
+  rows,
+  columns,
+  manyRows,
+  setcurrentDropdown,
+}) => {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [currentPage, setCurrentPage] = React.useState(0);
 
@@ -102,13 +111,16 @@ export const SearchableListLayout: React.FC<{
       }
     });
   };
+  const closeDropdown = () => setcurrentDropdown && setcurrentDropdown("");
   return (
-    <div className={`flex flex-row overflow-x-auto space-x-4 prose max-w-none w-full`}>
+    <div
+      className={`flex flex-row overflow-x-auto space-x-4 prose max-w-none w-full`}
+    >
       <div className="p-4 flex-col justify-around border-r-2 border-r-neutral-400 space-y-4">
         <h3 className="m-0">{label}</h3>
         {!!path && (
           <div>
-            <Link href={path} className="btn-link m-0">
+            <Link href={path} className="btn-link m-0" onClick={closeDropdown}>
               {label} Overview
             </Link>
           </div>
@@ -138,7 +150,11 @@ export const SearchableListLayout: React.FC<{
         <div className="flex flex-col space-y-1 flex-1 m-0 p-0" key={idx}>
           {column.map((option) => (
             <div key={option.label}>
-              <Link className="btn-link m-0 p-0" href={option.href}>
+              <Link
+                className="btn-link m-0 p-0"
+                href={option.href}
+                onClick={closeDropdown}
+              >
                 <div className="flex flex-col">
                   {Boolean(option.imgPath) && (
                     <img
