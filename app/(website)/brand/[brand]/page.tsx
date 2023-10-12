@@ -7,10 +7,15 @@ import queryClient from "@/utils/getMillData";
 import { StatsBlock } from "@/components/StatsBlock";
 import { ServerInfotable } from "@/components/InfoTable";
 import { getDataDownload, getStats } from "./pageConfig";
+import { getBrandInfo } from "@/sanity/lib/client";
 
 export default async function Page({ params }: { params: { brand: string } }) {
-  await queryClient.init();
   const brand = params.brand ? decodeURIComponent(params.brand) : "";
+  const [_, r] = await Promise.all([
+    await queryClient.init(),
+    getBrandInfo(brand),
+  ]);
+
   const { averageCurrentRisk, uniqueMills, uniqueCountries, uniqueSuppliers } =
     queryClient.getBrandStats(brand);
 
@@ -24,10 +29,12 @@ export default async function Page({ params }: { params: { brand: string } }) {
   const downloads = getDataDownload(brand);
 
   const brandInfo = brands[brand as keyof typeof brands];
-  
+
   if (!brandInfo) {
     return (
-      <div>Could not find brand {`"${brand}"`}. Please contact administrator.</div>
+      <div>
+        Could not find brand {`"${brand}"`}. Please contact administrator.
+      </div>
     );
   }
 
@@ -96,14 +103,14 @@ export default async function Page({ params }: { params: { brand: string } }) {
           />
         </div>
       </QueryProvider>
-        <div className="bg-neutral-50 m-0  px-4 flex flex-col lg:flex-row lg:space-x-4 lg:space-y-0 space-y-4 prose max-w-none shadow-xl">
-          <div className="flex-1 basis-2/3">
-            <h2 className="my-4">About {brand}</h2>
-            <p>
-              {description} <i>(description via {descriptionAttribution})</i>
-            </p>
-          </div>
-          <div className="flex-1 basis-1/3 border-l-2 border-l-neutral-200 pl-6">
+      <div className="bg-neutral-50 m-0  px-4 flex flex-col lg:flex-row lg:space-x-4 lg:space-y-0 space-y-4 prose max-w-none shadow-xl">
+        <div className="flex-1 basis-2/3">
+          <h2 className="my-4">About {brand}</h2>
+          <p>
+            {description} <i>(description via {descriptionAttribution})</i>
+          </p>
+        </div>
+        <div className="flex-1 basis-1/3 border-l-2 border-l-neutral-200 pl-6">
           {disclosures && (
             <>
               <h2 className="my-4">Disclosure PDFs</h2>
@@ -123,28 +130,28 @@ export default async function Page({ params }: { params: { brand: string } }) {
                   </li>
                 ))}
               </ul>
-              </>
+            </>
           )}
           <h2>Data Download</h2>
-              <ul>
-                {downloads.map((download, i) => (
-                  <li key={i}>
-                    <a
-                      className="link-primary"
-                      href={`${download.href}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      download
-                    >
-                      {download.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-          
+          <ul>
+            {downloads.map((download, i) => (
+              <li key={i}>
+                <a
+                  className="link-primary"
+                  href={`${download.href}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  download
+                >
+                  {download.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
           <p></p>
-          </div>
         </div>
+      </div>
     </main>
   );
 }

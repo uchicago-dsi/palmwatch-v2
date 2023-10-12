@@ -74,7 +74,7 @@ function BboxInner() {
       return res.json();
     }
   );
-  console.log(data)
+
   const stats = getStats(
     data?.mills?.length,
     data?.uniqueCountries,
