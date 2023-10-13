@@ -59,7 +59,7 @@ export default {
     },
     {
       name: 'content',
-      title: 'Content',
+      title: 'Additional Content',
       type: 'array',
       of: [
         {
