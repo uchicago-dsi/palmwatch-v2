@@ -2,34 +2,32 @@ import React from "react";
 import { ServerIqr } from "@/components/IqrOverTimeLineChart";
 import { ServerMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
-import brands from "@/config/brands";
 import queryClient from "@/utils/getMillData";
 import { StatsBlock } from "@/components/StatsBlock";
 import { ServerInfotable } from "@/components/InfoTable";
 import { getDataDownload, getStats } from "./pageConfig";
 import { getBrandInfo } from "@/sanity/lib/client";
+import { PortableText } from "@portabletext/react";
+import brands from "@/config/brands";
+import { BrandSchema } from "@/config/brands/types";
 
 export default async function Page({ params }: { params: { brand: string } }) {
   const brand = params.brand ? decodeURIComponent(params.brand) : "";
-  const [_, r] = await Promise.all([
-    await queryClient.init(),
+  const [_, _brandInfo] = await Promise.all([
+    queryClient.init(),
     getBrandInfo(brand),
   ]);
-
+  const brandInfo = (_brandInfo || brands[brand]) as BrandSchema
+  
   const { averageCurrentRisk, uniqueMills, uniqueCountries, uniqueSuppliers } =
     queryClient.getBrandStats(brand);
-
   const stats = getStats(
     averageCurrentRisk,
     uniqueMills,
     uniqueCountries,
     uniqueSuppliers
   );
-
   const downloads = getDataDownload(brand);
-
-  const brandInfo = brands[brand as keyof typeof brands];
-
   if (!brandInfo) {
     return (
       <div>
@@ -39,7 +37,6 @@ export default async function Page({ params }: { params: { brand: string } }) {
   }
 
   const { disclosures, description, descriptionAttribution } = brandInfo;
-
   return (
     <main className="relative flex flex-col items-center justify-center w-[90%] mx-auto max-w-[90vw] 2xl:max-w-[1400px]">
       <div className="flex flex-col space-y-4 my-8 w-full shadow-xl align-center justify-center prose max-w-none">
@@ -152,6 +149,11 @@ export default async function Page({ params }: { params: { brand: string } }) {
           <p></p>
         </div>
       </div>
+      {brandInfo.content && (
+        <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
+          <PortableText value={brandInfo.content} />
+        </div>
+      )}
     </main>
   );
 }

@@ -1,3 +1,5 @@
+import { TypedObject } from "sanity";
+
 export type BrandSchema = {
   /*
   * The name of the brand.
@@ -15,4 +17,5 @@ export type BrandSchema = {
   country: string;
   rspoMemberSince: string;
   externalLink: string;
+  content?: TypedObject | TypedObject[];
 };
