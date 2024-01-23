@@ -1,14 +1,11 @@
-import { MultiSearch } from "@/components/MutliSearch";
 import { Inter } from "next/font/google";
-import Link from "next/link";
 import queryClient from "@/utils/getMillData";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
-import { promises as fs } from "fs";
 import path from "path";
 import { Feedback } from "@/components/Feedback";
 import { Analytics } from "@vercel/analytics/react";
-
+import cmsClient from "@/sanity/lib/client";
 export const metadata = {
   title: "PalmWatch",
   description: "Explore the impact of palm oil production on deforestation",
@@ -26,13 +23,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
+  const [_, footerContent] = await Promise.all([
+    queryClient.init(dataDir),
+    cmsClient.getFooterContent(),
+  ]);
   const searchList = queryClient.getSearchList();
 
   return (
     <html lang="en" data-theme="lemonade">
       <body className={inter.variable}>
-        <NavBar searchList={searchList} currentPage="">
+        <NavBar searchList={searchList} currentPage="" footerContent={footerContent}>
           {children}
           <Analytics />
         </NavBar>

@@ -9,12 +9,14 @@ interface NavbarProps {
   searchList: ReturnType<typeof queryClient.getSearchList>;
   children: React.ReactNode;
   currentPage: string;
+  footerContent: any;
 }
 
 export const NavBar: React.FC<NavbarProps> = ({
   searchList,
   children,
   currentPage,
+  footerContent
 }) => {
   return (
     <div className="drawer">
@@ -84,7 +86,7 @@ export const NavBar: React.FC<NavbarProps> = ({
           </div>
         </div>
         {children}
-        <Footer />
+        <Footer footerContent={footerContent} />
       </div>
       <div className="drawer-side">
         <label
