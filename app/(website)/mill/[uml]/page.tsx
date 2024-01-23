@@ -12,13 +12,21 @@ import { StatsBlock } from "@/components/StatsBlock";
 import { sumForestLoss } from "@/utils/sumForestloss";
 import { fullYearRange } from "@/config/years";
 import { BarShareChartForests } from "@/components/BarShareChartForests";
+import cmsClient from "@/sanity/lib/client";
+import { PortableText } from "@portabletext/react";
 
 export default async function Page({ params }: { params: { uml: string } }) {
   const uml = decodeURIComponent(params.uml);
 
   // data
   const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
+  const [
+    _,
+    millContent
+  ] = await Promise.all([
+    queryClient.init(dataDir),
+    cmsClient.getUmlInfo(uml)
+  ])
   const data = queryClient.getUml(uml).objects();
   const medianMillData = queryClient.getMedianMill()?.[0];
   const entry = data?.[0] as UmlData | undefined;
@@ -125,6 +133,11 @@ export default async function Page({ params }: { params: { uml: string } }) {
           <MillInfo millOverride={uml} dataOverride={[entry]} />
         </QueryProvider>
       </div>
+      {millContent.content && (
+        <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
+          <PortableText value={millContent.content} />
+        </div>
+      )}
     </main>
   );
 }
