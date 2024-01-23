@@ -4,7 +4,8 @@ import millInfo from './schemas/millInfo'
 import supplierInfo from './schemas/supplierInfo'
 import countryInfo from './schemas/countryInfo'
 import aboutPage from './schemas/aboutPage'
-
+import contactPage from './schemas/contactPage'
+import footerInfo from './schemas/footerInfo'
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     brandInfo,
@@ -12,6 +13,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     supplierInfo,
     countryInfo,
     aboutPage,
+    contactPage,
+    footerInfo
   ],
 }
 
