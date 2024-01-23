@@ -6,7 +6,7 @@ import queryClient from "@/utils/getMillData";
 import { StatsBlock } from "@/components/StatsBlock";
 import { ServerInfotable } from "@/components/InfoTable";
 import { getDataDownload, getStats } from "./pageConfig";
-import { getBrandInfo } from "@/sanity/lib/client";
+import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@portabletext/react";
 import brands from "@/config/brands";
 import { BrandSchema } from "@/config/brands/types";
@@ -15,7 +15,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
   const brand = params.brand ? decodeURIComponent(params.brand) : "";
   const [_, _brandInfo] = await Promise.all([
     queryClient.init(),
-    getBrandInfo(brand),
+    cmsClient.getBrandInfo(brand),
   ]);
   const brandInfo = (_brandInfo || brands[brand]) as BrandSchema
   
