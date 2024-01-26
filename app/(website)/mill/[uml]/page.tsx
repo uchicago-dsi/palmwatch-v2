@@ -133,7 +133,7 @@ export default async function Page({ params }: { params: { uml: string } }) {
           <MillInfo millOverride={uml} dataOverride={[entry]} />
         </QueryProvider>
       </div>
-      {millContent.content && (
+      {!!millContent?.content && (
         <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
           <PortableText value={millContent.content} />
         </div>

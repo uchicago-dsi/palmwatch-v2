@@ -1,5 +1,5 @@
 import { createClient } from 'next-sanity'
-import { brandInfoQuery, aboutPageQuery, contactPageQuery, footerInfoQuery } from "./groq";
+import { brandInfoQuery, aboutPageQuery, contactPageQuery, footerInfoQuery, umlInfoQuery } from "./groq";
 import { BrandSchema } from "@/config/brands/types";
 
 import { apiVersion, dataset, projectId, useCdn } from '../env'
@@ -31,7 +31,7 @@ class CmsClient {
     if (this.umlData[uml]) {
       return this.umlData[uml];
     }
-    const data = await this.client.fetch<Partial<BrandSchema>>(brandInfoQuery, { uml });
+    const data = await this.client.fetch<Partial<BrandSchema>>(umlInfoQuery, { uml });
     this.umlData[uml] = data;
     return data;
   }
