@@ -21,7 +21,7 @@ export const brandInfoQuery = groq`
 `;
 
 export const umlInfoQuery = groq`
-*[_type == "mill" && name == "uml"][0] {
+*[_type == "mill" && name == $uml][0] {
   _id,
   name,
   description,
