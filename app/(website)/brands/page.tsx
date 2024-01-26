@@ -37,7 +37,7 @@ export default async function Page() {
         />
         <h3>Brand Search</h3>
         <p>
-          Search below for consumer brands, and learn more about the Palm Oil
+          Search below for consumer brands, and learn more about the palm oil
           mill utilization of each.
         </p>
       </section>

@@ -11,8 +11,7 @@ export default async function Page() {
       <section className="prose flex flex-col py-4">
         <h1 className="p-0 m-0">Suppliers Search</h1>
         <p>
-          Search below for consumer brands, and learn more about the Palm Oil
-          mill utilization of each.
+          Search below for palm oil suppliers and learn more about the palm oil mill utilization of each.
         </p>
       </section>
       <div>
