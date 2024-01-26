@@ -59,7 +59,7 @@ export const forestStatsConfig = (
   }
   if (totalForestLoss !== null) {
     stats.push({
-      title: "Total Forest Los (km2)",
+      title: "Total Forest Loss (km2)",
       stat: formatter.format(totalForestLoss),
       className: "text-error",
     });
