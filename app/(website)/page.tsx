@@ -46,7 +46,7 @@ export default async function Home() {
               <Link className="btn btn-outline btn-info" href="/groups">
                 Groups
               </Link>
-              <Link className="btn btn-outline btn-info" href="/country">
+              <Link className="btn btn-outline btn-info" href="/countries">
                 Countries
               </Link>
             </div>
