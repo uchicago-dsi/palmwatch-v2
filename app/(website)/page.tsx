@@ -80,7 +80,7 @@ export default async function Home() {
       </section>
       {!!useCases?.length && <section className="
       max-w-none w-full  flex flex-col space-y-4 bg-neutral-200 mb-4 prose justify-center items-center lg:h-[100vh] lg:flex-row lg:space-x-4 lg:space-y-0">
-        {useCases.map((useCase, index) => (
+        {useCases?.map((useCase, index) => (
           <div key={index} className="w-full lg:w-1/2">
             <PortableText value={useCase.body} />
           </div>
