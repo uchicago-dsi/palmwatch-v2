@@ -1,6 +1,8 @@
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@portabletext/react";
 
+export const revalidate = 60 // revalidate the data at most every minute
+
 export default async function Page() {
   const aboutPageContent = await cmsClient.getAboutPage();
   return (
