@@ -7,7 +7,7 @@ import { StatsBlock } from "@/components/StatsBlock";
 import { ServerInfotable } from "@/components/InfoTable";
 import { getDataDownload, getStats } from "./pageConfig";
 import cmsClient from "@/sanity/lib/client";
-import { PortableText } from "@portabletext/react";
+import { PortableText } from "@/sanity/lib/components";
 import brands from "@/config/brands";
 import { BrandSchema } from "@/config/brands/types";
 

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ScrollToButton } from "@/components/ScrollToButton";
 import path from "path";
 import cmsClient from "@/sanity/lib/client";
-import { PortableText } from "@portabletext/react";
+import { PortableText } from "@/sanity/lib/components";
 
 export const revalidate = 60
 

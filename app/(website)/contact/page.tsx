@@ -1,5 +1,5 @@
 import cmsClient from "@/sanity/lib/client";
-import { PortableText } from "@portabletext/react";
+import { PortableText } from "@/sanity/lib/components";
 
 export const revalidate = 60
 

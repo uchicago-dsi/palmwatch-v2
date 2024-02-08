@@ -51,4 +51,6 @@ class CmsClient {
   }
 }
 
-export default new CmsClient();
+const client =  new CmsClient();
+
+export default client;

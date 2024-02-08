@@ -13,7 +13,7 @@ import { sumForestLoss } from "@/utils/sumForestloss";
 import { fullYearRange } from "@/config/years";
 import { BarShareChartForests } from "@/components/BarShareChartForests";
 import cmsClient from "@/sanity/lib/client";
-import { PortableText } from "@portabletext/react";
+import { PortableText } from "@/sanity/lib/components";
 
 export default async function Page({ params }: { params: { uml: string } }) {
   const uml = decodeURIComponent(params.uml);
