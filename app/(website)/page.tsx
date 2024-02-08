@@ -19,7 +19,7 @@ export default async function Home() {
     mapDescription,
     useCases,
     introContent
-  } = homeContent
+  } = homeContent || {}
 
   return (
     <main className="flex flex-col items-center justify-center h-auto">
