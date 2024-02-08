@@ -6,10 +6,20 @@ import { BrandInfoClient } from "@/components/BrandInfoClient";
 import Link from "next/link";
 import { ScrollToButton } from "@/components/ScrollToButton";
 import path from "path";
+import cmsClient from "@/sanity/lib/client";
+import { PortableText } from "@portabletext/react";
+
+
 export default async function Home() {
   const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
   const data = queryClient.getFullMillInfo().objects();
+  const homeContent = await cmsClient.getHomeContent();
+  const {
+    mapDescription,
+    useCases,
+    introContent
+  } = homeContent
 
   return (
     <main className="flex flex-col items-center justify-center h-auto">
@@ -68,26 +78,22 @@ export default async function Home() {
           Cover Video by Sum Mayyah Channel | Creative Commons Attribution
         </a>
       </section>
-
-      {/* <section className="max-w-none w-full  flex flex-col space-y-4 bg-neutral-200 mb-4 prose justify-center items-center lg:h-[100vh] lg:flex-row lg:space-x-4 lg:space-y-0">
-        <div className="flex w-full m-4 lg:m-0 lg:max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
-          <h3>How is palm oil produced?</h3>
-        </div>
-        <div className="flex w-full m-4 lg:m-0 lg:max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
-          <h3>Why is supply chain transparency important?</h3>
-        </div>
-        <div className="flex w-full m-4 lg:m-0 lg:max-w-[25%] p-4 h-[50vh] rounded-xl shadow-xl bg-neutral-100">
-          <h3>What can this site help me learn?</h3>
-        </div>
-      </section> */}
+      {!!useCases?.length && <section className="
+      max-w-none w-full  flex flex-col space-y-4 bg-neutral-200 mb-4 prose justify-center items-center lg:h-[100vh] lg:flex-row lg:space-x-4 lg:space-y-0">
+        {useCases.map((useCase, index) => (
+          <div key={index} className="w-full lg:w-1/2">
+            <PortableText value={useCase.body} />
+          </div>
+        ))}
+        </section>}
+      {!!introContent?.length && <section className="max-w-none w-full  flex flex-col space-y-4 bg-neutral-200 mb-4 prose justify-center items-center lg:h-[100vh] lg:flex-row lg:space-x-4 lg:space-y-0">
+        <PortableText value={introContent} />
+      </section>}
       <section
         id="homepage-map"
         className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] relative block"
       >
-        <h3 className="text-xl my-4 font-bold">
-          Palm Oil Mill Deforestation Map
-        </h3>
-        {/* <p>TODO: Map Explanation</p> */}
+       {!!mapDescription?.length && <PortableText value={mapDescription} />}
         <QueryProvider>
           <div className="h-[80vh] relative w-full">
             <PalmwatchMap

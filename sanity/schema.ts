@@ -6,6 +6,8 @@ import countryInfo from './schemas/countryInfo'
 import aboutPage from './schemas/aboutPage'
 import contactPage from './schemas/contactPage'
 import footerInfo from './schemas/footerInfo'
+import homePage from './schemas/homePage'
+
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     brandInfo,
@@ -14,7 +16,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     countryInfo,
     aboutPage,
     contactPage,
-    footerInfo
+    footerInfo,
+    homePage
   ],
 }
 

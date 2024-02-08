@@ -1,9 +1,9 @@
 import { createClient } from 'next-sanity'
-import { brandInfoQuery, aboutPageQuery, contactPageQuery, footerInfoQuery, umlInfoQuery } from "./groq";
+import { brandInfoQuery, aboutPageQuery, contactPageQuery, footerInfoQuery, umlInfoQuery, homePageQuery } from "./groq";
 import { BrandSchema } from "@/config/brands/types";
 
 import { apiVersion, dataset, projectId, useCdn } from '../env'
-import { AboutPageContent, ContactPageContent } from './types';
+import { AboutPageContent, ContactPageContent, HomePageContent } from './types';
 class CmsClient {
   client: ReturnType<typeof createClient>;
   brandData: Record<string, BrandSchema> = {}
@@ -45,6 +45,9 @@ class CmsClient {
   }
   async getFooterContent() {
     return await this.client.fetch(footerInfoQuery);
+  }
+  async getHomeContent() {
+    return await this.client.fetch<HomePageContent>(homePageQuery)
   }
 }
 
