@@ -9,7 +9,19 @@ function urlFor(source: string) {
 export const myPortableTextComponents = {
   types: {
     image: (v: any) =>  {
-      return <img src={urlFor(v?.value?.asset?._ref || '')}  alt={v?.value?.alt || ''} />
+      const alt = v?.value?.alt || '';
+      const src = urlFor(v?.value?.asset?._ref || '');
+      const href = v?.value?.link
+      const img = <img src={urlFor(v?.value?.asset?._ref || '')}  alt={v?.value?.alt || ''} />
+      if (href) {
+        return (
+          <a href={href} target="_blank" rel="noopener noreferrer">
+            {img}
+          </a>
+        )
+      } else {
+        return img
+      }
   }
   }
 }

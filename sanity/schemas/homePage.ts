@@ -1,31 +1,4 @@
-const contentSchema = {
-  name: "body",
-  title: "Body (Answer)",
-  type: "array",
-  of: [
-    {
-      type: "block",
-    },
-    {
-      type: "image",
-      fields: [
-        {
-          type: "text",
-          name: "alt",
-          title: "Alternative text",
-          description: `Some of your visitors cannot see images, 
-            be they blind, color-blind, low-sighted; 
-            alternative text is of great help for those 
-            people that can rely on it to have a good idea of 
-            what\'s on your page.`,
-          options: {
-            isHighlighted: true,
-          },
-        },
-      ],
-    },
-  ],
-}
+import { getGenericContentConfig } from "./utils";
 
 export default {
   name: "home",
@@ -38,7 +11,7 @@ export default {
       type: "string",
     },
     {
-      ...contentSchema,
+      ...getGenericContentConfig("content"),
       name: "introContent",
       title: "Intro Content",
     },
@@ -57,7 +30,7 @@ export default {
               type: "string",
             },
             {
-              ...contentSchema,
+              ...getGenericContentConfig("content"),
               name: "body",
               title: "Body",
             },
@@ -71,7 +44,7 @@ export default {
       ],
     },
     {
-      ...contentSchema,
+      ...getGenericContentConfig("content"),
       name: "mapDescription",
       title: "Map Description"
     },

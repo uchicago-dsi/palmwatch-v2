@@ -22,6 +22,11 @@ export const getGenericContentConfig = (name: string) => ({
             isHighlighted: true,
           },
         },
+        {
+          type: "text",
+          name: "link",
+          title: "Image Link",
+          description: `Optionally, this image can link somewhere`,}
       ],
     },
   ],
