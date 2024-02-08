@@ -9,6 +9,7 @@ import path from "path";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@portabletext/react";
 
+export const revalidate = 60
 
 export default async function Home() {
   const dataDir = path.join(process.cwd(), "public", "data");
