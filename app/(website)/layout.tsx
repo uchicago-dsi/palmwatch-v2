@@ -6,10 +6,42 @@ import path from "path";
 import { Feedback } from "@/components/Feedback";
 import { Analytics } from "@vercel/analytics/react";
 import cmsClient from "@/sanity/lib/client";
+
 export const metadata = {
-  title: "PalmWatch",
-  description: "Explore the impact of palm oil production on deforestation",
-};
+  "title": "PalmWatch: Tracking Big Brands' Impact on Palm Oil Use",
+  "description": "PalmWatch is an innovative open-access platform leveraging advanced data science and open-source intelligence to map the global palm oil supply chain's impact, connecting major brands like Nestlé, PepsiCo, and Unilever to deforestation and environmental changes.",
+  "keywords": "PalmWatch, palm oil, deforestation, environmental impact, data science, open-source intelligence, global supply chain, Nestlé, PepsiCo, Unilever",
+  "robots": "index, follow",
+  "openGraph": {
+    "url": "https://www.palmwatch.inclusivedevelopment.net/",
+    "title": "PalmWatch: Tracking Big Brands' Impact on Palm Oil Use",
+    "description": "Discover how major brands' palm oil use drives deforestation and environmental change with PalmWatch, an open-access tool powered by data science and open-source intelligence.",
+    "images": [
+      {
+        "url": "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
+        "width": 1200,
+        "height": 630,
+        "alt": "PalmWatch: Tracking Big Brands' Impact on Palm Oil Use"
+      }
+    ]
+  },
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "PalmWatch: Tracking Big Brands' Impact on Palm Oil Use",
+    "description": "PalmWatch reveals the environmental footprint of global palm oil consumption by brands like Nestlé, PepsiCo, and Unilever through advanced data analysis.",
+    "images": [
+      {
+        "url": "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
+        "width": 1200,
+        "height": 630,
+        "alt": "PalmWatch: Tracking Big Brands' Impact on Palm Oil Use"
+      }
+    ],
+    "site": "@inclusivedevt",
+    "creator": "@inclusivedevt"
+  }
+}
+
 
 const inter = Inter({
   variable: "--font-inter",
