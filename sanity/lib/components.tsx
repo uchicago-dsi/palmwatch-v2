@@ -2,7 +2,7 @@ import imageUrlBuilder from '@sanity/image-url'
 import { PortableText as OgPortableText } from "@portabletext/react";
 import client from './client';
 
-function urlFor(source: string) {
+export function urlFor(source: string) {
   return imageUrlBuilder(client.client).image(source).url()
 }
 

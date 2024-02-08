@@ -7,21 +7,16 @@ import Link from "next/link";
 import { ScrollToButton } from "@/components/ScrollToButton";
 import path from "path";
 import cmsClient from "@/sanity/lib/client";
-import { PortableText } from "@/sanity/lib/components";
+import { PortableText, urlFor } from "@/sanity/lib/components";
 
-export const revalidate = 60
+export const revalidate = 60;
 
 export default async function Home() {
   const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
   const data = queryClient.getFullMillInfo().objects();
   const homeContent = await cmsClient.getHomeContent();
-  const {
-    mapDescription,
-    useCases,
-    introContent
-  } = homeContent || {}
-
+  const { mapDescription, useCases, introContent } = homeContent || {};
   return (
     <main className="flex flex-col items-center justify-center h-auto">
       {/* fullheight hero div */}
@@ -79,22 +74,40 @@ export default async function Home() {
           Cover Video by Sum Mayyah Channel | Creative Commons Attribution
         </a>
       </section>
-      {!!useCases?.length && <section className="
-      max-w-none w-full  flex flex-col space-y-4 bg-neutral-200 mb-4 prose justify-center items-center lg:h-[100vh] lg:flex-row lg:space-x-4 lg:space-y-0">
-        {useCases?.map((useCase, index) => (
-          <div key={index} className="w-full lg:w-1/2">
-            <PortableText value={useCase.body} />
+      {!!introContent?.length && (
+        <section className="max-w-none w-full py-4 flex flex-col space-y-4 mb-4 prose justify-center items-center lg:py-4 lg:min-h-[50vh] lg:flex-row lg:space-x-4 lg:space-y-0">
+          <div className="mx-auto my-0 max-w-[75%]">
+            <PortableText value={introContent} />
           </div>
-        ))}
-        </section>}
-      {!!introContent?.length && <section className="max-w-none w-full  flex flex-col space-y-4 bg-neutral-200 mb-4 prose justify-center items-center lg:h-[100vh] lg:flex-row lg:space-x-4 lg:space-y-0">
-        <PortableText value={introContent} />
-      </section>}
+        </section>
+      )}
+      {!!useCases?.length && (
+        <section
+          className="
+      max-w-none w-full py-10 flex flex-col space-y-4 bg-neutral-200 mb-4 prose justify-center items-center lg:py-4 lg:min-h-[50vh] lg:flex-row lg:space-x-4 lg:space-y-0"
+        >
+          {useCases?.map((useCase, index) => (
+            <div key={index} className="w-full text-center lg:w-1/3">
+              {/* @ts-ignore */}
+              <img src={urlFor(useCase?.image?.asset?._ref || "")}
+                alt={useCase.title + " icon"}
+                className="mx-auto my-0"
+              />
+              <h3>{useCase.title}</h3>
+              <div className="mx-auto my-0 max-w-[75%]">
+                <PortableText value={useCase.body} />
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
       <section
         id="homepage-map"
         className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] relative block"
       >
-       {!!mapDescription?.length && <PortableText value={mapDescription} />}
+        <div className="p-4">
+          {!!mapDescription?.length && <PortableText value={mapDescription} />}
+        </div>
         <QueryProvider>
           <div className="h-[80vh] relative w-full">
             <PalmwatchMap
