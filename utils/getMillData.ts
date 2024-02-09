@@ -1,9 +1,7 @@
-import { load, loadArrow, all, desc, op, table, escape } from "arquero";
+import { loadArrow, all, desc, op, escape } from "arquero";
 import ColumnTable from "arquero/dist/types/table/column-table";
 import { CompanyData, UmlData } from "./dataTypes";
-import { fullYearRange, fullYearRangeColumns } from "@/config/years";
-import Column from "arquero/dist/types/table/column";
-import { constants } from "fs/promises";
+import { fullYearRangeColumns } from "@/config/years";
 
 class MillDataQuery {
   companies?: ColumnTable;
@@ -437,6 +435,30 @@ class MillDataQuery {
       timeseries,
     };
   }
+  
+  @cache("countrySummaryStats")
+  getCountriesSummary() {
+    const countryStats = this.uml!.
+      groupby("Country")
+        .rollup({
+          count: () => op.count(),
+          totalForestLoss: (d: UmlData) => op.round(op.sum(d.sum_of_treeloss_km as any) * 100) / 100,
+          totalArea: (d: UmlData) => op.round(op.sum(d.km_area as any) * 100) / 100,
+          totalForestArea: (d: UmlData) => op.round(op.sum(d.km_forest_area_00 as any) * 100) / 100,
+          pctForestLoss: (d: UmlData) => op.round(op.sum(d.sum_of_treeloss_km as any) / op.sum(d.km_forest_area_00 as any) * 1000)/10,
+          pctForestLossString: (d: UmlData) => `${op.round(op.sum(d.sum_of_treeloss_km as any) / op.sum(d.km_forest_area_00 as any) * 1000)/10} %`,
+          currentRisk: (d: UmlData) => op.round(op.mean(d.risk_score_current) * 100) / 100,
+          futureRisk: (d: UmlData) => op.round(op.mean(d.risk_score_future) * 100) / 100,
+          pastRisk: (d: UmlData) => op.round(op.mean(d.risk_score_past) * 100) / 100,
+        })
+        .orderby(desc("count"))
+        .objects();
+      return {
+        countryStats
+      }
+
+  }
+  
   getRankingOfMillsCurrentImpactScore() {}
 
   rollups = {
