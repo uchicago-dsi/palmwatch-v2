@@ -8,6 +8,7 @@ import { ScrollToButton } from "@/components/ScrollToButton";
 import path from "path";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText, urlFor } from "@/sanity/lib/components";
+import { HomePageMap } from "@/components/HomePageMap";
 
 export const revalidate = 60;
 
@@ -109,16 +110,7 @@ export default async function Home() {
           {!!mapDescription?.length && <PortableText value={mapDescription} />}
         </div>
         <QueryProvider>
-          <div className="h-[80vh] relative w-full">
-            <PalmwatchMap
-              geoDataUrl="/data/mill-catchment.geojson"
-              dataTable={data!}
-              geoIdColumn="UML ID"
-              dataIdColumn="UML ID"
-              choroplethColumn="treeloss_km_2022"
-              choroplethScheme="forestLoss"
-            />
-          </div>
+          <HomePageMap />
           <div className="p-4 w-full flex flex-col space-y-4 lg:flex-row lg:space-x-4">
             <MillInfo />
             <BrandInfoClient />
