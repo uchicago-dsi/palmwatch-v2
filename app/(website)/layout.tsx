@@ -6,6 +6,7 @@ import path from "path";
 import { Feedback } from "@/components/Feedback";
 import { Analytics } from "@vercel/analytics/react";
 import cmsClient from "@/sanity/lib/client";
+import Head from "next/head";
 
 export const metadata = {
   "title": "PalmWatch: Tracking Big Brands' Impact on Palm Oil Use",
@@ -65,8 +66,35 @@ export default async function RootLayout({
 
   return (
     <html lang="en" data-theme="lemonade">
+      <Head>
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
+        <meta name="msapplication-TileColor" content="#da532c" />
+        <meta name="theme-color" content="#ffffff" />
+      </Head>
       <body className={inter.variable}>
-        <NavBar searchList={searchList} currentPage="" footerContent={footerContent}>
+        <NavBar
+          searchList={searchList}
+          currentPage=""
+          footerContent={footerContent}
+        >
           {children}
           <Analytics />
         </NavBar>
