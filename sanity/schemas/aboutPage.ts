@@ -11,7 +11,7 @@ export default {
       type: "string",
     },
     {
-      ...getGenericContentConfig("conrtent"),
+      ...getGenericContentConfig("content"),
       title: "Main Content",
     },
     {
