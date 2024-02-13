@@ -20,7 +20,7 @@ export const Feedback = () => {
   return (
     <>
       <button
-        className="btn btn-sm normal-case rounded-r-none fixed right-0 bottom-[50%] bg-accent rounded-full shadow-xl z-50"
+        className="btn btn-sm normal-case rounded-r-none fixed right-0 bottom-[50%] bg-accent rounded-full shadow-xl z-50 dark:text-black"
         // @ts-ignore
         onClick={handleOpen}
       >
@@ -51,7 +51,7 @@ export const Feedback = () => {
           </div>
           <iframe
             src="https://docs.google.com/forms/d/e/1FAIpQLSc_bWuT5T4WKu0kfU4rbuUqaSlbCtNfTTWdRrt2pc7AmShqUQ/viewform?embedded=true"
-            className="flex-1 shadow-inner border-neutral-500"
+            className="flex-1 shadow-inner border-base-300"
           >
             Loading…
           </iframe>

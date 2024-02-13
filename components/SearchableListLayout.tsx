@@ -116,7 +116,7 @@ export const SearchableListLayout: React.FC<{
     <div
       className={`flex flex-row overflow-x-auto space-x-4 prose max-w-none w-full`}
     >
-      <div className="p-4 flex-col justify-around border-r-2 border-r-neutral-400 space-y-4">
+      <div className="p-4 flex-col justify-around border-r-2 border-r-base-300 space-y-4">
         <h3 className="m-0">{label}</h3>
         {!!path && (
           <div>

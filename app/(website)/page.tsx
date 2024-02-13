@@ -59,7 +59,7 @@ export default async function Home() {
             </div>
             {/* onclick scroll to #homepage-map div*/}
             <ScrollToButton
-              className="btn btn-oultine btn-neutral mt-4"
+              className="btn btn-oultine btn-base mt-4"
               target="homepage-map"
             >
               Explore the map now
@@ -86,12 +86,12 @@ export default async function Home() {
       {!!useCases?.length && (
         <section
           className="
-      max-w-none w-full py-10 flex flex-col space-y-4 bg-neutral-200 mb-4 prose justify-center items-center lg:py-4 lg:min-h-[50vh] lg:flex-row lg:space-x-4 lg:space-y-0"
+      max-w-none w-full py-10 flex flex-col space-y-4 bg-base-200 mb-4 prose justify-center items-center lg:py-4 lg:min-h-[50vh] lg:flex-row lg:space-x-4 lg:space-y-0"
         >
           {useCases?.map((useCase, index) => (
             <div key={index} className="w-full text-center lg:w-1/3">
-              {/* @ts-ignore */}
-              <img src={urlFor(useCase?.image?.asset?._ref || "")}
+              <img  /* @ts-ignore */
+                src={urlFor(useCase?.image?.asset?._ref || "")}
                 alt={useCase.title + " icon"}
                 className="mx-auto my-0"
               />
@@ -105,14 +105,14 @@ export default async function Home() {
       )}
       <section
         id="homepage-map"
-        className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] relative block"
+        className="bg-base-200 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] relative block"
       >
         <div className="prose p-4 max-w-none">
           {!!mapDescription?.length && <PortableText value={mapDescription} />}
         </div>
         <QueryProvider>
           <HomePageMap />
-          <div className="p-4 w-full flex flex-col space-y-4 lg:flex-row lg:space-x-4">
+          <div className="p-0 w-full flex flex-col space-y-4 lg:flex-row lg:space-x-4">
             <MillInfo />
             <BrandInfoClient />
           </div>

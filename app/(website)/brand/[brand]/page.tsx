@@ -102,14 +102,14 @@ export default async function Page({ params }: { params: { brand: string } }) {
           />
         </div>
       </QueryProvider>
-      <div className="bg-neutral-50 m-0  px-4 flex flex-col lg:flex-row lg:space-x-4 lg:space-y-0 space-y-4 prose max-w-none shadow-xl">
+      <div className="bg-base-100 m-0  px-4 flex flex-col lg:flex-row lg:space-x-4 lg:space-y-0 space-y-4 prose max-w-none shadow-xl">
         <div className="flex-1 basis-2/3">
           <h2 className="my-4">About {brand}</h2>
           <p>
             {description} <i>(description via {descriptionAttribution})</i>
           </p>
         </div>
-        <div className="flex-1 basis-1/3 border-l-2 border-l-neutral-200 pl-6">
+        <div className="flex-1 basis-1/3 border-l-2 border-l-base-200 pl-6">
           {disclosures && (
             <>
               <h2 className="my-4">Disclosure PDFs</h2>
@@ -152,7 +152,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
         </div>
       </div>
       {!!brandInfo.content && (
-        <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
+        <div className="prose bg-base-100 p-4 my-4 w-full shadow-xl max-w-none">
           <PortableText value={brandInfo.content} />
         </div>
       )}

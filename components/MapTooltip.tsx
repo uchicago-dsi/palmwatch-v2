@@ -56,7 +56,7 @@ export const MapTooltip = () => {
 
   return (
     <div
-      className="absolute max-w-96 bg-neutral-100 shadow-xl rounded-xl px-4 pointer-events-none prose z-40"
+      className="absolute max-w-96 bg-base-100 shadow-xl rounded-xl px-4 pointer-events-none prose z-40"
       style={{ left: x + 10, top: y + 10 }}
     >
       {isLoading ? (

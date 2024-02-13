@@ -57,7 +57,7 @@ export const NavBar: React.FC<NavbarProps> = ({
           </div>
           <div className="flex-1 hidden px-2 lg:block">
             <div className="block mx-auto w-fit">
-              <ul className="menu menu-horizontal bg-neutral-100 rounded-xl p-0">
+              <ul className="menu menu-horizontal bg-base-100 rounded-xl p-0">
                 {/* Navbar menu content here */}
                 <li className="pointer-events-none">
                   <p>Search:</p>
@@ -96,7 +96,7 @@ export const NavBar: React.FC<NavbarProps> = ({
         ></label>
         <ul className="menu p-4 w-80 min-h-full bg-base-200">
           {/* Sidebar content here */}
-          <ul className="menu menu-vertical bg-neutral-100 rounded-xl p-0 pt-24">
+          <ul className="menu menu-vertical bg-base-100 rounded-xl p-0 pt-24">
             <li>
               <Link href="/" className="font-bold mb-8">
                 PalmWatch

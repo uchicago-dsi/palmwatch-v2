@@ -102,7 +102,7 @@ export default async function Page({ params }: { params: { uml: string } }) {
           />
         </div>
       </div>
-      <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
+      <div className="my-4 p-4 bg-surface/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
         <h3 className="text-xl my-4 font-bold">
           Palm Oil Mill Deforestation Map: Forest Loss in KM2 (2022)
         </h3>
@@ -120,23 +120,23 @@ export default async function Page({ params }: { params: { uml: string } }) {
         </div>
       </div>
       <div className="flex flex-row space-x-4 w-full">
-        <div className="p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto  w-full">
+        <div className="p-4 bg-surface/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto  w-full">
           <BrandInfo data={brandData} />
         </div>
-        <div className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full prose">
+        <div className="bg-surface/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full prose">
           <div className="h-[40vh] relative w-full">
             <h3 className="ml-4 my-4">Forest Loss Over Time (km2)</h3>
             <IqrOverTime type="mill" data={lineChartData} showMedian={true} />
           </div>
         </div>
       </div>
-      <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
+      <div className="my-4 p-4 bg-surface/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
         <QueryProvider>
           <MillInfo millOverride={uml} dataOverride={[entry]} />
         </QueryProvider>
       </div>
       {!!millContent?.content && (
-        <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
+        <div className="prose bg-base-100 p-4 my-4 w-full shadow-xl max-w-none">
           <PortableText value={millContent.content} />
         </div>
       )}

@@ -212,80 +212,84 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     <div className="w-full h-full flex flex-row">
       <div
         className={`${
-          showLayerPanel ? "w-96 opacity-100 transition-all " : "w-0 opacity-0 "
-        } px-2 prose`}
+          showLayerPanel
+            ? "w-96 opacity-100 transition-all "
+            : "w-0 opacity-0 px-0"
+        } prose`}
       >
-        <h3>Map Data Layers</h3>
-        <ul className="menu p-0 w-full rounded-box">
-          <li>
-            <button
-              onClick={() => handleVariable("treeloss_km_2022")}
-              className={`p-2 m-0 ${currentYear === -1 ? "" : "btn-active"}`}
-            >
-              Deforestation By Year
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => handleVariable("risk_score_current")}
-              className={`p-2 m-0 ${currentYear !== -1 ? "" : "btn-active"}`}
-            >
-              Risk Scores
-            </button>
-          </li>
-        </ul>
-        {currentYear !== -1 ? (
-          <>
-            <h4>Data Year</h4>
-            <div className="join w-full max-w-none">
-              <button className="join-item btn" onClick={decrementYear}>
-                «
+        <div className="px-2">
+          <h3>Map Data Layers</h3>
+          <ul className="menu p-0 w-full rounded-box">
+            <li>
+              <button
+                onClick={() => handleVariable("treeloss_km_2022")}
+                className={`p-2 m-0 ${currentYear === -1 ? "" : "btn-active"}`}
+              >
+                Deforestation By Year
               </button>
-              <button className="join-item btn">{currentYear}</button>
-              <button className="join-item btn" onClick={incrementYear}>
-                »
+            </li>
+            <li>
+              <button
+                onClick={() => handleVariable("risk_score_current")}
+                className={`p-2 m-0 ${currentYear !== -1 ? "" : "btn-active"}`}
+              >
+                Risk Scores
               </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <h4>Risk Score</h4>
-            <div className="join join-vertical">
-              {[
-                {
-                  value: "risk_score_past",
-                  label: "Past Risk Score",
-                },
-                {
-                  value: "risk_score_current",
-                  label: "Current Risk Score",
-                },
-                {
-                  value: "risk_score_future",
-                  label: "Future Risk Score",
-                },
-              ].map((variable) => (
-                <button
-                  key={variable.value}
-                  className={`join-item btn ${
-                    currentChoroplethColumn === variable.value
-                      ? "btn-active"
-                      : ""
-                  }`}
-                  onClick={() => handleVariable(variable.value)}
-                >
-                  {variable.label}
+            </li>
+          </ul>
+          {currentYear !== -1 ? (
+            <>
+              <h4>Data Year</h4>
+              <div className="join w-full max-w-none">
+                <button className="join-item btn" onClick={decrementYear}>
+                  «
                 </button>
-              ))}
-            </div>
-          </>
-        )}
+                <button className="join-item btn">{currentYear}</button>
+                <button className="join-item btn" onClick={incrementYear}>
+                  »
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h4>Risk Score</h4>
+              <div className="join join-vertical">
+                {[
+                  {
+                    value: "risk_score_past",
+                    label: "Past Risk Score",
+                  },
+                  {
+                    value: "risk_score_current",
+                    label: "Current Risk Score",
+                  },
+                  {
+                    value: "risk_score_future",
+                    label: "Future Risk Score",
+                  },
+                ].map((variable) => (
+                  <button
+                    key={variable.value}
+                    className={`join-item btn ${
+                      currentChoroplethColumn === variable.value
+                        ? "btn-active"
+                        : ""
+                    }`}
+                    onClick={() => handleVariable(variable.value)}
+                  >
+                    {variable.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
       <div className="w-full h-full relative">
         <button
           onClick={() => setShowLayerPanel((p) => !p)}
           aria-label="Toggle Layer Panel"
-          className="btn absolute left-2 py-0 top-[50%] z-10 bg-neutral-100 translate-y-[-50%] shadow-xl rounded-r-lg"
+          className="btn absolute left-2 py-0 top-[50%] z-10 bg-base-100 translate-y-[-50%] shadow-xl rounded-r-lg"
         >
           <svg
             width="24px"
@@ -293,6 +297,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
             version="1.1"
             viewBox="0 0 100 100"
             xmlns="http://www.w3.org/2000/svg"
+            className="dark:fill-white"
           >
             <path d="m3.5 67.75c-0.011719 1.125 0.58594 2.1719 1.5625 2.7344l43.375 24c0.94141 0.52344 2.0898 0.52344 3.0312 0l43.422-24c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-43.328-24c-0.94141-0.52344-2.0898-0.52344-3.0312 0l-43.422 24c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99219 0.55078-1.6094 1.5977-1.6094 2.7344zm9.5781-37.5 36.922-20.422 36.922 20.422-11.922 6.6406-25 13.781-24.922-13.781zm10.484 31.703 25 13.781c0.94141 0.52344 2.0898 0.52344 3.0312 0l25-13.781 10.484 5.7969-37.078 20.422-36.922-20.422z" />
           </svg>

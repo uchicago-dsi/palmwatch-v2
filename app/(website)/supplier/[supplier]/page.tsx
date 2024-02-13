@@ -56,7 +56,7 @@ export default async function Page({
           /> */}
         </div>
       </div>
-      <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
+      <div className="my-4 p-4 bg-base/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
         <h3 className="text-xl my-4 font-bold">
           Palm Oil Mill Deforestation Map: Forest Loss in KM2 (2022)
         </h3>
