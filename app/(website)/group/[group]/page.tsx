@@ -12,6 +12,8 @@ import cmsClient from "@/sanity/lib/client";
 import { CmsDescription } from "@/components/CmsDescription";
 import { CmsContent } from "@/components/CmsContent";
 
+export const revalidate = 60;
+
 export default async function Page({
   params,
 }: {

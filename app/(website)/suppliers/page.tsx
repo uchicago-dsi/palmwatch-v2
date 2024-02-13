@@ -2,6 +2,8 @@ import { SearchableListLayout } from "@/components/SearchableListLayout";
 import queryClient from "@/utils/getMillData";
 import React from "react";
 
+export const revalidate = 60;
+
 export default async function Page() {
   await queryClient.init();
   const options = queryClient.getSearchList().Suppliers;

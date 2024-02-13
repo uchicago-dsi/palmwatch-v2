@@ -5,14 +5,11 @@ import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import path from "path";
-import { UmlData } from "@/utils/dataTypes";
-import { MillInfo } from "@/components/MillInfo";
 import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
-import { sumForestLoss } from "@/utils/sumForestloss";
-import { fullYearRange } from "@/config/years";
-import { BarShareChartForests } from "@/components/BarShareChartForests";
 import { InfoTable } from "@/components/InfoTable";
+
+export const revalidate = 60;
 
 export default async function Page({
   params,

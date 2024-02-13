@@ -5,6 +5,8 @@ import React from "react";
 import { basicStatsConfig, forestStatsConfig, rspoStatsConfig } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 
+export const revalidate = 60;
+
 export default async function Page() {
   await queryClient.init();
   const options = queryClient.getSearchList().Mills;

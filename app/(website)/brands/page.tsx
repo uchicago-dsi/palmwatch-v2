@@ -6,7 +6,7 @@ import queryClient from "@/utils/getMillData";
 import React from "react";
 import { getStatConfig } from "./pageConfig";
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 export default async function Page() {
   await queryClient.init();
