@@ -11,6 +11,8 @@ import { PortableText } from "@/sanity/lib/components";
 import brands from "@/config/brands";
 import { BrandSchema } from "@/config/brands/types";
 
+export const revalidate = 60;
+
 export default async function Page({ params }: { params: { brand: string } }) {
   const brand = params.brand ? decodeURIComponent(params.brand) : "";
   const [_, _brandInfo] = await Promise.all([
@@ -149,7 +151,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
           <p></p>
         </div>
       </div>
-      {brandInfo.content && (
+      {!!brandInfo.content && (
         <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
           <PortableText value={brandInfo.content} />
         </div>
