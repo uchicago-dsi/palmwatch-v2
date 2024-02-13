@@ -70,7 +70,7 @@ export default async function Page({
               dataTable={mills}
               geoIdColumn="UML ID"
               dataIdColumn="UML ID"
-              choroplethColumn="treeloss_km_2020"
+              choroplethColumn="treeloss_km_2022"
               choroplethScheme="forestLoss"
             />
           </QueryProvider>

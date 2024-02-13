@@ -111,7 +111,7 @@ export default async function Page({ params }: { params: { uml: string } }) {
               dataTable={data}
               geoIdColumn="UML ID"
               dataIdColumn="UML ID"
-              choroplethColumn="treeloss_km_2020"
+              choroplethColumn="treeloss_km_2022"
               choroplethScheme="forestLoss"
             />
           </QueryProvider>
