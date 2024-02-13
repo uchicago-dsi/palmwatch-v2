@@ -11,14 +11,14 @@ import groupInfo from './schemas/groupInfo'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
-    brandInfo,
-    millInfo,
-    supplierInfo,
-    countryInfo,
+    homePage,
     aboutPage,
     contactPage,
     footerInfo,
-    homePage,
+    brandInfo,
+    countryInfo,
+    millInfo,
+    supplierInfo,
     groupInfo
   ],
 }
