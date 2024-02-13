@@ -10,6 +10,8 @@ import { StatsBlock } from "@/components/StatsBlock";
 import { InfoTable } from "@/components/InfoTable";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
+import { CmsDescription } from "@/components/CmsDescription";
+import { CmsContent } from "@/components/CmsContent";
 
 export default async function Page({
   params,
@@ -65,15 +67,11 @@ export default async function Page({
           /> */}
         </div>
       </div>
-
-      {!!description && (
-        <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
-          <p>
-            {description}
-          </p>
-          {!!externalLink && <a href={externalLink} target="_blank" rel="noreferrer">Click here for more info about {country}</a>}
-        </div>
-      )}
+      <CmsDescription
+        description={description}
+        externalLink={externalLink}
+        linkText={`Click here for more info about ${country}`}
+        />
       <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
         <h3 className="text-xl my-4 font-bold">
           Palm Oil Mill Deforestation Map: Forest Loss in KM2
@@ -115,11 +113,7 @@ export default async function Page({
           }}
         />
       </div>
-      {!!content && (
-        <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
-          <PortableText value={content} />
-        </div>
-      )}
+      <CmsContent content={content} />
     </main>
   );
 }

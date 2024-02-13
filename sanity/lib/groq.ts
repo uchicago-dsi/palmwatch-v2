@@ -46,6 +46,19 @@ export const countyInfoQuery = groq`
 }
 `;
 
+export const groupInfoQuery = groq`
+*[_type == "group" && name == $group][0] {
+  _id,
+  name,
+  description,
+  externalLink,
+  content[] {
+    ...,
+    _type,
+  }
+}
+`;
+
 export const aboutPageQuery = groq`
 *[_type == "about"][0] {
   _id,

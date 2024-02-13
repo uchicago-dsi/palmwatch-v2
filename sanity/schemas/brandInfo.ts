@@ -7,6 +7,13 @@ export default {
       name: "name",
       title: "Name",
       type: "string",
+      description: "This is an ID used to match the data and must be the same as the navigation / data brand name."
+    },
+    {
+      name: "name",
+      title: "Alternate Name (optional)",
+      type: "string",
+      description: "If the brand is known by a different name, enter it here.",
     },
     {
       name: "disclosures",

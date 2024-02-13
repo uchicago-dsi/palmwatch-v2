@@ -39,6 +39,9 @@ class CmsClient {
   async getCountryInfo(country: string) {
     return await this.client.fetch<Partial<BrandSchema>>(countyInfoQuery, { country });
   }
+  async getGroupInfo(group: string) {
+    return await this.client.fetch<Partial<BrandSchema>>(countyInfoQuery, { group });
+  }
   async getAboutPage() {
     return await this.client.fetch<AboutPageContent>(aboutPageQuery);
   }

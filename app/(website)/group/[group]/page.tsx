@@ -5,14 +5,12 @@ import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import path from "path";
-import { UmlData } from "@/utils/dataTypes";
-import { MillInfo } from "@/components/MillInfo";
 import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
-import { sumForestLoss } from "@/utils/sumForestloss";
-import { fullYearRange } from "@/config/years";
-import { BarShareChartForests } from "@/components/BarShareChartForests";
 import { InfoTable } from "@/components/InfoTable";
+import cmsClient from "@/sanity/lib/client";
+import { CmsDescription } from "@/components/CmsDescription";
+import { CmsContent } from "@/components/CmsContent";
 
 export default async function Page({
   params,
@@ -23,7 +21,16 @@ export default async function Page({
 
   // data
   const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
+  const [_, groupInfo] = await Promise.all([
+    queryClient.init(dataDir),
+    cmsClient.getGroupInfo(group),
+  ]);
+
+  const {
+    description,
+    externalLink,
+    content
+  } = groupInfo || {}
 
   const {
     mills,
@@ -59,6 +66,11 @@ export default async function Page({
           /> */}
         </div>
       </div>
+      <CmsDescription
+        description={description}
+        externalLink={externalLink}
+        linkText={`Click here for more info about ${group}`}
+      />
       <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
         <h3 className="text-xl my-4 font-bold">
           Palm Oil Mill Deforestation Map: Forest Loss in KM2 (2022)
@@ -100,6 +112,7 @@ export default async function Page({
           }}
         />
       </div>
+      <CmsContent content={content} />
     </main>
   );
 }
