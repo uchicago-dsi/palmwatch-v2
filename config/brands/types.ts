@@ -5,6 +5,7 @@ export type BrandSchema = {
   * The name of the brand.
   */
   name: string;
+  altName?: string;
   /*
   * List of disclosure PDFs by year
   */

@@ -20,7 +20,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
     cmsClient.getBrandInfo(brand),
   ]);
   const brandInfo = (_brandInfo || brands[brand]) as BrandSchema
-  
+
   const { averageCurrentRisk, uniqueMills, uniqueCountries, uniqueSuppliers } =
     queryClient.getBrandStats(brand);
   const stats = getStats(
@@ -38,12 +38,12 @@ export default async function Page({ params }: { params: { brand: string } }) {
     );
   }
 
-  const { disclosures, description, descriptionAttribution } = brandInfo;
+  const { disclosures, description, descriptionAttribution, altName } = brandInfo;
   return (
     <main className="relative flex flex-col items-center justify-center w-[90%] mx-auto max-w-[90vw] 2xl:max-w-[1400px]">
       <div className="flex flex-col space-y-4 my-8 w-full shadow-xl align-center justify-center prose max-w-none">
         <div className="p-4">
-          <h1 className="p-0 m-0">{brand}</h1>
+          <h1 className="p-0 m-0">{brand} {altName ? `(${altName})`: null}</h1>
           <h2 className="p-0 m-0">Palm Oil Usage</h2>
         </div>
         <StatsBlock stats={stats} />

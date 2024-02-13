@@ -4,6 +4,7 @@ export const brandInfoQuery = groq`
 *[_type == "brand" && name == $name][0] {
   _id,
   name,
+  altName,
   description,
   descriptionAttribution,
   country,
