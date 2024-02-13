@@ -304,6 +304,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
             setZoom(Math.round(e.viewState.zoom));
             onMapMove && onMapMove(e);
           }}
+          pitch={0}
+          bearing={0}
           initialViewState={{
             latitude: 0,
             longitude: 0,
