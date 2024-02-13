@@ -8,6 +8,8 @@ import path from "path";
 import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import { InfoTable } from "@/components/InfoTable";
+import cmsClient from "@/sanity/lib/client";
+import { PortableText } from "@/sanity/lib/components";
 
 export default async function Page({
   params,
@@ -18,7 +20,18 @@ export default async function Page({
 
   // data
   const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
+  const [_, countryInfo] = await Promise.all([
+    queryClient.init(dataDir),
+    cmsClient.getCountryInfo(country),
+  ]);
+
+  const {
+    description,
+    externalLink,
+    content
+  } = countryInfo || {}
+  
+
 
   const {
     mills,
@@ -52,9 +65,18 @@ export default async function Page({
           /> */}
         </div>
       </div>
+
+      {!!description && (
+        <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
+          <p>
+            {description}
+          </p>
+          {!!externalLink && <a href={externalLink} target="_blank" rel="noreferrer">Click here for more info about {country}</a>}
+        </div>
+      )}
       <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
         <h3 className="text-xl my-4 font-bold">
-          Palm Oil Mill Deforestation Map: Forest Loss in KM2 (2022)
+          Palm Oil Mill Deforestation Map: Forest Loss in KM2
         </h3>
         <div className="relative h-[60vh] w-full">
           <QueryProvider>
@@ -63,7 +85,7 @@ export default async function Page({
               dataTable={mills}
               geoIdColumn="UML ID"
               dataIdColumn="UML ID"
-              choroplethColumn="treeloss_km_2020"
+              choroplethColumn="treeloss_km_2022"
               choroplethScheme="forestLoss"
             />
           </QueryProvider>
@@ -93,6 +115,11 @@ export default async function Page({
           }}
         />
       </div>
+      {!!content && (
+        <div className="prose bg-neutral-50 p-4 my-4 w-full shadow-xl max-w-none">
+          <PortableText value={content} />
+        </div>
+      )}
     </main>
   );
 }
