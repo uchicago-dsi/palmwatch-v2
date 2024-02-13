@@ -106,7 +106,7 @@ export default async function Home() {
         id="homepage-map"
         className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] relative block"
       >
-        <div className="p-4">
+        <div className="prose p-4">
           {!!mapDescription?.length && <PortableText value={mapDescription} />}
         </div>
         <QueryProvider>
