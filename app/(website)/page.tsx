@@ -70,7 +70,8 @@ export default async function Home() {
           target="_blank"
           rel="noopener noreferrer"
           href="https://www.youtube.com/watch?v=YKJcN81mZgA"
-          className="absolute bottom-1 right-1 text-white/50 text-xs z-[1]"
+          // text rotates 90deg
+          className="absolute bottom-1 right-1 text-white/50 text-xs z-[1] translate-y-[-25vh] translate-x-[48%]  rotate-90"
         >
           Cover Video by Sum Mayyah Channel | Creative Commons Attribution
         </a>
