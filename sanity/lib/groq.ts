@@ -33,6 +33,19 @@ export const umlInfoQuery = groq`
 }
 `;
 
+export const countyInfoQuery = groq`
+*[_type == "country" && name == $country][0] {
+  _id,
+  name,
+  description,
+  externalLink,
+  content[] {
+    ...,
+    _type,
+  }
+}
+`;
+
 export const aboutPageQuery = groq`
 *[_type == "about"][0] {
   _id,

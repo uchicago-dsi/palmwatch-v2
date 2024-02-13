@@ -1,5 +1,5 @@
 import { createClient } from 'next-sanity'
-import { brandInfoQuery, aboutPageQuery, contactPageQuery, footerInfoQuery, umlInfoQuery, homePageQuery } from "./groq";
+import { brandInfoQuery, aboutPageQuery, contactPageQuery, footerInfoQuery, umlInfoQuery, homePageQuery, countyInfoQuery } from "./groq";
 import { BrandSchema } from "@/config/brands/types";
 
 import { apiVersion, dataset, projectId, useCdn } from '../env'
@@ -36,6 +36,9 @@ class CmsClient {
     return data;
   }
 
+  async getCountryInfo(country: string) {
+    return await this.client.fetch<Partial<BrandSchema>>(countyInfoQuery, { country });
+  }
   async getAboutPage() {
     return await this.client.fetch<AboutPageContent>(aboutPageQuery);
   }
