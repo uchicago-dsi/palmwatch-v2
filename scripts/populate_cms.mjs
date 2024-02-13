@@ -2,15 +2,17 @@
 // read cms_config.json
 // exported from nav bar search
 const config = await JSON.parse(await $`cat scripts/cms_config.json`)
-const sanityToken = '' // token
+const sanityToken = ''
 const sanityId = '' // id
 const datasetName = 'production'
 
 const crudConfig = {
   makeBrands: false,
   makeMills: false,
-  makeCountries: true,
-  makeSuppliers: true
+  makeCountries: false,
+  makeSuppliers: false,
+  makeGroups: true
+
 }
 
 const batchSize = 25
@@ -21,7 +23,7 @@ const makeMutations = (elements, type, prop) => {
       createOrReplace: {
         _type: type,
         name: element[prop],
-        id: element[prop],
+        // id: element[prop],
       },
     })),
   }
@@ -58,4 +60,9 @@ if (crudConfig.makeCountries) {
 
 if (crudConfig.makeSuppliers) {
   await makeAndDoMutations(config.Suppliers, 'supplier', 'label')
+}
+
+if (crudConfig.makeGroups) {
+  console.log('making groups', config.Groups.length)
+  await makeAndDoMutations(config.Groups, 'group', 'label')
 }

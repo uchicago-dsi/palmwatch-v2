@@ -7,6 +7,7 @@ import aboutPage from './schemas/aboutPage'
 import contactPage from './schemas/contactPage'
 import footerInfo from './schemas/footerInfo'
 import homePage from './schemas/homePage'
+import groupInfo from './schemas/groupInfo'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -17,7 +18,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     aboutPage,
     contactPage,
     footerInfo,
-    homePage
+    homePage,
+    groupInfo
   ],
 }
 
