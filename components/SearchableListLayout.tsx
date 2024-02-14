@@ -21,8 +21,7 @@ const paginateOptions = (
   const hasPages = options.length > pageLength;
   const colLength = hasPages ? rows : Math.ceil(options.length / columns);
   const items: any[][] = [];
-  const numPages = Math.ceil(options.length / (colLength * rows));
-
+  const numPages = Math.ceil(options.length / pageLength);
   for (let i = 0; i < numPages; i++) {
     const page = [];
     for (let j = 0; j < columns; j++) {
