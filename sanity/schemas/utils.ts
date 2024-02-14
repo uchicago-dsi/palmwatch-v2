@@ -5,6 +5,29 @@ export const getGenericContentConfig = (name: string) => ({
   of: [
     {
       type: "block",
+      marks: {
+        annotations: [
+          {
+            name: "link",
+            type: "object",
+            title: "Link",
+            fields: [
+              {
+                name: "href",
+                type: "text",
+                title: "URL",
+              },
+              {
+                title: "Open in new tab",
+                name: "blank",
+                description: "Read https://css-tricks.com/use-target_blank/",
+                type: "boolean",
+                default: true
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       type: "image",
@@ -26,7 +49,8 @@ export const getGenericContentConfig = (name: string) => ({
           type: "text",
           name: "link",
           title: "Image Link",
-          description: `Optionally, this image can link somewhere`,}
+          description: `Optionally, this image can link somewhere`,
+        },
       ],
     },
   ],
