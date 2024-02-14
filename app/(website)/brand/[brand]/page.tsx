@@ -158,6 +158,14 @@ export default async function Page({ params }: { params: { brand: string } }) {
           <PortableText value={brandInfo.content} />
         </div>
       )}
+      <p className="prose my-4">
+        <i>
+          Note: Many brands source palm oil from the same mills. The total
+          deforestation loss for each brand is not disaggregated based on the
+          amount of palm oil each brand sources from an individual mill, because
+          this data is not disclosed.
+        </i>
+      </p>
     </main>
   );
 }
