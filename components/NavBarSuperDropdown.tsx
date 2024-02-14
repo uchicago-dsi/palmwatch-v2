@@ -9,6 +9,7 @@ interface NavBarSuperDropdownProps {
   options: Array<{ label: string; href: string; imgPath?: string }>;
   path: string;
   showText?: boolean;
+  description?: string;
 }
 
 export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
@@ -16,7 +17,8 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
   label,
   options,
   path,
-  showText
+  showText,
+  description,
 }) => {
   const { currentDropdown, setcurrentDropdown } = useDropdownStore();
   const isActive = currentDropdown === label;
@@ -47,7 +49,11 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
             className="w-full h-[100vh] absolute top-[100%] left-0 bg-black opacity-30 shadow-xl"
           ></button>
           <div className="w-full absolute top-[100%] p-4 left-0 bg-base-100 shadow-xl pr-4">
-            <SearchableListLayout label={label} options={options} path={path} 
+            <SearchableListLayout
+              label={label}
+              options={options}
+              path={path}
+              description={description}
               setcurrentDropdown={setcurrentDropdown}
             />
           </div>

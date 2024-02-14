@@ -4,6 +4,7 @@ export const MENU_ITEMS: Array<{
   label: keyof ReturnType<typeof queryClient.getSearchList>;
   icon: React.ReactNode;
   path: string;
+  description?: string;
 }> = [
   {
     label: "Brands",
@@ -14,6 +15,7 @@ export const MENU_ITEMS: Array<{
       />
     ),
     path: "/brands",
+    
   },
   {
     label: "Mills",
@@ -24,6 +26,7 @@ export const MENU_ITEMS: Array<{
       </g>
     ),
     path: "/mills",
+    description: "The local facilities that crush fruit to produce crude palm oil. Search below for specific mills and to learn more about their production and deforestation impact."
   },
   {
     label: "Suppliers",
@@ -31,6 +34,7 @@ export const MENU_ITEMS: Array<{
       <path d="m99.992 48.664c-0.015626-0.50781-0.16797-1.0117-0.45313-1.4375l-15.395-23.098c-0.50781-0.75391-1.3633-1.2109-2.2734-1.2109h-20.809c-1.5078 0-2.7305 1.2227-2.7305 2.7344v44.535c0 1.5039 1.2227 2.7305 2.7344 2.7305h5.5977c0 6.9023 5.5977 12.5 12.5 12.5 6.9023 0 12.5-5.5977 12.5-12.5h5.5977c1.5078 0 2.7344-1.2227 2.7344-2.7344l0.003906-21.441c0-0.027344-0.007812-0.054688-0.007812-0.078126zm-29.16-0.74609v-16.668h10.543l11.113 16.668zm8.332 31.25c-3.4453 0-6.25-2.8047-6.25-6.25 0-3.4453 2.8047-6.25 6.25-6.25 3.4453 0 6.25 2.8047 6.25 6.25 0 3.4453-2.8047 6.25-6.25 6.25zm-28.629-64.586h-46.906c-2.0039 0-3.6289 1.625-3.6289 3.6289v51.074c0 2.0039 1.625 3.6289 3.6289 3.6289h8.8711c0 6.9023 5.5977 12.5 12.5 12.5s12.5-5.5977 12.5-12.5h13.039c2.0039 0 3.6289-1.625 3.6289-3.6289l-0.003907-51.074c0-2.0039-1.6211-3.6289-3.6289-3.6289zm-25.535 64.586c-3.4453 0-6.25-2.8047-6.25-6.25 0-3.4453 2.8047-6.25 6.25-6.25s6.25 2.8047 6.25 6.25c0 3.4453-2.8047 6.25-6.25 6.25z" />
     ),
     path: "/suppliers",
+    description: "The companies that directly control crushing mills that supply palm oil to consumer brands. Search below to learn more about their operations and the brands they supply."
   },
   {
     label: "Groups",
@@ -41,6 +45,7 @@ export const MENU_ITEMS: Array<{
       />
     ),
     path: "/groups",
+    description: "The parent companies that control crushing mills that supply palm oil to consumer brands. Search below to learn more about the mills they control and the brands they supply."
   },
   {
     label: "Countries",

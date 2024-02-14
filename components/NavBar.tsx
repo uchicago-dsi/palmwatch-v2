@@ -69,6 +69,7 @@ export const NavBar: React.FC<NavbarProps> = ({
                     options={(searchList[item.label] as []) || []}
                     path={item.path}
                     key={item.label}
+                    description={item.description}
                   />
                 ))}
               </ul>

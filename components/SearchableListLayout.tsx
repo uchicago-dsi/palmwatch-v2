@@ -49,6 +49,7 @@ const paginateOptions = (
 
 export const SearchableListLayout: React.FC<{
   label: string;
+  description?: string;
   options: Array<{
     label: string;
     href: string;
@@ -61,6 +62,7 @@ export const SearchableListLayout: React.FC<{
   setcurrentDropdown?: (label: string) => void;
 }> = ({
   label,
+  description,
   path,
   options,
   rows,
@@ -118,6 +120,7 @@ export const SearchableListLayout: React.FC<{
     >
       <div className="p-4 flex-col justify-around border-r-2 border-r-base-300 space-y-4">
         <h3 className="m-0">{label}</h3>
+        {!!description && <p className="m-0 max-w-[20ch]">{description}</p>}
         {!!path && (
           <div>
             <Link href={path} className="btn-link m-0" onClick={closeDropdown}>
@@ -151,7 +154,7 @@ export const SearchableListLayout: React.FC<{
           {column.map((option) => (
             <div key={option.label}>
               <Link
-                className="btn-link m-0 p-0"
+                className="btn-link m-0 p-0 capitalize"
                 href={option.href}
                 onClick={closeDropdown}
               >
@@ -163,7 +166,7 @@ export const SearchableListLayout: React.FC<{
                       className="w-20 h-20"
                     />
                   )}
-                  {option.label}
+                  {option.label.toLowerCase()}
                 </div>
               </Link>
             </div>
