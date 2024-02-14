@@ -15,21 +15,21 @@ export const getStats = (
   }
   if (currentRisk !== null) {
     stats.push({
-      title: "Risk Score",
+      title: "Recent Deforestation Score",
       stat: formatter.format(+currentRisk),
       className: "text-error",
     });
   }
   if (pastRisk !== null) {
     stats.push({
-      title: "Past Risk Score",
+      title: "Past Deforestation Score",
       stat: formatter.format(+pastRisk),
       className: "text-error",
     });
   }
   if (futureRisk !== null) {
     stats.push({
-      title: "Future Risk Score",
+      title: "Future Deforestation Score",
       stat: formatter.format(+futureRisk),
       className: "text-error",
     });

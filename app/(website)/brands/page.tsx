@@ -30,9 +30,9 @@ export default async function Page() {
           data={rankedTable}
           columnMapping={{
             consumer_brand: "Brand",
-            averageCurrentRisk: "Average Current Risk Score",
-            averageFutureRisk: "Average Future Risk Score",
-            averagePastRisk: "Average Past Risk Score",
+            averageCurrentRisk: "Average Recent Deforestation Score",
+            averageFutureRisk: "Average Future Deforestation Risk Score",
+            averagePastRisk: "Average Past Deforestation Score",
             totalForestLoss: "Total Forest Loss (km2)",
           }}
           fullHeight

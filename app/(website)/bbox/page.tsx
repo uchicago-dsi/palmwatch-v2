@@ -102,7 +102,7 @@ function BboxInner() {
         data={data?.mills || []}
         columnMapping={{
           "Mill Name": "Name",
-          risk_score_current: "Current Risk",
+          risk_score_current: "Recent Deforestation Score",
           Country: "Country",
           Province: "Province",
           District: "District",

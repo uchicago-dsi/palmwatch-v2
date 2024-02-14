@@ -14,7 +14,7 @@ export const getStats = (
   }
   if (averageCurrentRisk !== null) {
     stats.push({
-      title: "Average Risk Score",
+      title: "Average Recent Deforestation Score",
       stat: formatter.format(+averageCurrentRisk),
       className: "text-error",
     });

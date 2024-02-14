@@ -22,9 +22,9 @@ export default async function Page() {
             Country: "Country",
             count: "Number of Palm Oil Mills",
             pctForestLossString: "Percent of Tree Cover Area Lost",
-            pastRisk: "Average Past Risk Score",
-            currentRisk: "Average Current Risk Score",
-            futureRisk: "Average Future Risk Score"
+            pastRisk: "Average Past Deforestation Score",
+            currentRisk: "Average Recent Deforestation Score",
+            futureRisk: "Average Future Deforestation Risk Score"
           }}
           fullHeight
         />

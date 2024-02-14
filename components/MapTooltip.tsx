@@ -23,15 +23,15 @@ const TOOLTIP_CONFIG: Array<{
     column: "treeloss_km_2022",
   },
   {
-    label: "Risk Score",
+    label: "Recent Deforestation Score",
     column: "risk_score_current",
   },
   {
-    label: "Risk Score (Past)",
+    label: "Past Deforestation Score",
     column: "risk_score_past",
   },
   {
-    label: "Risk Score (Future)",
+    label: "Future Deforestation Risk Score",
     column: "risk_score_future",
   },
 ];

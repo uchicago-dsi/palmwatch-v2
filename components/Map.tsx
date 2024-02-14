@@ -233,7 +233,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
                 onClick={() => handleVariable("risk_score_current")}
                 className={`p-2 m-0 ${currentYear !== -1 ? "" : "btn-active"}`}
               >
-                Risk Scores
+                Deforestation Scores
               </button>
             </li>
           </ul>
@@ -252,20 +252,20 @@ export const PalmwatchMap: React.FC<MapProps> = ({
             </>
           ) : (
             <>
-              <h4>Risk Score</h4>
+              <h4>Deforestation Score</h4>
               <div className="join join-vertical">
                 {[
                   {
                     value: "risk_score_past",
-                    label: "Past Risk Score",
+                    label: "Past Deforestation Score",
                   },
                   {
                     value: "risk_score_current",
-                    label: "Current Risk Score",
+                    label: "Recent Deforestation Score",
                   },
                   {
                     value: "risk_score_future",
-                    label: "Future Risk Score",
+                    label: "Future Deforestation Risk Score",
                   },
                 ].map((variable) => (
                   <button

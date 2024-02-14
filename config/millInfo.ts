@@ -5,16 +5,16 @@ export const millInfoColumns = [
     formatter: undefined,
   },
   {
+    label: "Recent Deforestation Score",
     column: "risk_score_current",
-    label: "Risk Score (Current)",
   },
   {
+    label: "Past Deforestation Score",
     column: "risk_score_past",
-    label: "Risk Score (Past)",
   },
   {
+    label: "Future Deforestation Risk Score",
     column: "risk_score_future",
-    label: "Risk Score (Future)",
   },
   {
     column: "Alternative name",
@@ -25,13 +25,13 @@ export const millInfoColumns = [
     column: "Group Name",
     label: "Group Name",
     formatter: undefined,
-    linkFormat: (value: string) => `/group/${value}`
+    linkFormat: (value: string) => `/group/${value}`,
   },
   {
     column: "Parent Company",
     label: "Parent Company",
     formatter: undefined,
-    linkFormat: (value: string) => `/supplier/${value}`
+    linkFormat: (value: string) => `/owner/${value}`,
   },
   {
     column: "RSPO Status",
@@ -57,7 +57,7 @@ export const millInfoColumns = [
     column: "Country",
     label: "Country",
     formatter: undefined,
-    linkFormat: (value: string) => `/country/${value}`
+    linkFormat: (value: string) => `/country/${value}`,
   },
   {
     column: "Province",
