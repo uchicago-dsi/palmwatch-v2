@@ -46,9 +46,9 @@ class MillDataQuery {
     return this.getBrandUsage(data).objects();
   }
 
-  getBrandUsageBySupplier(supplier: string) {
+  getBrandUsageByOwner(owner: string) {
     const data = this.uml!.filter(
-      escape((d: UmlData) => d["Parent Company"] === supplier)
+      escape((d: UmlData) => d["Parent Company"] === owner)
     ).join(this.companies!, ["UML ID", "UML ID"]);
     return this.getBrandUsage(data).objects();
   }
@@ -74,7 +74,7 @@ class MillDataQuery {
       cols,
       quantiles
     );
-    const suppliers = companies
+    const owners = companies
       .groupby("Parent Company")
       .derive({
         count: () => op.count(),
@@ -86,7 +86,7 @@ class MillDataQuery {
     return {
       umlInfo: companies.objects(),
       timeseries: quantileResults,
-      suppliers,
+      owners,
     };
   }
 
@@ -100,7 +100,10 @@ class MillDataQuery {
     const uniqueCountries = table.dedupe("Country").count().objects() as {
       count: number;
     }[];
-    const uniqueSuppliers = table.dedupe("Group Name").count().objects() as {
+    const uniqueOwners = table.dedupe("Parent Company").count().objects() as {
+      count: number;
+    }[];
+    const uniqueGroups = table.dedupe("Group Name").count().objects() as {
       count: number;
     }[];
 
@@ -108,7 +111,8 @@ class MillDataQuery {
       averageCurrentRisk: Math.round(averageCurrentRisk[0].mean * 100) / 100,
       uniqueMills: uniqueMills[0].count,
       uniqueCountries: uniqueCountries[0].count,
-      uniqueSuppliers: uniqueSuppliers[0].count,
+      uniqueOwners: uniqueOwners[0].count,
+      uniqueGroups: uniqueGroups[0].count,
     };
   }
   getBrandStats(brand: string) {
@@ -121,11 +125,11 @@ class MillDataQuery {
     return this.getSummaryStats(companyMills);
   }
 
-  getSupplierStats(supplier: string) {
-    const supplierMills = this.uml!.filter(
-      escape((d: UmlData) => d["Parent Company"] === supplier)
+  getOwnerStats(owner: string) {
+    const ownerMills = this.uml!.filter(
+      escape((d: UmlData) => d["Parent Company"] === owner)
     ).dedupe("UML ID");
-    return this.getSummaryStats(supplierMills);
+    return this.getSummaryStats(ownerMills);
   }
   getFullData(data: ColumnTable) {
     const joinedData = data
@@ -150,11 +154,11 @@ class MillDataQuery {
       totalForestLoss,
     };
   }
-  getSupplierData(supplier: string) {
-    const supplierMills = this.uml!.filter(
-      escape((d: UmlData) => d["Parent Company"] === supplier)
+  getOwnerData(owner: string) {
+    const ownerMills = this.uml!.filter(
+      escape((d: UmlData) => d["Parent Company"] === owner)
     ).dedupe("UML ID");
-    return this.getFullData(supplierMills);
+    return this.getFullData(ownerMills);
   }
 
   getGroupData(group: string) {
@@ -277,7 +281,7 @@ class MillDataQuery {
 
     const comapniesList = companies.map((d) => ({
       label: d["Parent Company"] || "",
-      href: `/supplier/${d["Parent Company"]}`,
+      href: `/owner/${d["Parent Company"]}`,
     }));
 
     const countries = this.uml!.select("Country")
@@ -292,8 +296,8 @@ class MillDataQuery {
     const result = {
       Brands: brandList,
       Mills: millList,
-      Suppliers: comapniesList,
-      Groups: groupsList,
+      'Mill Owners': comapniesList,
+      'Mill Groups': groupsList,
       Countries: countryList,
     } as const;
 

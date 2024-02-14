@@ -29,7 +29,7 @@ export const basicStatsConfig = (
   }
   if (companyCount !== null) {
     stats.push({
-      title: "Suppliers",
+      title: "Mill Owners",
       stat: formatter.format(companyCount),
       className: "",
     });

@@ -1,6 +1,6 @@
 export default {
   name: "group",
-  title: "Group",
+  title: "Mill Groups",
   type: "document",
   fields: [
     {

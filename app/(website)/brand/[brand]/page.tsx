@@ -21,14 +21,16 @@ export default async function Page({ params }: { params: { brand: string } }) {
   ]);
   const brandInfo = (_brandInfo || brands[brand]) as BrandSchema
 
-  const { averageCurrentRisk, uniqueMills, uniqueCountries, uniqueSuppliers } =
+  const { averageCurrentRisk, uniqueMills, uniqueCountries, uniqueOwners, uniqueGroups } =
     queryClient.getBrandStats(brand);
   const stats = getStats(
     averageCurrentRisk,
     uniqueMills,
     uniqueCountries,
-    uniqueSuppliers
+    uniqueOwners,
+    uniqueGroups
   );
+
   const downloads = getDataDownload(brand);
   if (!brandInfo) {
     return (
@@ -78,9 +80,9 @@ export default async function Page({ params }: { params: { brand: string } }) {
         <div className="bg-white/30 shadow-xl my-4 ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
           <ServerInfotable
             endpoint={`/api/brand/${brand}`}
-            dataAccessor="suppliers"
+            dataAccessor="owners"
             columnMapping={{
-              "Parent Company": "Supplier",
+              "Parent Company": "Mill Owner",
               Country: "Country",
               count: "No. Mills for Brand",
             }}
@@ -93,7 +95,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
             dataAccessor="umlInfo"
             columnMapping={{
               "Mill Name": "Name",
-              risk_score_current: "Current Risk",
+              risk_score_current: "Recent Deforestation Score",
               Country: "Country",
               Province: "Province",
               District: "District",

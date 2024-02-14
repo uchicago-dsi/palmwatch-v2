@@ -38,7 +38,7 @@ export default async function Home() {
             Explore the impact of palm oil production on deforestation
           </h2>
           <div className="flex flex-col space-y-4 mt-10 items-center">
-            {/* search by consumer brand, mill, supplier, group */}
+            {/* search by consumer brand, mill, mill owner, mill group */}
             <p>Explore by</p>
             <div className="flex flex-col space-y-4 mb-4 lg:flex-row lg:space-y-0 lg:space-x-4">
               <Link className="btn btn-outline btn-info" href="/brands">
@@ -47,8 +47,8 @@ export default async function Home() {
               <Link className="btn btn-outline btn-info" href="/mills">
                 Mills
               </Link>
-              <Link className="btn btn-outline btn-info" href="/suppliers">
-                Suppliers
+              <Link className="btn btn-outline btn-info" href="/owners">
+                Mill Owners
               </Link>
               <Link className="btn btn-outline btn-info" href="/groups">
                 Groups

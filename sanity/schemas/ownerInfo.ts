@@ -1,6 +1,6 @@
 export default {
   name: "supplier",
-  title: "Supplier",
+  title: "Mill Owners",
   type: "document",
   fields: [
     {

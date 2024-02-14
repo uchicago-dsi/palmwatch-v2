@@ -2,16 +2,17 @@ export const getStats = (
   averageCurrentRisk: number | null,
   uniqueMills: number | null,
   uniqueCountries: number | null,
-  uniqueSuppliers: number | null
+  uniqueOwners: number | null,
+  uniqueGroups: number | null,
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
   const stats = [];
   if (averageCurrentRisk !== null) {
     stats.push({
-      title: "Average Current Risk Score",
+      title: "Average Recent Deforestation Score",
       stat: formatter.format(averageCurrentRisk),
       className: "text-error",
-      description: "Mean Risk Score of mills used by this brand (2020-2022)",
+      description: "Mean Recent Deforestation Score of mills used by this brand (2020-2022)",
     });
   }
   if (uniqueMills !== null) {
@@ -28,10 +29,17 @@ export const getStats = (
       className: "text-error",
     });
   }
-  if (uniqueSuppliers !== null) {
+  if (uniqueOwners !== null) {
     stats.push({
-      title: "Suppliers",
-      stat: formatter.format(uniqueSuppliers),
+      title: "Mill Owners",
+      stat: formatter.format(uniqueOwners),
+      className: "text-error",
+    });
+  }
+  if (uniqueGroups !== null) {
+    stats.push({
+      title: "Mill Groups",
+      stat: formatter.format(uniqueGroups),
       className: "text-error",
     });
   }
@@ -55,8 +63,8 @@ export const getDataDownload = (
       href: `/api/brand/${brand}?output=mills`,
     },
     {
-      label: "Suppliers Used (CSV)",
-      href: `/api/brand/${brand}?output=suppliers`,
+      label: "Mill Owners Used (CSV)",
+      href: `/api/brand/${brand}?output=owners`,
     }
   ]
 }

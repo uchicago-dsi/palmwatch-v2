@@ -14,9 +14,9 @@ export const revalidate = 60;
 export default async function Page({
   params,
 }: {
-  params: { supplier: string };
+  params: { owner: string };
 }) {
-  const supplier = decodeURIComponent(params.supplier);
+  const owner = decodeURIComponent(params.owner);
 
   // data
   const dataDir = path.join(process.cwd(), "public", "data");
@@ -30,7 +30,7 @@ export default async function Page({
     averageCurrentRisk,
     timeseries,
     totalForestLoss,
-  } = queryClient.getSupplierData(supplier);
+  } = queryClient.getOwnerData(owner);
 
   const stats = getStats(
     uniqueMills,
@@ -45,7 +45,7 @@ export default async function Page({
         <div className="flex flex-col w-full">
           <div className="flex-1">
             <h2 className="text-xl">Palm Oil Impact</h2>
-            <h1 className="text-4xl font-bold">{supplier}</h1>
+            <h1 className="text-4xl font-bold">{owner}</h1>
           </div>
           <hr className="mt-4 block" />
 
@@ -89,7 +89,7 @@ export default async function Page({
           data={mills}
           columnMapping={{
             "Mill Name": "Name",
-            risk_score_current: "Current Risk",
+            risk_score_current: "Recent Deforestation Score",
             Country: "Country",
             Province: "Province",
             District: "District",

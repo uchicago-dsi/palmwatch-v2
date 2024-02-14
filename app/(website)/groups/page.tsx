@@ -6,7 +6,7 @@ export const revalidate = 60;
 
 export default async function Page() {
   await queryClient.init();
-  const options = queryClient.getSearchList().Groups;
+  const options = queryClient.getSearchList()['Mill Groups'];
 
   return (
     <main className="max-w-3xl mx-auto">

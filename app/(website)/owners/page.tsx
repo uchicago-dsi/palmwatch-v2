@@ -6,21 +6,21 @@ export const revalidate = 60;
 
 export default async function Page() {
   await queryClient.init();
-  const options = queryClient.getSearchList().Suppliers;
+  const options = queryClient.getSearchList()['Mill Owners'];
 
   return (
     <main className="max-w-3xl mx-auto">
       <section className="prose flex flex-col py-4">
-        <h1 className="p-0 m-0">Suppliers Search</h1>
+        <h1 className="p-0 m-0">Mill Owners Search</h1>
         <p>
-          Search below for palm oil suppliers and learn more about the palm oil mill utilization of each.
+          Search below for palm oil mill owners and learn more about the palm oil mill utilization of each.
         </p>
       </section>
       <div>
         <SearchableListLayout
         // @ts-ignore
           options={options}
-          label="Suppliers"
+          label="Mill Owners"
           columns={2}
           rows={20}
         />

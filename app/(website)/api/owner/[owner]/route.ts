@@ -63,8 +63,8 @@ export async function GET(req: Request, res: { params: { brand: string } }) {
           "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
         },
       });
-    case "suppliers":
-      return new NextResponse(unparse(data.suppliers), {
+    case "owners":
+      return new NextResponse(unparse(data.owners), {
         headers: {
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
