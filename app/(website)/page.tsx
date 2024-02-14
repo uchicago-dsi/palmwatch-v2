@@ -51,7 +51,7 @@ export default async function Home() {
                 Mill Owners
               </Link>
               <Link className="btn btn-outline btn-info" href="/groups">
-                Groups
+                Mill Groups
               </Link>
               <Link className="btn btn-outline btn-info" href="/countries">
                 Countries
