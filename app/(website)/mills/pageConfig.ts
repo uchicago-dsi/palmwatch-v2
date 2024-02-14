@@ -46,7 +46,7 @@ export const forestStatsConfig = (
   const stats = [];
   if (totalArea !== null) {
     stats.push({
-      title: "Total Area (km2)",
+      title: "Total Area Within Mill Catchments (km2)",
       stat: formatter.format(totalArea),
       className: "",
     });

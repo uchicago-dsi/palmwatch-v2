@@ -16,7 +16,7 @@ const CircleSvg = () => {
 export const BrandInfo: React.FC<{ data: BrandData }> = ({ data }) => {
   return (
     <div className="prose w-full">
-      <h3>Consumer Brand Impact</h3>
+      <h3>Consumer Brands Sourcing from This Mill</h3>
       <div className="overflow-x-auto max-h-96 card pt-0 shadow-xl bg-base-200 w-full">
         <table className="table table-pin-rows">
           <thead>
