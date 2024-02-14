@@ -11,7 +11,7 @@ export default async function Page() {
   return (
     <main className="max-w-3xl mx-auto">
       <section className="prose flex flex-col py-4">
-        <h1 className="p-0 m-0">Mill Owners Search</h1>
+        <h1 className="p-0 m-0">Mill Companies</h1>
         <p>
           Search below for palm oil mill owners and learn more about the palm oil mill utilization of each.
         </p>
