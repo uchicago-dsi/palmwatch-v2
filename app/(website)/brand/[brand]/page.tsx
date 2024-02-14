@@ -45,7 +45,9 @@ export default async function Page({ params }: { params: { brand: string } }) {
     <main className="relative flex flex-col items-center justify-center w-[90%] mx-auto max-w-[90vw] 2xl:max-w-[1400px]">
       <div className="flex flex-col space-y-4 my-8 w-full shadow-xl align-center justify-center prose max-w-none">
         <div className="p-4">
-          <h1 className="p-0 m-0">{brand} {altName ? `(${altName})`: null}</h1>
+          <h1 className="p-0 m-0">
+            {brand} {altName ? `(${altName})` : null}
+          </h1>
           <h2 className="p-0 m-0">Palm Oil Usage</h2>
         </div>
         <StatsBlock stats={stats} />
@@ -69,9 +71,23 @@ export default async function Page({ params }: { params: { brand: string } }) {
             </div>
           </div>
           <div className="bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg m-0 w-full">
-            <h3 className="text-2xl m-4 font-bold">
-              Forest Loss over time (KM<sup>2</sup>)
-            </h3>
+            <div className="flex flex-row align-center items-center">
+              <h3 className="text-2xl m-4 font-bold">
+                Forest Loss over time (KM<sup>2</sup>)
+              </h3>
+              <div
+                className="tooltip"
+                data-tip="1st Quartile Mill represents the square kilometers of forest loss per year that 25% of the mills used by this brand fall under. Median Mill represents this value at which 50% of the mills used by this brand fall under. 3rd Quartile Mill represents the square kilometers of forest loss per year that 75% of the mills used by this brand fall under."
+              >
+                <button
+                  data-tooltip-target="tooltip-default"
+                  type="button"
+                  className="btn btn-sm btn-outline ml-2 btn-circle"
+                >
+                  ?
+                </button>
+              </div>
+            </div>
             <div className="h-[60vh] relative w-full">
               <ServerIqr dataUrl={`/api/brand/${brand}`} type="brand" />
             </div>
