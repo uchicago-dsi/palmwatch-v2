@@ -54,7 +54,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
         <div className="flex flex-col space-y-4 w-full lg:flex-row lg:space-x-4 lg:space-y-0">
           <div className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg m-0 w-full">
             <h3 className="text-2xl m-4 font-bold">
-              2022 Mill Impact (KM<sup>2</sup> of Forest Loss)
+              Mill Deforestation (KM<sup>2</sup> of Forest Loss)
             </h3>
             <div className="h-[60vh] relative w-full">
               <ServerMap
