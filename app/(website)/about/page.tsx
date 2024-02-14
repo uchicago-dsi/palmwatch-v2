@@ -26,6 +26,10 @@ export default async function Page() {
           </>
         )}
       </div>
+
+      {!!aboutPageContent?.contributors && (
+        <PortableText value={aboutPageContent.contributors} />
+      )}
     </div>
   );
 }

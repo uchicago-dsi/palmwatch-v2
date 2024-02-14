@@ -3,7 +3,8 @@ export type AboutPageContent = {
   faq: Array<{
     heading: string,
     body: Array<any>
-  }>
+  }>,
+  contributors: Array<any>
 }
 export type ContactPageContent = {
   content: Array<any>

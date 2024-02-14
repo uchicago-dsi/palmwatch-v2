@@ -71,7 +71,8 @@ export const aboutPageQuery = groq`
   faq[] {
     ...,
     _type,
-  }
+  },
+  contributors
 }
 `;
 

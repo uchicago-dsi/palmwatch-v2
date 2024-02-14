@@ -34,5 +34,10 @@ export default {
         },
       ],
     },
+    {
+      ...getGenericContentConfig("contributors"),
+      title: "Contributors",
+      description: "List of contributors to the project. Displays after FAQ."
+    },
   ],
 };
