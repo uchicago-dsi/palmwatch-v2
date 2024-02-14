@@ -52,7 +52,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
       </div>
       <QueryProvider>
         <div className="flex flex-col space-y-4 w-full lg:flex-row lg:space-x-4 lg:space-y-0">
-          <div className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg m-0 w-full">
+          <div className="bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg m-0 w-full">
             <h3 className="text-2xl m-4 font-bold">
               Mill Deforestation (KM<sup>2</sup> of Forest Loss)
             </h3>
@@ -68,7 +68,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
               />
             </div>
           </div>
-          <div className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg m-0 w-full">
+          <div className="bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg m-0 w-full">
             <h3 className="text-2xl m-4 font-bold">
               Forest Loss over time (KM<sup>2</sup>)
             </h3>
@@ -77,7 +77,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
             </div>
           </div>
         </div>
-        <div className="bg-white/30 shadow-xl my-4 ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
+        <div className="bg-base-100 shadow-xl my-4 ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
           <ServerInfotable
             endpoint={`/api/brand/${brand}`}
             dataAccessor="owners"
@@ -89,7 +89,7 @@ export default async function Page({ params }: { params: { brand: string } }) {
           />
         </div>
 
-        <div className="bg-white/30 shadow-xl my-4 ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
+        <div className="bg-base-100 shadow-xl my-4 ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
           <ServerInfotable
             endpoint={`/api/brand/${brand}`}
             dataAccessor="umlInfo"

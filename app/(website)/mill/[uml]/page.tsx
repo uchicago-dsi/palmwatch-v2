@@ -104,7 +104,7 @@ export default async function Page({ params }: { params: { uml: string } }) {
       </div>
       <div className="my-4 p-4 bg-surface/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
         <h3 className="text-xl my-4 font-bold">
-          Palm Oil Mill Deforestation Map: Forest Loss in KM2 (2022)
+          Palm Oil Mill Deforestation Map: Forest Loss in KM2
         </h3>
         <div className="relative h-[60vh] w-full">
           <QueryProvider>

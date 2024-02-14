@@ -74,7 +74,7 @@ export default async function Page({
         externalLink={externalLink}
         linkText={`Click here for more info about ${country}`}
         />
-      <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
+      <div className="my-4 p-4 bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
         <h3 className="text-xl my-4 font-bold">
           Palm Oil Mill Deforestation Map: Forest Loss in KM2
         </h3>
@@ -92,17 +92,17 @@ export default async function Page({
         </div>
       </div>
       <div className="flex flex-row space-x-4 w-full">
-        <div className="p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto  w-full">
+        <div className="p-4 bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto  w-full">
           <BrandInfo data={brandUsage as BrandData} />
         </div>
-        <div className="bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full prose">
+        <div className="bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full prose">
           <div className="h-[40vh] relative w-full">
             <h3 className="ml-4 my-4">Forest Loss Over Time (km2)</h3>
             <IqrOverTime type="brand" data={timeseries} />
           </div>
         </div>
       </div>
-      <div className="my-4 p-4 bg-white/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
+      <div className="my-4 p-4 bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
         <InfoTable
           data={mills}
           columnMapping={{
