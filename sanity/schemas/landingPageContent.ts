@@ -21,7 +21,7 @@ export default {
       title: "Intro Content",
     },
     {
-      ...getGenericContentConfig("dislclaimer"),
+      ...getGenericContentConfig("disclaimer"),
       title: "Disclaimer / Bottom Content",
     }
   ]
