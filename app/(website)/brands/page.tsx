@@ -5,11 +5,19 @@ import queryClient from "@/utils/getMillData";
 
 import React from "react";
 import { getStatConfig } from "./pageConfig";
-
+import cmsClient from "@/sanity/lib/client";
+import { PortableText } from "@/sanity/lib/components";
 export const revalidate = 60;
 
 export default async function Page() {
-  await queryClient.init();
+  const [
+    _,
+    landingPageContent
+  ] = await Promise.all([
+    queryClient.init(),
+    cmsClient.getLandingPageContent('brands')
+  ])
+
   const options = queryClient.getSearchList().Brands;
   const { brandCount, companyCount, countryCount, millCount, groupCount } =
     queryClient.getUniqueCounts();
@@ -25,6 +33,7 @@ export default async function Page() {
     <main className="mx-auto">
       <section className="prose flex flex-col py-4 max-w-none space-y-4">
         <h1 className="p-0 m-0">Consumer Brands</h1>
+        {!!landingPageContent?.content && <PortableText value={landingPageContent.content} />}
         <StatsBlock stats={statConfig} />
         <br/>
         <h3 className="mt-4 mb-0 py-0">Average Deforestation Scores by Brand (1 best, 5 worst)</h3>
@@ -55,12 +64,7 @@ export default async function Page() {
       </div>
       <br/>
       <p className="prose my-4">
-        <i>
-          Note: Many brands source palm oil from the same mills. The total
-          deforestation loss for each brand is not disaggregated based on the
-          amount of palm oil each brand sources from an individual mill, because
-          this data is not disclosed.
-        </i>
+        {!!landingPageContent?.disclaimer && <PortableText value={landingPageContent.disclaimer} />}
       </p>
     </main>
   );

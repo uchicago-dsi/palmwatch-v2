@@ -124,3 +124,18 @@ export const homePageQuery = groq`
   }
 }
 `;
+
+export const landingPageContentQuery = groq`
+*[_type == "landingPage" && page == $page][0] {
+  _id,
+  title,
+  content[] {
+    ...,
+    _type,
+  },
+  disclaimer[] {
+    ...,
+    _type,
+  }
+}
+`;

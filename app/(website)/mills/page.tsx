@@ -4,11 +4,17 @@ import queryClient from "@/utils/getMillData";
 import React from "react";
 import { basicStatsConfig, forestStatsConfig, rspoStatsConfig } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
+import cmsClient from "@/sanity/lib/client";
+import { PortableText } from "@/sanity/lib/components";
 
 export const revalidate = 60;
 
 export default async function Page() {
-  await queryClient.init();
+  const [_, landingPageContent] = await Promise.all([
+    queryClient.init(),
+    cmsClient.getLandingPageContent("mills"),
+  ]);
+
   const options = queryClient.getSearchList().Mills;
   const {
     timeseries,
@@ -44,15 +50,19 @@ export default async function Page() {
     <main className="mx-auto">
       <section className="prose flex flex-col py-4 max-w-none">
         <h1 className="p-0 m-0">Mills</h1>
+        {!!landingPageContent?.content && (
+          <PortableText value={landingPageContent.content} />
+        )}
         <p>
-          Search below for specific mills and learn more about the palm oil production of each mill.
+          Search below for specific mills and learn more about the palm oil
+          production of each mill.
         </p>
         <StatsBlock stats={basicStats} />
-        <hr className="py-0 my-0"/>
+        <hr className="py-0 my-0" />
         <StatsBlock stats={rspoStats} />
-        <hr className="py-0 my-0"/>
+        <hr className="py-0 my-0" />
         <StatsBlock stats={forestStats} />
-        <hr className="py-0 my-0"/>
+        <hr className="py-0 my-0" />
         <div className="h-96">
           <IqrOverTime data={timeseries} type="brand" />
         </div>
@@ -66,6 +76,11 @@ export default async function Page() {
           rows={20}
         />
       </div>
+      <p className="prose my-4">
+        {!!landingPageContent?.disclaimer && (
+          <PortableText value={landingPageContent.disclaimer} />
+        )}
+      </p>
     </main>
   );
 }

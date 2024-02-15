@@ -8,6 +8,7 @@ import contactPage from './schemas/contactPage'
 import footerInfo from './schemas/footerInfo'
 import homePage from './schemas/homePage'
 import groupInfo from './schemas/groupInfo'
+import landingPageContent from './schemas/landingPageContent'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -15,6 +16,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     aboutPage,
     contactPage,
     footerInfo,
+    landingPageContent,
     brandInfo,
     countryInfo,
     millInfo,
