@@ -105,7 +105,7 @@ export const NavBar: React.FC<NavbarProps> = ({
             </li>
             {MENU_ITEMS.map((item) => (
               <li key={item.label}>
-                <Link href={`/${item.path}`}>{item.label}</Link>
+                <Link href={`${item.path}`}>{item.label}</Link>
               </li>
             ))}
             {/* about, contact */}
