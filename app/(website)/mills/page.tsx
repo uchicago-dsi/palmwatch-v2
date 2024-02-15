@@ -50,13 +50,7 @@ export default async function Page() {
     <main className="mx-auto">
       <section className="prose flex flex-col py-4 max-w-none">
         <h1 className="p-0 m-0">Mills</h1>
-        {!!landingPageContent?.content && (
-          <PortableText value={landingPageContent.content} />
-        )}
-        <p>
-          Search below for specific mills and learn more about the palm oil
-          production of each mill.
-        </p>
+        {!!landingPageContent?.content && <p className="prose"><PortableText value={landingPageContent.content} /></p>}
         <StatsBlock stats={basicStats} />
         <hr className="py-0 my-0" />
         <StatsBlock stats={rspoStats} />

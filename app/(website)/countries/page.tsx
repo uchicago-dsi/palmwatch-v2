@@ -21,9 +21,7 @@ export default async function Page() {
     <main className="mx-auto">
       <section className="prose flex flex-col py-4 max-w-none">
         <h1 className="p-0 m-0">Countries</h1>
-        {!!landingPageContent?.content && (
-          <PortableText value={landingPageContent.content} />
-        )}
+        {!!landingPageContent?.content && <p className="prose"><PortableText value={landingPageContent.content} /></p>}
         <InfoTable
           data={countryStats}
           columnMapping={{

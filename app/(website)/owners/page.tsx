@@ -21,10 +21,8 @@ export default async function Page() {
     <main className="max-w-3xl mx-auto">
       <section className="prose flex flex-col py-4">
         <h1 className="p-0 m-0">Mill Companies</h1>
-        {!!landingPageContent?.content && <PortableText value={landingPageContent.content} />}
-        <p>
-          Search below for palm oil mill owners and learn more about the palm oil mill utilization of each.
-        </p>
+        {!!landingPageContent?.content && <p className="prose"><PortableText value={landingPageContent.content} /></p>}
+
       </section>
       <div>
         <SearchableListLayout
