@@ -12,6 +12,8 @@ export type ContactPageContent = {
 
 export type HomePageContent = {
   title: string,
+  heroTitle: string,
+  heroSubtitle: string,
   introContent: Array<any>,
   useCases: Array<{
     title: string,

@@ -13,11 +13,9 @@ import { HomePageMap } from "@/components/HomePageMap";
 export const revalidate = 60;
 
 export default async function Home() {
-  const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
-  const data = queryClient.getFullMillInfo().objects();
   const homeContent = await cmsClient.getHomeContent();
   const { mapDescription, useCases, introContent } = homeContent || {};
+  
   return (
     <main className="flex flex-col items-center justify-center h-auto">
       {/* fullheight hero div */}
@@ -33,9 +31,9 @@ export default async function Home() {
           {/* Your browser does not support the video tag. */}
         </video>
         <div className="relative z-[0] flex flex-col justify-center items-center h-full p-4 text-white">
-          <h1 className="text-6xl font-bold">PalmWatch</h1>
+          <h1 className="text-6xl font-bold">{homeContent?.heroTitle || 'PalmWatch'}</h1>
           <h2 className="text-3xl">
-            Explore the impact of palm oil production on deforestation
+            {homeContent?.heroSubtitle || 'Explore the impact of palm oil production on deforestation'}
           </h2>
           <div className="flex flex-col space-y-4 mt-10 items-center">
             {/* search by consumer brand, mill, mill owner, mill group */}

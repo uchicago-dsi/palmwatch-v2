@@ -11,6 +11,16 @@ export default {
       type: "string",
     },
     {
+      name: "heroTitle",
+      title: "Hero Title",
+      type: "string",
+    },
+    {
+      name: "heroSubtitle",
+      title: "Hero Subtitle",
+      type: "string",
+    },
+    {
       ...getGenericContentConfig("content"),
       name: "introContent",
       title: "Intro Content",
