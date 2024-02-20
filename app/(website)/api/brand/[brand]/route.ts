@@ -5,6 +5,7 @@ import { unparse } from "papaparse";
 import { timestamp } from "@/utils/timestamp";
 import { readFileSync } from "fs";
 import { fullYearRangeColumns } from "@/config/years";
+import { cleanLossData, cleanUnparse } from "@/utils/renameOutputColumns";
 
 export async function GET(req: Request, res: { params: { brand: string } }) {
   const { brand } = res.params;
@@ -35,7 +36,18 @@ export async function GET(req: Request, res: { params: { brand: string } }) {
           features.push({
             type: "Feature",
             geometry: feature.geometry,
-            properties: row,
+            properties: {
+              ...row,
+              // @ts-ignore
+              'Current Deforestation Score': row.risk_score_current,
+              // @ts-ignore
+              'Past Deforestation Score': row.risk_score_past,
+              // @ts-ignore
+              'Future Risk Score': row.risk_score_future,
+              risk_score_current: undefined,
+              risk_score_past: undefined,
+              risk_score_future: undefined,
+            },
           });
         }
       }
@@ -50,21 +62,23 @@ export async function GET(req: Request, res: { params: { brand: string } }) {
         }
       );
     case "loss":
-      return new NextResponse(unparse(data.timeseries), {
+      const lossDataRaw = data.timeseries
+      const cleanedLossData = cleanLossData(lossDataRaw)
+      return new NextResponse(cleanUnparse(cleanedLossData), {
         headers: {
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
         },
       });
     case "mills":
-      return new NextResponse(unparse(data.umlInfo), {
+      return new NextResponse(cleanUnparse(data.umlInfo), {
         headers: {
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
         },
       });
     case "owners":
-      return new NextResponse(unparse(data.owners), {
+      return new NextResponse(cleanUnparse(data.owners), {
         headers: {
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
