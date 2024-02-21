@@ -19,7 +19,9 @@ export const metadata = {
     "description": "Discover how major brands' palm oil use drives deforestation and environmental change with PalmWatch, an open-access tool powered by data science and open-source intelligence.",
     "images": [
       {
-        "url": "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
+        "url": "http://www.palmwatch.inclusivedevelopment.net/og-image.png",
+        // @ts-ignore
+        "secure_url": "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
         "width": 1200,
         "height": 630,
         "alt": "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use"
@@ -27,12 +29,15 @@ export const metadata = {
     ]
   },
   "twitter": {
+    // @ts-ignore
     "card": "summary_large_image",
     "title": "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use",
     "description": "PalmWatch reveals the environmental footprint of global palm oil consumption by brands like Nestlé, PepsiCo, and Unilever through advanced data analysis.",
     "images": [
       {
         "url": "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
+        // @ts-ignore
+        "secure_url": "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
         "width": 1200,
         "height": 630,
         "alt": "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use"
