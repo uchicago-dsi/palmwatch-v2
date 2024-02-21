@@ -21,7 +21,7 @@ export const metadata = {
     description:
       "Discover how major brands' palm oil use drives deforestation and environmental change with PalmWatch, an open-access tool powered by data science and open-source intelligence.",
     images: {
-      url: "http://www.palmwatch.inclusivedevelopment.net/og-image.png",
+      url: "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
       width: "1200",
       height: "630",
       alt: "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use",
