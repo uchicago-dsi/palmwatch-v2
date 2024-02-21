@@ -13,6 +13,7 @@ export const metadata = {
   "description": "PalmWatch is an innovative open-access platform leveraging advanced data science and open-source intelligence to map the global palm oil supply chain's impact, connecting major brands like Nestlé, PepsiCo, and Unilever to deforestation and environmental changes.",
   "keywords": "PalmWatch, palm oil, deforestation, environmental impact, data science, open-source intelligence, global supply chain, Nestlé, PepsiCo, Unilever",
   "robots": "index, follow",
+  "metadataBase": new URL("https://www.palmwatch.inclusivedevelopment.net/"),
   "openGraph": {
     "url": "https://www.palmwatch.inclusivedevelopment.net/",
     "title": "PalmWatch:  Tracking the impact of Big Brands' Palm Oil Use",
