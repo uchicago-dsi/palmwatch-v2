@@ -1,27 +1,38 @@
+"use client";
 import queryClient from "@/utils/getMillData";
 import React from "react";
 import Link from "next/link";
 import { NavBarSuperDropdown } from "./NavBarSuperDropdown";
 import { MENU_ITEMS } from "@/config/navBarConfig";
-import { Footer } from "./Footer";
 
 interface NavbarProps {
-  searchList: ReturnType<typeof queryClient.getSearchList>;
-  children: React.ReactNode;
-  currentPage: string;
-  footerContent: any;
+  searchList?: ReturnType<typeof queryClient.getSearchList>;
+  children?: React.ReactNode;
 }
 
-export const NavBar: React.FC<NavbarProps> = ({
-  searchList,
-  children,
-  currentPage,
-  footerContent
-}) => {
+export const NavBar: React.FC<NavbarProps> = ({ searchList, children }) => {
+  const [innerSearchList, setInnerSearchList] =
+    React.useState<NavbarProps["searchList"]>();
+
+  React.useEffect(() => {
+    if (innerSearchList == undefined) {
+      if (searchList) {
+        setInnerSearchList(searchList);
+      } else {
+        const getSearchList = async () => {
+          const data = await fetch("/api/list");
+          const json = await data.json();
+          setInnerSearchList(json);
+        };
+        getSearchList();
+      }
+    }
+  }, [searchList]);
+
   return (
-    <div className="drawer">
+    <div className="drawer z-50">
       <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col max-w-full overflow-hidden">
+      <div className="drawer-content flex flex-col max-w-full">
         {/* Navbar */}
         <div className="w-full navbar bg-base-300 relative z-10">
           <div className="flex-none lg:hidden">
@@ -66,7 +77,7 @@ export const NavBar: React.FC<NavbarProps> = ({
                   <NavBarSuperDropdown
                     icon={item.icon}
                     label={item.label}
-                    options={(searchList[item.label] as []) || []}
+                    options={(innerSearchList?.[item.label] as []) || []}
                     path={item.path}
                     key={item.label}
                     description={item.description}
@@ -87,7 +98,6 @@ export const NavBar: React.FC<NavbarProps> = ({
           </div>
         </div>
         {children}
-        <Footer footerContent={footerContent} />
       </div>
       <div className="drawer-side">
         <label

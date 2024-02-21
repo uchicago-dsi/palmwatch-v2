@@ -69,6 +69,7 @@ export const SearchableListLayout: React.FC<{
   manyRows,
   setcurrentDropdown,
 }) => {
+  const hasNoOptions = options.length === 0;
   const [searchTerm, setSearchTerm] = React.useState("");
   const [currentPage, setCurrentPage] = React.useState(0);
 
@@ -148,30 +149,34 @@ export const SearchableListLayout: React.FC<{
           </div>
         )}
       </div>
-      {currentItems.map((column: any[], idx: number) => (
-        <div className="flex flex-col space-y-1 flex-1 m-0 p-0" key={idx}>
-          {column.map((option) => (
-            <div key={option.label}>
-              <Link
-                className="btn-link m-0 p-0 capitalize"
-                href={option.href}
-                onClick={closeDropdown}
-              >
-                <div className="flex flex-col">
-                  {Boolean(option.imgPath) && (
-                    <img
-                      src={option.imgPath}
-                      alt={option.label}
-                      className="w-20 h-20"
-                    />
-                  )}
-                  {option.label.toLowerCase()}
-                </div>
-              </Link>
-            </div>
-          ))}
-        </div>
-      ))}
+      {hasNoOptions ? (
+        <p>Loading, please wait...</p>
+      ) : (
+        currentItems.map((column: any[], idx: number) => (
+          <div className="flex flex-col space-y-1 flex-1 m-0 p-0" key={idx}>
+            {column.map((option) => (
+              <div key={option.label}>
+                <Link
+                  className="btn-link m-0 p-0 capitalize"
+                  href={option.href}
+                  onClick={closeDropdown}
+                >
+                  <div className="flex flex-col">
+                    {Boolean(option.imgPath) && (
+                      <img
+                        src={option.imgPath}
+                        alt={option.label}
+                        className="w-20 h-20"
+                      />
+                    )}
+                    {option.label.toLowerCase()}
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        ))
+      )}
     </div>
   );
 };
