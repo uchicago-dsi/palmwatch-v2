@@ -1,11 +1,8 @@
-import queryClient from "@/utils/getMillData";
-import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import { MillInfo } from "@/components/MillInfo";
 import { BrandInfoClient } from "@/components/BrandInfoClient";
 import Link from "next/link";
 import { ScrollToButton } from "@/components/ScrollToButton";
-import path from "path";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText, urlFor } from "@/sanity/lib/components";
 import { HomePageMap } from "@/components/HomePageMap";
@@ -14,8 +11,8 @@ export const revalidate = 60;
 
 export default async function Home() {
   const homeContent = await cmsClient.getHomeContent();
-  const { mapDescription, useCases, introContent } = homeContent || {};
-  
+  const { mapDescription, useCases, introContent, heroSubtitle, heroTitle } = homeContent || {};
+
   return (
     <main className="flex flex-col items-center justify-center h-auto">
       {/* fullheight hero div */}
@@ -31,9 +28,9 @@ export default async function Home() {
           {/* Your browser does not support the video tag. */}
         </video>
         <div className="relative z-[0] flex flex-col justify-center items-center h-full p-4 text-white">
-          <h1 className="text-6xl font-bold">{homeContent?.heroTitle || 'PalmWatch'}</h1>
+          <h1 className="text-6xl font-bold">{heroTitle || 'PalmWatch'}</h1>
           <h2 className="text-3xl">
-            {homeContent?.heroSubtitle || 'Explore the impact of palm oil production on deforestation'}
+            {heroSubtitle || 'Explore the impact of palm oil production on deforestation'}
           </h2>
           <div className="flex flex-col space-y-4 mt-10 items-center">
             {/* search by consumer brand, mill, mill owner, mill group */}
