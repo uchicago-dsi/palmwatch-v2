@@ -9,46 +9,40 @@ import cmsClient from "@/sanity/lib/client";
 import Head from "next/head";
 
 export const metadata = {
-  "title": "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use",
-  "description": "PalmWatch is an innovative open-access platform leveraging advanced data science and open-source intelligence to map the global palm oil supply chain's impact, connecting major brands like Nestlé, PepsiCo, and Unilever to deforestation and environmental changes.",
-  "keywords": "PalmWatch, palm oil, deforestation, environmental impact, data science, open-source intelligence, global supply chain, Nestlé, PepsiCo, Unilever",
-  "robots": "index, follow",
-  "metadataBase": new URL("https://www.palmwatch.inclusivedevelopment.net/"),
-  "openGraph": {
-    "url": "https://www.palmwatch.inclusivedevelopment.net/",
-    "title": "PalmWatch:  Tracking the impact of Big Brands' Palm Oil Use",
-    "description": "Discover how major brands' palm oil use drives deforestation and environmental change with PalmWatch, an open-access tool powered by data science and open-source intelligence.",
-    "images": [
-      {
-        "url": "http://www.palmwatch.inclusivedevelopment.net/og-image.png",
-        // @ts-ignore
-        "secure_url": "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
-        "width": 1200,
-        "height": 630,
-        "alt": "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use"
-      }
-    ]
+  title: "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use",
+  description:
+    "PalmWatch is an innovative open-access platform leveraging advanced data science and open-source intelligence to map the global palm oil supply chain's impact, connecting major brands like Nestlé, PepsiCo, and Unilever to deforestation and environmental changes.",
+  keywords:
+    "PalmWatch, palm oil, deforestation, environmental impact, data science, open-source intelligence, global supply chain, Nestlé, PepsiCo, Unilever",
+  robots: "index, follow",
+  metadataBase: new URL("https://www.palmwatch.inclusivedevelopment.net/"),
+  openGraph: {
+    url: "https://www.palmwatch.inclusivedevelopment.net/",
+    title: "PalmWatch:  Tracking the impact of Big Brands' Palm Oil Use",
+    description:
+      "Discover how major brands' palm oil use drives deforestation and environmental change with PalmWatch, an open-access tool powered by data science and open-source intelligence.",
+    images: {
+      url: "http://www.palmwatch.inclusivedevelopment.net/og-image.png",
+      width: "1200",
+      height: "630",
+      alt: "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use",
+    },
   },
-  "twitter": {
-    // @ts-ignore
-    "card": "summary_large_image",
-    "title": "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use",
-    "description": "PalmWatch reveals the environmental footprint of global palm oil consumption by brands like Nestlé, PepsiCo, and Unilever through advanced data analysis.",
-    "images": [
-      {
-        "url": "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
-        // @ts-ignore
-        "secure_url": "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
-        "width": 1200,
-        "height": 630,
-        "alt": "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use"
-      }
-    ],
-    "site": "@inclusivedevt",
-    "creator": "@inclusivedevt"
-  }
-}
-
+  twitter: {
+    card: "summary_large_image",
+    title: "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use",
+    description:
+      "PalmWatch reveals the environmental footprint of global palm oil consumption by brands like Nestlé, PepsiCo, and Unilever through advanced data analysis.",
+    images: {
+      url: "https://www.palmwatch.inclusivedevelopment.net/og-image.png",
+      width: "1200",
+      height: "630",
+      alt: "PalmWatch: Tracking the impact of Big Brands' Palm Oil Use",
+    },
+    site: "@inclusivedevt",
+    creator: "@inclusivedevt",
+  },
+};
 
 const inter = Inter({
   variable: "--font-inter",
@@ -56,7 +50,7 @@ const inter = Inter({
   display: "swap",
 });
 
-export const revalidate = 60
+export const revalidate = 60;
 
 export default async function RootLayout({
   children,
