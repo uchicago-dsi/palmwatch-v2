@@ -61,7 +61,7 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList, children }) => {
               <li>
                 <Link href="/" className="font-bold">
                   PalmWatch
-                  <i className="text-accent inline">beta</i>
+                  {/* <i className="text-accent inline">beta</i> */}
                 </Link>
               </li>
             </ul>
