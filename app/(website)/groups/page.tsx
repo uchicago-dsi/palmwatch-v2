@@ -3,12 +3,13 @@ import queryClient from "@/utils/getMillData";
 import React from "react";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-
+import path from "path";
 export const revalidate = 60;
 
 export default async function Page() {
+  const dataDir = path.join(process.cwd(), "public", "data");
   const [_, landingPageContent] = await Promise.all([
-    queryClient.init(),
+    queryClient.init(dataDir),
     cmsClient.getLandingPageContent("groups"),
   ]);
   const options = queryClient.getSearchList()['Mill Groups'];
