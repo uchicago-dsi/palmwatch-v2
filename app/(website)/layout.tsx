@@ -85,6 +85,9 @@ export default async function RootLayout({
         <meta name="msapplication-TileColor" content="#da532c" />
         <meta name="theme-color" content="#ffffff" />
       </Head>
+      <head>
+        <script defer src="https://core-facility-umami.vercel.app/script.js" data-website-id="c121bc2a-788e-40a0-a81e-346e799c279d" />
+      </head>
       <body className={inter.variable}>
         <NavBar />
         {children}
