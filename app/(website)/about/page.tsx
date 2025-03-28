@@ -12,7 +12,7 @@ export default async function Page() {
         {!!aboutPageContent?.faq?.length && (
           <>
             <h3>FAQ</h3>
-            {aboutPageContent.faq.map((item, index) => (
+            {aboutPageContent.faq.map((item: any, index: number) => (
               <div key={index} className="collapse bg-base-200 my-4 shadow-xl">
                 <input type="radio" name={`faq-accordion`} />
                 <div className="collapse-title text-xl font-medium">

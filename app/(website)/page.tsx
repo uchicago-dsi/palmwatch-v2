@@ -83,7 +83,7 @@ export default async function Home() {
           className="
       max-w-none w-full py-10 flex flex-col space-y-4 bg-base-200 mb-4 prose justify-center items-center lg:py-4 lg:min-h-[50vh] lg:flex-row lg:space-x-4 lg:space-y-0"
         >
-          {useCases?.map((useCase, index) => (
+          {useCases?.map((useCase: any, index: number) => (
             <div key={index} className="w-full text-center lg:w-1/3">
               <img  /* @ts-ignore */
                 src={urlFor(useCase?.image?.asset?._ref || "")}

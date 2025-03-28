@@ -4,8 +4,9 @@ import { BrandSchema } from "@/config/brands/types";
 
 import { apiVersion, dataset, projectId, useCdn } from '../env'
 import { AboutPageContent, ContactPageContent, HomePageContent } from './types';
+import { SanityClient } from 'sanity';
 class CmsClient {
-  client: ReturnType<typeof createClient>;
+  client: SanityClient;
   brandData: Record<string, BrandSchema> = {}
   umlData: Record<string, Partial<BrandSchema>> = {}
   
@@ -15,7 +16,7 @@ class CmsClient {
       dataset,
       projectId,
       useCdn,
-    });
+    }) as SanityClient;
   }
 
   async getBrandInfo(name: string) {
