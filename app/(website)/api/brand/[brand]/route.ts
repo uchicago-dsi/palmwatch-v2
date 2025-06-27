@@ -6,6 +6,7 @@ import { timestamp } from "@/utils/timestamp";
 import { readFileSync } from "fs";
 import { fullYearRangeColumns } from "@/config/years";
 import { cleanLossData, cleanUnparse } from "@/utils/renameOutputColumns";
+import removeAccents from 'remove-accents';
 
 export async function GET(req: Request, res: { params: { brand: string } }) {
   const { brand } = res.params;
@@ -18,7 +19,7 @@ export async function GET(req: Request, res: { params: { brand: string } }) {
   const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
   const data = queryClient.getBrandInfo(brand, fullYearRangeColumns);
-
+  const sanitizedBrand = removeAccents(brand);
   switch (output) {
     case "geo":
       const geoDataRaw = await readFileSync(
@@ -57,7 +58,7 @@ export async function GET(req: Request, res: { params: { brand: string } }) {
           status: 200,
           headers: {
             "Content-Type": "application/json",
-            "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.geojson"`,
+            "Content-Disposition": `attachment; filename="${sanitizedBrand}-Mills-${timestamp}.geojson"`,
           },
         }
       );
@@ -67,21 +68,21 @@ export async function GET(req: Request, res: { params: { brand: string } }) {
       return new NextResponse(cleanUnparse(cleanedLossData), {
         headers: {
           "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
+          "Content-Disposition": `attachment; filename="${sanitizedBrand}-Mills-${timestamp}.csv"`,
         },
       });
     case "mills":
       return new NextResponse(cleanUnparse(data.umlInfo), {
         headers: {
           "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
+          "Content-Disposition": `attachment; filename="${sanitizedBrand}-Mills-${timestamp}.csv"`,
         },
       });
     case "owners":
       return new NextResponse(cleanUnparse(data.owners), {
         headers: {
           "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
+          "Content-Disposition": `attachment; filename="${sanitizedBrand}-Mills-${timestamp}.csv"`,
         },
       });
     default:
