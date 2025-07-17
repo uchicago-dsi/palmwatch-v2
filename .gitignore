@@ -39,6 +39,5 @@ yarn-error.log*
 *.tsbuildinfo
 
 yarn.lock
-pnpm-lock.yaml
 .vscode/settings.json
 .vscode/settings.json
