@@ -15,7 +15,7 @@ export const revalidate = 60;
 
 export default async function Page({ params }: { params: Promise<{ brand: string }> }) {
   const { brand: _brand } = await params;
-  const brand = _brand ? decodeURIComponent(_brand) : "";
+  const brand = decodeURIComponent(_brand);
   const dataDir = path.join(process.cwd(), "public", "data");
   const [_, _brandInfo] = await Promise.all([
     queryClient.init(dataDir),
