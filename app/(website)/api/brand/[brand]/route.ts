@@ -1,15 +1,14 @@
 import queryClient from "@/utils/getMillData";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import { unparse } from "papaparse";
 import { timestamp } from "@/utils/timestamp";
 import { readFileSync } from "fs";
 import { fullYearRangeColumns } from "@/config/years";
 import { cleanLossData, cleanUnparse } from "@/utils/renameOutputColumns";
 import removeAccents from "remove-accents";
 
-export async function GET(req: Request, res: { params: { brand: string } }) {
-  const { brand } = res.params;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ brand: string }> }) {
+  const { brand } = await params;
   const output = new URL(req.url).searchParams.get("output");
   if (!brand)
     return NextResponse.json(

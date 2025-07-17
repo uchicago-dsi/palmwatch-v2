@@ -18,9 +18,10 @@ export const revalidate = 60;
 export default async function Page({
   params,
 }: {
-  params: { country: string };
+  params: Promise<{ country: string }>;
 }) {
-  const country = decodeURIComponent(params.country);
+  const { country: _country } = await params;
+  const country = decodeURIComponent(_country);
 
   // data
   const dataDir = path.join(process.cwd(), "public", "data");

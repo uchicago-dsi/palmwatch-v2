@@ -17,8 +17,9 @@ import { PortableText } from "@/sanity/lib/components";
 
 export const revalidate = 60;
 
-export default async function Page({ params }: { params: { uml: string } }) {
-  const uml = decodeURIComponent(params.uml);
+export default async function Page({ params }: { params: Promise<{ uml: string }> }) {
+  const { uml: _uml } = await params;
+  const uml = decodeURIComponent(_uml);
 
   // data
   const dataDir = path.join(process.cwd(), "public", "data");
