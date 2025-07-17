@@ -14,9 +14,10 @@ export const revalidate = 60;
 export default async function Page({
   params,
 }: {
-  params: { owner: string };
+  params: Promise<{ owner: string }>;
 }) {
-  const owner = decodeURIComponent(params.owner);
+  const { owner: _owner } = await params;
+  const owner = decodeURIComponent(_owner);
 
   // data
   const dataDir = path.join(process.cwd(), "public", "data");
@@ -31,7 +32,7 @@ export default async function Page({
     timeseries,
     totalForestLoss,
   } = queryClient.getOwnerData(owner);
-
+  
   const stats = getStats(
     uniqueMills,
     uniqueCountries,

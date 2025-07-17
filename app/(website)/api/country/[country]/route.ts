@@ -1,10 +1,12 @@
-import { fullYearRangeColumns } from "@/config/years";
 import queryClient from "@/utils/getMillData";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 
-export async function GET(_req: Request, res: { params: { country: string } }) {
-  const { country } = res.params;
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ country: string }> }
+) {
+  const { country } = await params;
   if (!country)
     return NextResponse.json(
       { error: new Error("No brand provided") },

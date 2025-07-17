@@ -1,7 +1,6 @@
 "use client";
-import React, { PureComponent } from "react";
+import React from "react";
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,

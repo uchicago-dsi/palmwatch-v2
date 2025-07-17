@@ -14,12 +14,9 @@ import { CmsContent } from "@/components/CmsContent";
 
 export const revalidate = 60;
 
-export default async function Page({
-  params,
-}: {
-  params: { group: string };
-}) {
-  const group = decodeURIComponent(params.group);
+export default async function Page({ params }: { params: Promise<{ group: string }> }) {
+  const { group: _group } = await params;
+  const group = decodeURIComponent(_group);
 
   // data
   const dataDir = path.join(process.cwd(), "public", "data");

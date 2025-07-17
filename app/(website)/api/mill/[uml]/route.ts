@@ -1,13 +1,11 @@
 import queryClient from "@/utils/getMillData";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import path from "path";
-export async function GET(_req: Request, res: { params: { uml: string } }) {
-  const { uml } = res.params;
-  // query param
-  // const { millOnly } = _req.query;
-  // search params from _req.url
-  const url = new URL(_req.url);
-  const millOnly = Boolean(url.searchParams.get("millOnly"));
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ uml: string }> }) {
+  const { uml } = await params;
+  const url = new URL(req.url);
+  const millOnly = !!(url.searchParams.get("millOnly"));
   if (!uml)
     return NextResponse.json(
       { error: new Error("No uml provided") },
@@ -20,5 +18,5 @@ export async function GET(_req: Request, res: { params: { uml: string } }) {
   const brands = millOnly
     ? []
     : queryClient.getBrandUsageByUml(uml)
-  return NextResponse.json({ brands, info }, { status: 200 });
+  return NextResponse.json({ brands, info });
 }

@@ -54,7 +54,7 @@ export default function Uploader() {
           if (res.status === 200) {
             const { url } = (await res.json()) as BlobResult
             toast(
-              (t) => (
+              (t: any) => (
                 <div className="relative">
                   <div className="p-2">
                     <p className="font-semibold text-gray-900">
