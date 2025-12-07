@@ -198,6 +198,39 @@ class MillDataQuery {
     }
     return quantileResults;
   }
+  getOwnerInfo(
+    owner: string,
+    cols: string[],
+    quantiles: number[] = [0.25, 0.5, 0.75]
+  ) {
+    const ownerMills = this.uml!.filter(
+      escape((d: UmlData) => d["Parent Company"] === owner)
+    )
+      .groupby("UML ID")
+      .dedupe("UML ID");
+
+    const quantileResults = this.getQuantileTimeseries(
+      ownerMills,
+      cols,
+      quantiles
+    );
+    const brands = ownerMills
+      .join(this.companies!, ["UML ID", "UML ID"])
+      .groupby("consumer_brand")
+      .derive({
+        count: () => op.count(),
+      })
+      .dedupe("consumer_brand")
+      .select(["consumer_brand", "count"])
+      .orderby(desc("count"))
+      .objects();
+    return {
+      umlInfo: ownerMills.objects(),
+      timeseries: quantileResults,
+      brands,
+    };
+  }
+
   getGroupInfo(
     group: string,
     cols: string[],

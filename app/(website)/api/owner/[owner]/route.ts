@@ -6,17 +6,18 @@ import { timestamp } from "@/utils/timestamp";
 import { readFileSync } from "fs";
 import { fullYearRangeColumns } from "@/config/years";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ brand: string }> }) {
-  const { brand } = await params;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ owner: string }> }) {
+  const { owner: _owner } = await params;
+  const owner = decodeURIComponent(_owner);
   const output = new URL(req.url).searchParams.get("output");
-  if (!brand)
+  if (!owner)
     return NextResponse.json(
-      { error: new Error("No brand provided") },
+      { error: new Error("No owner provided") },
       { status: 400 }
     );
   const dataDir = path.join(process.cwd(), "public", "data");
   await queryClient.init(dataDir);
-  const data = queryClient.getBrandInfo(brand, fullYearRangeColumns);
+  const data = queryClient.getOwnerInfo(owner, fullYearRangeColumns);
 
   switch (output) {
     case "geo":
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ bran
           status: 200,
           headers: {
             "Content-Type": "application/json",
-            "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.geojson"`,
+            "Content-Disposition": `attachment; filename="${owner}-Mills-${timestamp}.geojson"`,
           },
         }
       );
@@ -53,21 +54,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ bran
       return new NextResponse(unparse(data.timeseries), {
         headers: {
           "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
+          "Content-Disposition": `attachment; filename="${owner}-Mills-${timestamp}.csv"`,
         },
       });
     case "mills":
       return new NextResponse(unparse(data.umlInfo), {
         headers: {
           "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
+          "Content-Disposition": `attachment; filename="${owner}-Mills-${timestamp}.csv"`,
         },
       });
-    case "owners":
-      return new NextResponse(unparse(data.owners), {
+    case "brands":
+      return new NextResponse(unparse(data.brands), {
         headers: {
           "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="${brand}-Mills-${timestamp}.csv"`,
+          "Content-Disposition": `attachment; filename="${owner}-Brands-${timestamp}.csv"`,
         },
       });
     default:
