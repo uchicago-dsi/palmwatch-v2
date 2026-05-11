@@ -5,10 +5,13 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "prebuild": "node scripts/gen-treeloss-rollups.mjs && pnpm exec tsx --tsconfig tsconfig.json scripts/precompute-worker-data.ts",
     "build": "next build",
     "dev": "next dev --turbopack",
     "start": "next start",
-    "lint": "next lint",
+    "preview:next": "next build && next start",
+    "lint": "eslint . --max-warnings 0",
+    "precompute": "pnpm exec tsx --tsconfig tsconfig.json scripts/precompute-worker-data.ts",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
@@ -40,7 +43,7 @@
     "autoprefixer": "10.4.14",
     "daisyui": "3.7.7",
     "deck.gl": "8.9.35",
-    "eslint": "8.38.0",
+    "eslint": "^8.57.0",
     "eslint-config-next": "15.4.1",
     "keyv": "4.5.4",
     "lodash": "4.17.21",
@@ -70,6 +73,7 @@
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.19.9",
     "@types/ms": "0.7.31",
+    "tsx": "^4.21.0",
     "turbo": "1.9.3",
     "wrangler": "^4.90.0"
   },
