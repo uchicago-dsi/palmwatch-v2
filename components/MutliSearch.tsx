@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 // @ts-ignore
 import debounce from "lodash.debounce";
 import Link from "next/link";
@@ -20,20 +20,34 @@ export const MultiSearch: React.FC<{
         item.label.toLowerCase().includes(currentListSearch.toLowerCase())
       )
       .slice(0, 10);
-  }, [currentListSearch, currentOption]);
+  }, [currentListSearch, currentOption, options]);
 
-  const handleSearch = useCallback(
-    debounce((search: string) => {
-      setCurrentListSearch(search);
-    }, 100),
+  const setCurrentListSearchRef = useRef(setCurrentListSearch);
+  setCurrentListSearchRef.current = setCurrentListSearch;
+  const handleSearch = useMemo(
+    () =>
+      debounce((search: string) => {
+        setCurrentListSearchRef.current(search);
+      }, 100),
     []
   );
 
-  const debouncedClosed = useCallback(
-    debounce(() => {
-      setMenuOpen(false);
-    }, 250),
+  const setMenuOpenRef = useRef(setMenuOpen);
+  setMenuOpenRef.current = setMenuOpen;
+  const debouncedClosed = useMemo(
+    () =>
+      debounce(() => {
+        setMenuOpenRef.current(false);
+      }, 250),
     []
+  );
+
+  useEffect(
+    () => () => {
+      handleSearch.cancel();
+      debouncedClosed.cancel();
+    },
+    [handleSearch, debouncedClosed]
   );
 
   return (

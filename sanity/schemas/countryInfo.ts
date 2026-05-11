@@ -1,6 +1,6 @@
 import { getGenericContentConfig } from "./utils";
 
-export default {
+const countryInfo = {
   name: "country",
   title: "Country",
   type: "document",
@@ -27,5 +27,6 @@ export default {
       title: 'Additional Content'
     }
   ],
-  
 };
+
+export default countryInfo;

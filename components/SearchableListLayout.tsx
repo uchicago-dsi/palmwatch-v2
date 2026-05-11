@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { InnerTextComponent } from "./InnerTextComponent";
 import React, { useEffect, useMemo } from "react";
@@ -91,7 +92,7 @@ export const SearchableListLayout: React.FC<{
         searchTerm,
         "label"
       ),
-    [alphabeticalOptions, searchTerm]
+    [alphabeticalOptions, searchTerm, displayColumns, displayRows]
   );
   useEffect(() => {
     setCurrentPage(0);
@@ -163,10 +164,12 @@ export const SearchableListLayout: React.FC<{
                 >
                   <div className="flex flex-col">
                     {Boolean(option.imgPath) && (
-                      <img
-                        src={option.imgPath}
+                      <Image
+                        src={option.imgPath!}
                         alt={option.label}
-                        className="w-20 h-20"
+                        width={80}
+                        height={80}
+                        className="w-20 h-20 object-contain"
                       />
                     )}
                     {option.label.toLowerCase()}

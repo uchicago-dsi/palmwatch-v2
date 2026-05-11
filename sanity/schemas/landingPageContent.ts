@@ -1,6 +1,6 @@
 import { getGenericContentConfig } from "./utils";
 
-export default {
+const landingPageContent = {
   name: "landingPage",
   title: "Landing Page Content",
   type: "document",
@@ -24,5 +24,7 @@ export default {
       ...getGenericContentConfig("disclaimer"),
       title: "Disclaimer / Bottom Content",
     }
-  ]
+  ],
 };
+
+export default landingPageContent;

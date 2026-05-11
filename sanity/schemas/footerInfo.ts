@@ -1,6 +1,6 @@
 import { getGenericContentConfig } from "./utils";
 
-export default {
+const footerInfo = {
   name: "footer",
   title: "Footer",
   type: "document",
@@ -13,5 +13,7 @@ export default {
     getGenericContentConfig('column1'),
     getGenericContentConfig('column2'),
     getGenericContentConfig('column3'),
-  ]
+  ],
 };
+
+export default footerInfo;

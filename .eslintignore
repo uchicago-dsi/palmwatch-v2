@@ -1,0 +1,5 @@
+.next
+out
+.open-next
+node_modules
+public/data/precomputed

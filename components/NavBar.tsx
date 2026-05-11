@@ -1,12 +1,12 @@
 "use client";
-import queryClient from "@/utils/getMillData";
+import type { SearchListPayload } from "@/types/searchList";
 import React from "react";
 import Link from "next/link";
 import { NavBarSuperDropdown } from "./NavBarSuperDropdown";
 import { MENU_ITEMS } from "@/config/navBarConfig";
 
 interface NavbarProps {
-  searchList?: ReturnType<typeof queryClient.getSearchList>;
+  searchList?: SearchListPayload;
   children?: React.ReactNode;
 }
 
@@ -15,19 +15,21 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList, children }) => {
     React.useState<NavbarProps["searchList"]>();
 
   React.useEffect(() => {
-    if (innerSearchList == undefined) {
-      if (searchList) {
-        setInnerSearchList(searchList);
-      } else {
-        const getSearchList = async () => {
-          const data = await fetch("/api/list");
-          const json = await data.json();
-          setInnerSearchList(json);
-        };
-        getSearchList();
-      }
+    if (innerSearchList !== undefined) return;
+    if (searchList) {
+      setInnerSearchList(searchList);
+      return;
     }
-  }, [searchList]);
+    let cancelled = false;
+    (async () => {
+      const res = await fetch("/api/list");
+      const json = await res.json();
+      if (!cancelled) setInnerSearchList(json);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchList, innerSearchList]);
 
   return (
     <div className="drawer z-50">

@@ -1,6 +1,6 @@
 import { getGenericContentConfig } from "./utils";
 
-export default {
+const brandInfo = {
   name: "brand",
   title: "Brand",
   type: "document",
@@ -73,5 +73,6 @@ export default {
       title: 'Additional Content',
     }
   ],
-  
 };
+
+export default brandInfo;

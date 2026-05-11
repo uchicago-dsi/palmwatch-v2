@@ -1,6 +1,6 @@
 import { getGenericContentConfig } from "./utils";
 
-export default {
+const homePage = {
   name: "home",
   title: "Home",
   type: "document",
@@ -60,3 +60,5 @@ export default {
     },
   ],
 };
+
+export default homePage;

@@ -1,4 +1,4 @@
-import React, {useCallback} from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 // @ts-ignore
 import debounce from "lodash/debounce";
 
@@ -7,12 +7,22 @@ export const InnerTextComponent: React.FC<{
   onChange: (s: string) => void;
 }> = ({ onChange, label }) => {
   const [innerSearchTerm, setInnerSearchTerm] = React.useState("");
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
-  const debounceOnChange = useCallback(
-    debounce((search: string) => {
-      onChange(search);
-    }, 100),
+  const debounceOnChange = useMemo(
+    () =>
+      debounce((search: string) => {
+        onChangeRef.current(search);
+      }, 100),
     []
+  );
+
+  useEffect(
+    () => () => {
+      debounceOnChange.cancel();
+    },
+    [debounceOnChange]
   );
 
   const handleInput = (text: string) => {

@@ -1,6 +1,7 @@
 import { QueryProvider } from "@/components/QueryProvider";
 import { MillInfo } from "@/components/MillInfo";
 import { BrandInfoClient } from "@/components/BrandInfoClient";
+import Image from "next/image";
 import Link from "next/link";
 import { ScrollToButton } from "@/components/ScrollToButton";
 import cmsClient from "@/sanity/lib/client";
@@ -85,10 +86,12 @@ export default async function Home() {
         >
           {useCases?.map((useCase: any, index: number) => (
             <div key={index} className="w-full text-center lg:w-1/3">
-              <img  /* @ts-ignore */
+              <Image
                 src={urlFor(useCase?.image?.asset?._ref || "")}
-                alt={useCase.title + " icon"}
-                className="mx-auto my-0"
+                alt={`${useCase.title} icon`}
+                width={160}
+                height={160}
+                className="mx-auto my-0 w-auto h-auto max-h-40"
               />
               <h3>{useCase.title}</h3>
               <div className="mx-auto my-0 max-w-[75%]">

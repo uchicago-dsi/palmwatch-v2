@@ -1,6 +1,6 @@
 import { getGenericContentConfig } from "./utils";
 
-export default {
+const groupInfo = {
   name: "group",
   title: "Mill Groups",
   type: "document",
@@ -26,5 +26,6 @@ export default {
       title: 'Additional Content',
     }
   ],
-  
 };
+
+export default groupInfo;

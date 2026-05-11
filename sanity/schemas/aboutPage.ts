@@ -1,6 +1,6 @@
 import { getGenericContentConfig } from "./utils";
 
-export default {
+const aboutPage = {
   name: "about",
   title: "About",
   type: "document",
@@ -41,3 +41,5 @@ export default {
     },
   ],
 };
+
+export default aboutPage;

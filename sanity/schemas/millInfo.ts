@@ -1,6 +1,6 @@
 import { getGenericContentConfig } from "./utils";
 
-export default {
+const millInfo = {
   name: "mill",
   title: "Mill",
   type: "document",
@@ -26,5 +26,6 @@ export default {
       title: 'Additional Content',
     }
   ],
-  
 };
+
+export default millInfo;

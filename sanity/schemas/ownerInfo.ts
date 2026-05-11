@@ -1,6 +1,6 @@
 import { getGenericContentConfig } from "./utils";
 
-export default {
+const ownerInfo = {
   name: "supplier",
   title: "Mill Owners",
   type: "document",
@@ -26,5 +26,6 @@ export default {
       title: 'Additional Content',
     }
   ],
-  
 };
+
+export default ownerInfo;
