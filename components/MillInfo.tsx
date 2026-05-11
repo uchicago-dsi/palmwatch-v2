@@ -18,7 +18,7 @@ export const MillInfo: React.FC<{
   const _uml = useActiveUmlStore((state) => state.currentUml);
   const uml = millOverride || _uml;
   const { data, isLoading, isError } = useQuery<InfoData>(
-    [`mill-${uml}${dataOverride ? "-data-override" : ""}}`],
+    [`mill-${uml}${dataOverride ? "-data-override" : ""}`],
     async () => {
       if (dataOverride) {
         // @ts-ignore

@@ -1,6 +1,7 @@
 "use client";
 import { PalmwatchMap } from "./Map";
 import { useQuery } from "@tanstack/react-query";
+import { latestTreelossKmColumn } from "@/config/years";
 
 export const HomePageMap = () => {
   const { data, isLoading, isError } = useQuery(["full-data"], async () => {
@@ -17,7 +18,7 @@ export const HomePageMap = () => {
           dataTable={data!}
           geoIdColumn="UML ID"
           dataIdColumn="UML ID"
-          choroplethColumn="treeloss_km_2022"
+          choroplethColumn={latestTreelossKmColumn}
           choroplethScheme="forestLoss"
         />
       )}

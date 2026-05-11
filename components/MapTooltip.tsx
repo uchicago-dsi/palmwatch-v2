@@ -1,44 +1,42 @@
+import { latestTreelossKmColumn } from "@/config/years";
 import { useTooltipStore } from "@/stores/tooltipStore";
 import { UmlData } from "@/utils/dataTypes";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
-const TOOLTIP_CONFIG: Array<{
-  label: string;
-  column: keyof UmlData;
-}> = [
-  {
-    label: "Mill Name",
-    column: "Mill Name",
-  },
-  {
-    label: "UML ID",
-    column: "UML ID",
-  },
-  {
-    label: "Country",
-    column: "Country",
-  },
-  {
-    label: "Forest Loss 2022 (km2)",
-    column: "treeloss_km_2022",
-  },
-  {
-    label: "Recent Deforestation Score",
-    column: "risk_score_current",
-  },
-  {
-    label: "Past Deforestation Score",
-    column: "risk_score_past",
-  },
-  {
-    label: "Future Deforestation Risk Score",
-    column: "risk_score_future",
-  },
+const BASE_ROWS: Array<{ label: string; column: keyof UmlData }> = [
+  { label: "Mill Name", column: "Mill Name" },
+  { label: "UML ID", column: "UML ID" },
+  { label: "Country", column: "Country" },
 ];
+
+const RISK_ROWS: Array<{ label: string; column: keyof UmlData }> = [
+  { label: "Recent Deforestation Score", column: "risk_score_current" },
+  { label: "Past Deforestation Score", column: "risk_score_past" },
+  { label: "Future Deforestation Risk Score", column: "risk_score_future" },
+];
+
+function forestLossRow(
+  choroplethColumn: string
+): { label: string; column: keyof UmlData } {
+  const kmCol = choroplethColumn.startsWith("treeloss_km_")
+    ? choroplethColumn
+    : latestTreelossKmColumn;
+  const yearStr = kmCol.replace(/^treeloss_km_/, "");
+  const year = /^\d+$/.test(yearStr) ? yearStr : "?";
+  return {
+    label: `Forest Loss ${year} (km2)`,
+    column: kmCol as keyof UmlData,
+  };
+}
 
 export const MapTooltip = () => {
   const tooltipStore = useTooltipStore();
-  const { x, y, id } = tooltipStore;
+  const { x, y, id, choroplethColumn } = tooltipStore;
+
+  const rows = useMemo(() => {
+    return [...BASE_ROWS, forestLossRow(choroplethColumn), ...RISK_ROWS];
+  }, [choroplethColumn]);
 
   const { data, isLoading, error } = useQuery<{ info: Array<UmlData> }>(
     [`millonly-${id}`],
@@ -73,7 +71,7 @@ export const MapTooltip = () => {
                 </tr>
               </thead>
               <tbody>
-                {TOOLTIP_CONFIG.map(({ label, column }) => (
+                {rows.map(({ label, column }) => (
                   <tr key={label}>
                     <td>{label}</td>
                     <td>{info[column]}</td>
