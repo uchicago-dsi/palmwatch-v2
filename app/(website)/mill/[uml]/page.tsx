@@ -10,7 +10,7 @@ import { MillInfo } from "@/components/MillInfo";
 import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import { sumForestLoss } from "@/utils/sumForestloss";
-import { fullYearRange } from "@/config/years";
+import { fullYearRange, latestTreelossKmColumn, maxYear, minYear } from "@/config/years";
 import { BarShareChartForests } from "@/components/BarShareChartForests";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
@@ -53,7 +53,7 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
 
   // format
   const stats = getStats(
-    entry.treeloss_km_2022,
+    entry[latestTreelossKmColumn as keyof UmlData] as number,
     entry.risk_score_current,
     entry.risk_score_past,
     entry.risk_score_future
@@ -73,7 +73,7 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
                   {totalForestLoss.toLocaleString()} km2
                 </div>
                 <div className="stat-desc">
-                  Cumulative forest loss from 2001 to 2022
+                  Cumulative forest loss from {minYear} to {maxYear}
                 </div>
               </div>
               <div className="stat">
@@ -114,7 +114,7 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
               dataTable={data}
               geoIdColumn="UML ID"
               dataIdColumn="UML ID"
-              choroplethColumn="treeloss_km_2022"
+              choroplethColumn={latestTreelossKmColumn}
               choroplethScheme="forestLoss"
             />
           </QueryProvider>

@@ -9,6 +9,7 @@ import { WebMercatorViewport } from "@deck.gl/core/typed";
 import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import { InfoTable } from "@/components/InfoTable";
+import { latestTreelossKmColumn } from "@/config/years";
 
 function getBounds(
   latitude: number,
@@ -90,7 +91,7 @@ function BboxInner() {
         dataTable={data?.mills || []}
         geoIdColumn="UML ID"
         dataIdColumn="UML ID"
-        choroplethColumn="treeloss_km_2022"
+        choroplethColumn={latestTreelossKmColumn}
         choroplethScheme="forestLoss"
         onMapMove={setViewState}
         noFlyMap

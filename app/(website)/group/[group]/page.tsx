@@ -11,6 +11,7 @@ import { InfoTable } from "@/components/InfoTable";
 import cmsClient from "@/sanity/lib/client";
 import { CmsDescription } from "@/components/CmsDescription";
 import { CmsContent } from "@/components/CmsContent";
+import { latestTreelossKmColumn } from "@/config/years";
 
 export const revalidate = 60;
 
@@ -81,7 +82,7 @@ export default async function Page({ params }: { params: Promise<{ group: string
               dataTable={mills}
               geoIdColumn="UML ID"
               dataIdColumn="UML ID"
-              choroplethColumn="treeloss_km_2022"
+              choroplethColumn={latestTreelossKmColumn}
               choroplethScheme="forestLoss"
             />
           </QueryProvider>

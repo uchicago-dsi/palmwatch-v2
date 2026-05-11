@@ -11,6 +11,7 @@ import { PortableText } from "@/sanity/lib/components";
 import brands from "@/config/brands";
 import { BrandSchema } from "@/config/brands/types";
 import path from "path";
+import { latestTreelossKmColumn } from "@/config/years";
 export const revalidate = 60;
 
 export default async function Page({ params }: { params: Promise<{ brand: string }> }) {
@@ -67,7 +68,7 @@ export default async function Page({ params }: { params: Promise<{ brand: string
                 dataTable={[]}
                 geoIdColumn="UML ID"
                 dataIdColumn="UML ID"
-                choroplethColumn="treeloss_km_2022"
+                choroplethColumn={latestTreelossKmColumn}
                 choroplethScheme="forestLoss"
               />
             </div>

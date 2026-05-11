@@ -36,7 +36,11 @@ export default async function Page() {
     <main className="mx-auto">
       <section className="prose flex flex-col py-4 max-w-none space-y-4">
         <h1 className="p-0 m-0">Consumer Brands</h1>
-        {!!landingPageContent?.content && <p className="prose"><PortableText value={landingPageContent.content} /></p>}
+        {!!landingPageContent?.content && (
+          <div className="prose max-w-none">
+            <PortableText value={landingPageContent.content} />
+          </div>
+        )}
         <StatsBlock stats={statConfig} />
         <br/>
         <h3 className="mt-4 mb-0 py-0">Average Deforestation Scores by Brand (1 best, 5 worst)</h3>
@@ -66,9 +70,11 @@ export default async function Page() {
         />
       </div>
       <br/>
-      <p className="prose my-4">
-        {!!landingPageContent?.disclaimer && <PortableText value={landingPageContent.disclaimer} />}
-      </p>
+      <div className="prose my-4 max-w-none">
+        {!!landingPageContent?.disclaimer && (
+          <PortableText value={landingPageContent.disclaimer} />
+        )}
+      </div>
     </main>
   );
 }

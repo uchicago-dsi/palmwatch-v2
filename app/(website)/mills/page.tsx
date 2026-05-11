@@ -52,7 +52,11 @@ export default async function Page() {
     <main className="mx-auto">
       <section className="prose flex flex-col py-4 max-w-none">
         <h1 className="p-0 m-0">Mills</h1>
-        {!!landingPageContent?.content && <p className="prose"><PortableText value={landingPageContent.content} /></p>}
+        {!!landingPageContent?.content && (
+          <div className="prose max-w-none">
+            <PortableText value={landingPageContent.content} />
+          </div>
+        )}
         <StatsBlock stats={basicStats} />
         <hr className="py-0 my-0" />
         <StatsBlock stats={rspoStats} />
@@ -72,11 +76,11 @@ export default async function Page() {
           rows={20}
         />
       </div>
-      <p className="prose my-4">
+      <div className="prose my-4 max-w-none">
         {!!landingPageContent?.disclaimer && (
           <PortableText value={landingPageContent.disclaimer} />
         )}
-      </p>
+      </div>
     </main>
   );
 }

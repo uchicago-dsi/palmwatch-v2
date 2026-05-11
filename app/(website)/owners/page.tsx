@@ -22,7 +22,11 @@ export default async function Page() {
     <main className="max-w-3xl mx-auto">
       <section className="prose flex flex-col py-4">
         <h1 className="p-0 m-0">Mill Companies</h1>
-        {!!landingPageContent?.content && <p className="prose"><PortableText value={landingPageContent.content} /></p>}
+        {!!landingPageContent?.content && (
+          <div className="prose max-w-none">
+            <PortableText value={landingPageContent.content} />
+          </div>
+        )}
 
       </section>
       <div>
@@ -34,9 +38,11 @@ export default async function Page() {
           rows={20}
         />
       </div>
-      <p className="prose my-4">
-        {!!landingPageContent?.disclaimer && <PortableText value={landingPageContent.disclaimer} />}
-      </p>
+      <div className="prose my-4 max-w-none">
+        {!!landingPageContent?.disclaimer && (
+          <PortableText value={landingPageContent.disclaimer} />
+        )}
+      </div>
     </main>
   );
 }
