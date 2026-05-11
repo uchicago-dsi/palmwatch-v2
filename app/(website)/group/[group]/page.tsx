@@ -1,10 +1,11 @@
 import React from "react";
-import queryClient from "@/utils/getMillData";
 import { BrandData, BrandInfo } from "@/components/BrandInfo";
+import type { UmlData } from "@/utils/dataTypes";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
-import path from "path";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import { precomputedSlug } from "@/utils/precomputedSlug";
 import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import { InfoTable } from "@/components/InfoTable";
@@ -19,12 +20,7 @@ export default async function Page({ params }: { params: Promise<{ group: string
   const { group: _group } = await params;
   const group = decodeURIComponent(_group);
 
-  // data
-  const dataDir = path.join(process.cwd(), "public", "data");
-  const [_, groupInfo] = await Promise.all([
-    queryClient.init(dataDir),
-    cmsClient.getGroupInfo(group),
-  ]);
+  const groupInfo = await cmsClient.getGroupInfo(group);
 
   const {
     description,
@@ -40,7 +36,15 @@ export default async function Page({ params }: { params: Promise<{ group: string
     averageCurrentRisk,
     timeseries,
     totalForestLoss,
-  } = queryClient.getGroupData(group);
+  } = await loadPrecomputedJson<{
+    mills: UmlData[];
+    uniqueCountries: number;
+    uniqueMills: number;
+    brandUsage: BrandData;
+    averageCurrentRisk: number;
+    timeseries: Record<string, unknown>[];
+    totalForestLoss: number;
+  }>(`group/${precomputedSlug(group)}-page.json`);
 
   const stats = getStats(
     uniqueMills,

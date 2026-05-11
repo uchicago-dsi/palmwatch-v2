@@ -1,10 +1,11 @@
 import React from "react";
-import queryClient from "@/utils/getMillData";
 import { BrandData, BrandInfo } from "@/components/BrandInfo";
+import type { UmlData } from "@/utils/dataTypes";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
-import path from "path";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import { precomputedSlug } from "@/utils/precomputedSlug";
 import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import { InfoTable } from "@/components/InfoTable";
@@ -20,10 +21,6 @@ export default async function Page({
   const { owner: _owner } = await params;
   const owner = decodeURIComponent(_owner);
 
-  // data
-  const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
-
   const {
     mills,
     uniqueCountries,
@@ -32,7 +29,15 @@ export default async function Page({
     averageCurrentRisk,
     timeseries,
     totalForestLoss,
-  } = queryClient.getOwnerData(owner);
+  } = await loadPrecomputedJson<{
+    mills: UmlData[];
+    uniqueCountries: number;
+    uniqueMills: number;
+    brandUsage: BrandData;
+    averageCurrentRisk: number;
+    timeseries: Record<string, unknown>[];
+    totalForestLoss: number;
+  }>(`owner/${precomputedSlug(owner)}-page.json`);
   
   const stats = getStats(
     uniqueMills,

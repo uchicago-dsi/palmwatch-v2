@@ -1,25 +1,21 @@
-import queryClient from "@/utils/getMillData";
+import { mergeFullShards } from "@/utils/bboxCompute";
+import { readMillDataText } from "@/utils/readMillDataText";
+import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
 import { NextResponse } from "next/server";
-import path from "path";
 import { timestamp } from "@/utils/timestamp";
-import { readFileSync } from "fs";
 import { cleanUnparse } from "@/utils/renameOutputColumns";
 
 export async function GET(req: Request) {
   const output = new URL(req.url).searchParams.get("output");
-  const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
-  const data = queryClient.getFullMillInfo().objects()
-  console.log(data)
+  const dataDir = await resolveMillDataBase(req);
+  const data = await mergeFullShards(req);
+  console.log(data.length, "mills");
   switch (output) {
-    case "geo":
-      const geoDataRaw = await readFileSync(
-        path.join(dataDir, "mill-catchment.geojson"),
-        "utf8"
-      );
+    case "geo": {
+      const geoDataRaw = await readMillDataText(dataDir, "mill-catchment.geojson");
       const geoData = JSON.parse(geoDataRaw);
       const features = [];
-      for (const row of data) {
+      for (const row of data as Record<string, unknown>[]) {
         const feature = geoData.features.find(
           // @ts-ignore
           (f: any) => f.properties["UML ID"] === row["UML ID"]
@@ -53,6 +49,7 @@ export async function GET(req: Request) {
           },
         }
       );
+    }
     case "mills":
       return new NextResponse(cleanUnparse(data), {
         headers: {

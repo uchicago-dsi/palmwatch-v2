@@ -1,10 +1,11 @@
 import React from "react";
-import queryClient from "@/utils/getMillData";
 import { BrandData, BrandInfo } from "@/components/BrandInfo";
+import type { UmlData } from "@/utils/dataTypes";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
-import path from "path";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import { precomputedSlug } from "@/utils/precomputedSlug";
 import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import { InfoTable } from "@/components/InfoTable";
@@ -24,12 +25,7 @@ export default async function Page({
   const { country: _country } = await params;
   const country = decodeURIComponent(_country);
 
-  // data
-  const dataDir = path.join(process.cwd(), "public", "data");
-  const [_, countryInfo] = await Promise.all([
-    queryClient.init(dataDir),
-    cmsClient.getCountryInfo(country),
-  ]);
+  const countryInfo = await cmsClient.getCountryInfo(country);
 
   const {
     description,
@@ -46,7 +42,14 @@ export default async function Page({
     averageCurrentRisk,
     timeseries,
     totalForestLoss,
-  } = queryClient.getCountryData(country);
+  } = await loadPrecomputedJson<{
+    mills: UmlData[];
+    uniqueMills: number;
+    brandUsage: BrandData;
+    averageCurrentRisk: number;
+    timeseries: Record<string, unknown>[];
+    totalForestLoss: number;
+  }>(`country/${precomputedSlug(country)}.json`);
 
   const stats = getStats(
     uniqueMills,

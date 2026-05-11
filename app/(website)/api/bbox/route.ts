@@ -1,8 +1,7 @@
-import queryClient from "@/utils/getMillData";
+import { computeBboxPayload } from "@/utils/bboxCompute";
 import { NextResponse } from "next/server";
-import path from "path";
 
-export async function GET(req: Request, _res: any) {
+export async function GET(req: Request, _res: unknown) {
   const reqUrl = new URL(req.url);
   const [minLat, minLon, maxLat, maxLon] = [
     reqUrl.searchParams.get("minY"),
@@ -11,8 +10,6 @@ export async function GET(req: Request, _res: any) {
     reqUrl.searchParams.get("maxX"),
   ];
 
-  const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
   if ([minLat, minLon, maxLat, maxLon].some((v) => v === null)) {
     return NextResponse.json(
       { error: new Error("No bbox provided") },
@@ -20,11 +17,12 @@ export async function GET(req: Request, _res: any) {
     );
   }
 
-  const data = queryClient.getDataInBbox(
-    minLat as any,
-    minLon as any,
-    maxLat as any,
-    maxLon as any
+  const data = await computeBboxPayload(
+    req,
+    Number(minLat),
+    Number(minLon),
+    Number(maxLat),
+    Number(maxLon)
   );
   return NextResponse.json({ ...data }, { status: 200 });
 }

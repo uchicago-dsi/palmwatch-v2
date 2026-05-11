@@ -2,7 +2,6 @@ import React from "react";
 import { ServerIqr } from "@/components/IqrOverTimeLineChart";
 import { ServerMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
-import queryClient from "@/utils/getMillData";
 import { StatsBlock } from "@/components/StatsBlock";
 import { ServerInfotable } from "@/components/InfoTable";
 import { getDataDownload, getStats } from "./pageConfig";
@@ -10,22 +9,35 @@ import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
 import brands from "@/config/brands";
 import { BrandSchema } from "@/config/brands/types";
-import path from "path";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import { precomputedSlug } from "@/utils/precomputedSlug";
 import { latestTreelossKmColumn } from "@/config/years";
 export const revalidate = 60;
 
 export default async function Page({ params }: { params: Promise<{ brand: string }> }) {
   const { brand: _brand } = await params;
   const brand = decodeURIComponent(_brand);
-  const dataDir = path.join(process.cwd(), "public", "data");
-  const [_, _brandInfo] = await Promise.all([
-    queryClient.init(dataDir),
+  const [brandPre, _brandInfo] = await Promise.all([
+    loadPrecomputedJson<{
+      brandStats: {
+        averageCurrentRisk: number;
+        uniqueMills: number;
+        uniqueCountries: number;
+        uniqueOwners: number;
+        uniqueGroups: number;
+      };
+    }>(`brand/${precomputedSlug(brand)}.json`),
     cmsClient.getBrandInfo(brand),
   ]);
   const brandInfo = (_brandInfo || brands[brand]) as BrandSchema
 
-  const { averageCurrentRisk, uniqueMills, uniqueCountries, uniqueOwners, uniqueGroups } =
-    queryClient.getBrandStats(brand);
+  const {
+    averageCurrentRisk,
+    uniqueMills,
+    uniqueCountries,
+    uniqueOwners,
+    uniqueGroups,
+  } = brandPre.brandStats;
   const stats = getStats(
     averageCurrentRisk,
     uniqueMills,

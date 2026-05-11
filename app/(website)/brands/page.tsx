@@ -1,36 +1,42 @@
 import { InfoTable } from "@/components/InfoTable";
 import { SearchableListLayout } from "@/components/SearchableListLayout";
 import { StatsBlock } from "@/components/StatsBlock";
-import queryClient from "@/utils/getMillData";
-
 import React from "react";
 import { getStatConfig } from "./pageConfig";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import path from "path";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import type { SearchListPayload } from "@/types/searchList";
 
 export const revalidate = 60;
 
 export default async function Page() {
-  const dataDir = path.join(process.cwd(), "public", "data");
-  const [
-    _,
-    landingPageContent
-  ] = await Promise.all([
-    queryClient.init(dataDir),
-    cmsClient.getLandingPageContent('brands')
-  ])
+  const [searchList, millStats, rankingBrands, landingPageContent] =
+    await Promise.all([
+      loadPrecomputedJson<SearchListPayload>("search-list.json"),
+      loadPrecomputedJson<{
+        brandCount: number | null;
+        companyCount: number | null;
+        countryCount: number | null;
+        millCount: number | null;
+        groupCount: number | null;
+      }>("aggregates/mill-summary-stats.json"),
+      loadPrecomputedJson<Record<string, unknown>[]>(
+        "aggregates/ranking-brands.json"
+      ),
+      cmsClient.getLandingPageContent("brands"),
+    ]);
 
-  const options = queryClient.getSearchList().Brands;
+  const options = searchList.Brands;
   const { brandCount, companyCount, countryCount, millCount, groupCount } =
-    queryClient.getUniqueCounts();
+    millStats;
   const statConfig = getStatConfig(
     brandCount,
     countryCount,
     millCount,
     companyCount
   );
-  const rankedTable = queryClient.getRankingOfBrandsByCurrentImpactScore();
+  const rankedTable = rankingBrands;
 
   return (
     <main className="mx-auto">

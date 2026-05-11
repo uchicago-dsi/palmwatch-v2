@@ -1,18 +1,17 @@
 import { SearchableListLayout } from "@/components/SearchableListLayout";
-import queryClient from "@/utils/getMillData";
 import React from "react";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import path from "path";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import type { SearchListPayload } from "@/types/searchList";
 export const revalidate = 60;
 
 export default async function Page() {
-  const dataDir = path.join(process.cwd(), "public", "data");
-  const [_, landingPageContent] = await Promise.all([
-    queryClient.init(dataDir),
+  const [searchList, landingPageContent] = await Promise.all([
+    loadPrecomputedJson<SearchListPayload>("search-list.json"),
     cmsClient.getLandingPageContent("groups"),
   ]);
-  const options = queryClient.getSearchList()['Mill Groups'];
+  const options = searchList["Mill Groups"];
 
   return (
     <main className="max-w-3xl mx-auto">

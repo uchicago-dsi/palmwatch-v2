@@ -1,10 +1,7 @@
-import queryClient from "@/utils/getMillData";
+import { mergeFullShards } from "@/utils/bboxCompute";
 import { NextResponse } from "next/server";
-import path from "path";
 
-export async function GET(_req: Request) {
-  const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
-  const data = queryClient.getFullMillInfo().objects()
+export async function GET(req: Request) {
+  const data = await mergeFullShards(req);
   return NextResponse.json(data, { status: 200 });
 }

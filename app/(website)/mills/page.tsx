@@ -1,23 +1,25 @@
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { SearchableListLayout } from "@/components/SearchableListLayout";
-import queryClient from "@/utils/getMillData";
 import React from "react";
 import { basicStatsConfig, forestStatsConfig, rspoStatsConfig } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import path from "path";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import type { SearchListPayload } from "@/types/searchList";
 
 export const revalidate = 60;
 
 export default async function Page() {
-  const dataDir = path.join(process.cwd(), "public", "data");
-  const [_, landingPageContent] = await Promise.all([
-    queryClient.init(dataDir),
+  const [searchList, millStats, landingPageContent] = await Promise.all([
+    loadPrecomputedJson<SearchListPayload>("search-list.json"),
+    loadPrecomputedJson<Record<string, unknown>>(
+      "aggregates/mill-summary-stats.json"
+    ),
     cmsClient.getLandingPageContent("mills"),
   ]);
 
-  const options = queryClient.getSearchList().Mills;
+  const options = searchList.Mills;
   const {
     timeseries,
     totalForestArea,
@@ -30,7 +32,19 @@ export default async function Page() {
     millCount,
     rspoCertified,
     notRspoCertified,
-  } = queryClient.getMillSummaryStats();
+  } = millStats as {
+    timeseries: Record<string, unknown>[];
+    totalForestArea: number;
+    totalForestLoss: number;
+    totalArea: number;
+    brandCount: number | null;
+    companyCount: number | null;
+    countryCount: number | null;
+    groupCount: number | null;
+    millCount: number | null;
+    rspoCertified: number;
+    notRspoCertified: number;
+  };
 
   const basicStats = basicStatsConfig(
     millCount,

@@ -1,22 +1,22 @@
 import { InfoTable } from "@/components/InfoTable";
 import { SearchableListLayout } from "@/components/SearchableListLayout";
-import queryClient from "@/utils/getMillData";
 import React from "react";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import path from "path";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import type { SearchListPayload } from "@/types/searchList";
 export const revalidate = 60;
 
 export default async function Page() {
-  const dataDir = path.join(process.cwd(), "public", "data");
-  const [_, landingPageContent] = await Promise.all([
-    queryClient.init(dataDir),
+  const [searchList, countriesSummary, landingPageContent] = await Promise.all([
+    loadPrecomputedJson<SearchListPayload>("search-list.json"),
+    loadPrecomputedJson<{
+      countryStats: Record<string, unknown>[];
+    }>("aggregates/countries-summary.json"),
     cmsClient.getLandingPageContent("countries"),
   ]);
-  const options = queryClient.getSearchList().Countries;
-  const {
-    countryStats
-  } = queryClient.getCountriesSummary();
+  const options = searchList.Countries;
+  const { countryStats } = countriesSummary;
 
   return (
     <main className="mx-auto">

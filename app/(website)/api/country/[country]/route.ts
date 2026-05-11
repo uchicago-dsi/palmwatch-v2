@@ -1,9 +1,9 @@
-import queryClient from "@/utils/getMillData";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import { precomputedSlug } from "@/utils/precomputedSlug";
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ country: string }> }
 ) {
   const { country } = await params;
@@ -12,8 +12,10 @@ export async function GET(
       { error: new Error("No brand provided") },
       { status: 400 }
     );
-  const dataDir = path.join(process.cwd(), "public", "data");
-  await queryClient.init(dataDir);
-  const data = queryClient.getCountryData(country);
+  const slug = precomputedSlug(decodeURIComponent(country));
+  const data = await loadPrecomputedJson<Record<string, unknown>>(
+    `country/${slug}.json`,
+    req
+  );
   return NextResponse.json({ ...data }, { status: 200 });
 }

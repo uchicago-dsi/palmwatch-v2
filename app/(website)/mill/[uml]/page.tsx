@@ -1,10 +1,10 @@
 import React from "react";
-import queryClient from "@/utils/getMillData";
 import { BrandData, BrandInfo } from "@/components/BrandInfo";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
-import path from "path";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import { precomputedSlug } from "@/utils/precomputedSlug";
 import { UmlData } from "@/utils/dataTypes";
 import { MillInfo } from "@/components/MillInfo";
 import { getStats } from "./pageConfig";
@@ -21,17 +21,16 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
   const { uml: _uml } = await params;
   const uml = decodeURIComponent(_uml);
 
-  // data
-  const dataDir = path.join(process.cwd(), "public", "data");
-  const [
-    _,
-    millContent
-  ] = await Promise.all([
-    queryClient.init(dataDir),
-    cmsClient.getUmlInfo(uml)
-  ])
-  const data = queryClient.getUml(uml).objects();
-  const medianMillData = queryClient.getMedianMill()?.[0];
+  const slug = precomputedSlug(uml);
+  const [millPayload, medianMill, millContent] = await Promise.all([
+    loadPrecomputedJson<{ info: UmlData[]; brands: BrandData }>(
+      `mill/${slug}.json`
+    ),
+    loadPrecomputedJson<Record<string, number>[]>("aggregates/median-mill.json"),
+    cmsClient.getUmlInfo(uml),
+  ]);
+  const data = millPayload.info;
+  const medianMillData = medianMill?.[0];
   const entry = data?.[0] as UmlData | undefined;
 
   if (!entry) {
@@ -42,7 +41,7 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
   // @ts-ignore
   const umlId = entry?.["UML ID"];
   const millName = entry?.["Mill Name"];
-  const brandData = queryClient.getBrandUsageByUml(umlId) as BrandData;
+  const brandData = millPayload.brands;
   const lineChartData = fullYearRange.map((year) => ({
     year,
     // @ts-ignore

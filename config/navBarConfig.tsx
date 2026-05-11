@@ -1,7 +1,7 @@
-import queryClient from "@/utils/getMillData";
+import type { SearchListSection } from "@/types/searchList";
 
 export const MENU_ITEMS: Array<{
-  label: keyof ReturnType<typeof queryClient.getSearchList>;
+  label: SearchListSection;
   icon: React.ReactNode;
   path: string;
   description?: string;

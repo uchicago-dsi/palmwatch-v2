@@ -1,40 +1,9 @@
+import path from "node:path";
 import { loadArrow, all, desc, op, escape } from "arquero";
 import ColumnTable from "arquero/dist/types/table/column-table";
 import { CompanyData, UmlData } from "./dataTypes";
-import { fullYearRange, fullYearRangeColumns } from "@/config/years";
-
-/**
- * Arquero compiles rollup callbacks and rejects dynamic member access like `d[col]`.
- * Column names must appear as literals in the generated function body (e.g. `d['treeloss_km_2024']`).
- */
-function rollupSumTreelossKm(year: number): (d: any) => any {
-  const col = `treeloss_km_${year}`;
-  return new Function("op", `return (d) => op.sum(d['${col}'])`)(op) as (d: any) => any;
-}
-
-function rollupMedianTreelossKm(year: number): (d: any) => any {
-  const col = `treeloss_km_${year}`;
-  return new Function("op", `return (d) => op.median(d['${col}'])`)(op) as (d: any) => any;
-}
-
-function rollupMeanSumYear(year: number): (d: any) => any {
-  const sumKey = `sum${year}`;
-  return new Function("op", `return (d) => op.mean(d['${sumKey}'])`)(op) as (d: any) => any;
-}
-
-function buildTreelossRollups() {
-  const sumAllYears: Record<string, (d: any) => any> = {};
-  const medianAllYears: Record<string, (d: any) => any> = {};
-  for (const year of fullYearRange) {
-    sumAllYears[`sum${year}`] = rollupSumTreelossKm(year);
-    medianAllYears[`median${year}`] = rollupMedianTreelossKm(year);
-  }
-  const meanAllSums: Record<string, (d: any) => any> = {};
-  for (const year of fullYearRange) {
-    meanAllSums[`mean${year}`] = rollupMeanSumYear(year);
-  }
-  return { sumAllYears, medianAllYears, meanAllSums };
-}
+import { fullYearRangeColumns } from "@/config/years";
+import { buildTreelossRollups } from "./treelossRollups.generated";
 
 class MillDataQuery {
   companies?: ColumnTable;
@@ -42,11 +11,12 @@ class MillDataQuery {
   initialized: boolean = false;
   cache: Record<string, any> = {};
 
-  async init(basePath: string = "./public/data/") {
+  async init(basePath: string = path.join(process.cwd(), "public", "data")) {
     if (this.initialized) return;
+    const root = basePath.replace(/\/$/, "");
     const [uml, companies] = await Promise.all([
-      loadArrow(`${basePath}/uml.arrow`, { columns: all() }),
-      loadArrow(`${basePath}/companies.arrow`, { columns: all() }),
+      loadArrow(`${root}/uml.arrow`, { columns: all() }),
+      loadArrow(`${root}/companies.arrow`, { columns: all() }),
     ]);
 
     this.uml = uml;
@@ -312,6 +282,11 @@ class MillDataQuery {
 
   getFullMillInfo() {
     return this.uml!;
+  }
+
+  /** Build-time export for precomputed JSON (Node only). */
+  getCompaniesObjects() {
+    return this.companies!.objects() as CompanyData[];
   }
 
   @cache("searchList")

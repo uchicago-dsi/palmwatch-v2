@@ -7,7 +7,7 @@ import Map, {
   useControl,
   AttributionControl,
 } from "react-map-gl";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import bbox from "@turf/bbox";
 import { fitBounds } from "@math.gl/web-mercator";
@@ -24,6 +24,9 @@ import { fullYearRange, latestTreelossKmColumn } from "@/config/years";
 const DEFAULT_MAP_STYLE = "mapbox://styles/dhalpern/cln0e32pu06ba01qxcgrp4gv9";
 const MAP_STYLE = process.env.NEXT_PUBLIC_MAPBOX_STYLE || DEFAULT_MAP_STYLE;
 const MAP_PROJECTION = { name: "mercator" } as const;
+
+/** Mill pins only at this zoom or closer (Mapbox zoom is roughly log2 of scale). */
+const PIN_MIN_ZOOM = 7;
 
 export type MapProps = {
   geoDataUrl: string;
@@ -49,7 +52,14 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   noFlyMap
 }) => {
   const mapRef = React.useRef<typeof Map>(null);
-  const [zoom, setZoom] = useState(0);
+  const [mapZoom, setMapZoom] = useState(0);
+  const lastRoundedZoomRef = useRef<number | null>(null);
+  const syncZoomFromView = useCallback((z: number) => {
+    const rounded = Math.round(z);
+    if (lastRoundedZoomRef.current === rounded) return;
+    lastRoundedZoomRef.current = rounded;
+    setMapZoom(rounded);
+  }, []);
   const [currentChoroplethScheme, setCurrentChoroplethScheme] =
     useState(choroplethScheme);
   const [currentChoroplethColumn, setCurrentChoroplethColumn] =
@@ -87,21 +97,59 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       dataDict[row[dataIdColumn] as string] = row;
     }
 
-    const filteredData = {
-      type: "FeatureCollection",
-      features: data!.features.filter(
-        (feature) => feature.properties![geoIdColumn] in dataDict
-      ),
-    };
-    const mapBbox = bbox(filteredData);
-    const bounds = [
-      [mapBbox[0], mapBbox[1]],
-      [mapBbox[2], mapBbox[3]],
-    ] as [[number, number], [number, number]];
+    /** Prefer mill lon/lat — catchment polygons can span the globe and break fitBounds zoom. */
+    const lngs: number[] = [];
+    const lats: number[] = [];
+    for (const row of dataTable) {
+      const r = row as Record<string, unknown>;
+      const lng = Number(r.Longitude);
+      const lat = Number(r.Latitude);
+      if (
+        Number.isFinite(lng) &&
+        Number.isFinite(lat) &&
+        Math.abs(lat) <= 90 &&
+        Math.abs(lng) <= 180
+      ) {
+        lngs.push(lng);
+        lats.push(lat);
+      }
+    }
+
+    let bounds: [[number, number], [number, number]];
+    if (lngs.length > 0) {
+      let minLng = Math.min(...lngs);
+      let maxLng = Math.max(...lngs);
+      let minLat = Math.min(...lats);
+      let maxLat = Math.max(...lats);
+      if (minLng === maxLng) {
+        minLng -= 0.02;
+        maxLng += 0.02;
+      }
+      if (minLat === maxLat) {
+        minLat -= 0.02;
+        maxLat += 0.02;
+      }
+      bounds = [
+        [minLng, minLat],
+        [maxLng, maxLat],
+      ];
+    } else {
+      const filteredData = {
+        type: "FeatureCollection",
+        features: data!.features.filter(
+          (feature) => feature.properties![geoIdColumn] in dataDict
+        ),
+      };
+      const mapBbox = bbox(filteredData);
+      bounds = [
+        [mapBbox[0], mapBbox[1]],
+        [mapBbox[2], mapBbox[3]],
+      ];
+    }
 
     const { longitude, latitude, zoom } =
-      bounds[0][0] == Infinity
-        ? { latitude: 0, longitude: 0, zoom: 0 }
+      bounds[0][0] === Infinity || !Number.isFinite(bounds[0][0])
+        ? { latitude: 0, longitude: 0, zoom: 1.5 }
         : fitBounds({
             width: 800,
             height: 600,
@@ -116,7 +164,38 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       },
       dataDict,
     };
-  }, [data, dataTable]);
+  }, [data, dataTable, dataIdColumn, geoIdColumn, isLoading, isError]);
+
+  const millPinFeatures = useMemo(() => {
+    if (!data?.features || !dataDict) return [];
+    return data.features.filter((f) => {
+      const id = f.properties![geoIdColumn] as string;
+      if (!(id in dataDict)) return false;
+      const row = dataDict[id] as Record<string, unknown>;
+      const lng = Number(row.Longitude);
+      const lat = Number(row.Latitude);
+      return (
+        Number.isFinite(lat) &&
+        Number.isFinite(lng) &&
+        Math.abs(lat) <= 90 &&
+        Math.abs(lng) <= 180
+      );
+    });
+  }, [data, dataDict, geoIdColumn]);
+
+  useEffect(() => {
+    if (
+      initialMapView?.zoom != null &&
+      Number.isFinite(initialMapView.zoom)
+    ) {
+      syncZoomFromView(initialMapView.zoom);
+    }
+  }, [
+    initialMapView?.zoom,
+    initialMapView?.latitude,
+    initialMapView?.longitude,
+    syncZoomFromView,
+  ]);
 
   useEffect(() => {
     setChoroplethColumnInTooltip(currentChoroplethColumn);
@@ -132,6 +211,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     initialMapView?.latitude,
     initialMapView?.longitude,
     initialMapView?.zoom,
+    noFlyMap,
   ]);
 
   const layers = [
@@ -173,29 +253,30 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     
     new IconLayer({
       id: "mill-point",
-      data: data?.features || [],
+      data: millPinFeatures,
       getPosition: (d) => {
-        const data = dataDict?.[d.properties![geoIdColumn] as string] as any;
-        return [data?.Longitude || 0, data?.Latitude || 0];
+        const row = dataDict?.[
+          d.properties![geoIdColumn] as string
+        ] as Record<string, unknown>;
+        return [Number(row.Longitude), Number(row.Latitude)];
       },
       iconAtlas: "/icons/pin.png",
       iconMapping: {
         marker: { x: 0, y: 0, width: 128, height: 128, mask: true },
       },
-      getSize: 5000,
-      getIcon: (d) => "marker",
-      sizeUnits: "meters",
-      sizeMinPixels: 20,
-      sizeMaxPixels: 50,
+      getSize: 28,
+      getIcon: () => "marker",
+      sizeUnits: "pixels",
+      sizeMinPixels: 12,
+      sizeMaxPixels: 40,
       pickable: false,
-      visible: zoom > 5,
-      opacity: 0.8,
+      visible: mapZoom >= PIN_MIN_ZOOM,
+      opacity: 0.9,
       getColor: [0, 0, 0, 255],
       updateTriggers: {
-        visible: zoom,
+        visible: [mapZoom],
         getColor: [dataDict],
         getPosition: [dataDict],
-        getFillColor: [currentChoroplethColumn, currentChoroplethScheme],
       },
     }),
   ];
@@ -317,8 +398,10 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
           mapStyle={MAP_STYLE}
           projection={MAP_PROJECTION}
+          onLoad={(e) => syncZoomFromView(e.target.getZoom())}
+          onMove={(e) => syncZoomFromView(e.viewState.zoom)}
           onMoveEnd={(e) => {
-            setZoom(Math.round(e.viewState.zoom));
+            syncZoomFromView(e.viewState.zoom);
             onMapMove && onMapMove(e);
           }}
           pitch={0}
