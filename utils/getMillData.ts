@@ -1,7 +1,40 @@
 import { loadArrow, all, desc, op, escape } from "arquero";
 import ColumnTable from "arquero/dist/types/table/column-table";
 import { CompanyData, UmlData } from "./dataTypes";
-import { fullYearRangeColumns } from "@/config/years";
+import { fullYearRange, fullYearRangeColumns } from "@/config/years";
+
+/**
+ * Arquero compiles rollup callbacks and rejects dynamic member access like `d[col]`.
+ * Column names must appear as literals in the generated function body (e.g. `d['treeloss_km_2024']`).
+ */
+function rollupSumTreelossKm(year: number): (d: any) => any {
+  const col = `treeloss_km_${year}`;
+  return new Function("op", `return (d) => op.sum(d['${col}'])`)(op) as (d: any) => any;
+}
+
+function rollupMedianTreelossKm(year: number): (d: any) => any {
+  const col = `treeloss_km_${year}`;
+  return new Function("op", `return (d) => op.median(d['${col}'])`)(op) as (d: any) => any;
+}
+
+function rollupMeanSumYear(year: number): (d: any) => any {
+  const sumKey = `sum${year}`;
+  return new Function("op", `return (d) => op.mean(d['${sumKey}'])`)(op) as (d: any) => any;
+}
+
+function buildTreelossRollups() {
+  const sumAllYears: Record<string, (d: any) => any> = {};
+  const medianAllYears: Record<string, (d: any) => any> = {};
+  for (const year of fullYearRange) {
+    sumAllYears[`sum${year}`] = rollupSumTreelossKm(year);
+    medianAllYears[`median${year}`] = rollupMedianTreelossKm(year);
+  }
+  const meanAllSums: Record<string, (d: any) => any> = {};
+  for (const year of fullYearRange) {
+    meanAllSums[`mean${year}`] = rollupMeanSumYear(year);
+  }
+  return { sumAllYears, medianAllYears, meanAllSums };
+}
 
 class MillDataQuery {
   companies?: ColumnTable;
@@ -498,80 +531,7 @@ class MillDataQuery {
   
   getRankingOfMillsCurrentImpactScore() {}
 
-  rollups = {
-    sumAllYears: {
-      sum2001: (d: any) => op.sum(d.treeloss_km_2001),
-      sum2002: (d: any) => op.sum(d.treeloss_km_2002),
-      sum2003: (d: any) => op.sum(d.treeloss_km_2003),
-      sum2004: (d: any) => op.sum(d.treeloss_km_2004),
-      sum2005: (d: any) => op.sum(d.treeloss_km_2005),
-      sum2006: (d: any) => op.sum(d.treeloss_km_2006),
-      sum2007: (d: any) => op.sum(d.treeloss_km_2007),
-      sum2008: (d: any) => op.sum(d.treeloss_km_2008),
-      sum2009: (d: any) => op.sum(d.treeloss_km_2009),
-      sum2010: (d: any) => op.sum(d.treeloss_km_2010),
-      sum2011: (d: any) => op.sum(d.treeloss_km_2011),
-      sum2012: (d: any) => op.sum(d.treeloss_km_2012),
-      sum2013: (d: any) => op.sum(d.treeloss_km_2013),
-      sum2014: (d: any) => op.sum(d.treeloss_km_2014),
-      sum2015: (d: any) => op.sum(d.treeloss_km_2015),
-      sum2016: (d: any) => op.sum(d.treeloss_km_2016),
-      sum2017: (d: any) => op.sum(d.treeloss_km_2017),
-      sum2018: (d: any) => op.sum(d.treeloss_km_2018),
-      sum2019: (d: any) => op.sum(d.treeloss_km_2019),
-      sum2020: (d: any) => op.sum(d.treeloss_km_2020),
-      sum2021: (d: any) => op.sum(d.treeloss_km_2021),
-      sum2022: (d: any) => op.sum(d.treeloss_km_2022),
-    },
-    medianAllYears: {
-      median2001: (d: any) => op.median(d.treeloss_km_2001),
-      median2002: (d: any) => op.median(d.treeloss_km_2002),
-      median2003: (d: any) => op.median(d.treeloss_km_2003),
-      median2004: (d: any) => op.median(d.treeloss_km_2004),
-      median2005: (d: any) => op.median(d.treeloss_km_2005),
-      median2006: (d: any) => op.median(d.treeloss_km_2006),
-      median2007: (d: any) => op.median(d.treeloss_km_2007),
-      median2008: (d: any) => op.median(d.treeloss_km_2008),
-      median2009: (d: any) => op.median(d.treeloss_km_2009),
-      median2010: (d: any) => op.median(d.treeloss_km_2010),
-      median2011: (d: any) => op.median(d.treeloss_km_2011),
-      median2012: (d: any) => op.median(d.treeloss_km_2012),
-      median2013: (d: any) => op.median(d.treeloss_km_2013),
-      median2014: (d: any) => op.median(d.treeloss_km_2014),
-      median2015: (d: any) => op.median(d.treeloss_km_2015),
-      median2016: (d: any) => op.median(d.treeloss_km_2016),
-      median2017: (d: any) => op.median(d.treeloss_km_2017),
-      median2018: (d: any) => op.median(d.treeloss_km_2018),
-      median2019: (d: any) => op.median(d.treeloss_km_2019),
-      median2020: (d: any) => op.median(d.treeloss_km_2020),
-      median2021: (d: any) => op.median(d.treeloss_km_2021),
-      median2022: (d: any) => op.median(d.treeloss_km_2022),
-    },
-    meanAllSums: {
-      mean2001: (d: any) => op.mean(d.sum2001),
-      mean2002: (d: any) => op.mean(d.sum2002),
-      mean2003: (d: any) => op.mean(d.sum2003),
-      mean2004: (d: any) => op.mean(d.sum2004),
-      mean2005: (d: any) => op.mean(d.sum2005),
-      mean2006: (d: any) => op.mean(d.sum2006),
-      mean2007: (d: any) => op.mean(d.sum2007),
-      mean2008: (d: any) => op.mean(d.sum2008),
-      mean2009: (d: any) => op.mean(d.sum2009),
-      mean2010: (d: any) => op.mean(d.sum2010),
-      mean2011: (d: any) => op.mean(d.sum2011),
-      mean2012: (d: any) => op.mean(d.sum2012),
-      mean2013: (d: any) => op.mean(d.sum2013),
-      mean2014: (d: any) => op.mean(d.sum2014),
-      mean2015: (d: any) => op.mean(d.sum2015),
-      mean2016: (d: any) => op.mean(d.sum2016),
-      mean2017: (d: any) => op.mean(d.sum2017),
-      mean2018: (d: any) => op.mean(d.sum2018),
-      mean2019: (d: any) => op.mean(d.sum2019),
-      mean2020: (d: any) => op.mean(d.sum2020),
-      mean2021: (d: any) => op.mean(d.sum2021),
-      mean2022: (d: any) => op.mean(d.sum2022),
-    },
-  };
+  rollups = buildTreelossRollups();
 }
 
 const queryClient = new MillDataQuery();
