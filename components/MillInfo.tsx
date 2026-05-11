@@ -24,8 +24,11 @@ export const MillInfo: React.FC<{
         // @ts-ignore
         return { info: dataOverride } as InfoData;
       }
-      return await fetch(`/api/mill/${uml}`).then((res) => res.json());
-    }
+      return await fetch(
+        `/api/mill/${encodeURIComponent(uml as string)}`
+      ).then((res) => res.json());
+    },
+    { enabled: !!uml }
   );
 
   if (!uml) {

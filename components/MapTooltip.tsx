@@ -41,9 +41,10 @@ export const MapTooltip = () => {
   const { data, isLoading, error } = useQuery<{ info: Array<UmlData> }>(
     [`millonly-${id}`],
     async () =>
-      id
-        ? fetch(`/api/mill/${id}?millOnly=true`).then((res) => res.json())
-        : null
+      fetch(`/api/mill/${encodeURIComponent(id!)}?millOnly=true`).then((res) =>
+        res.json()
+      ),
+    { enabled: !!id }
   );
 
   const _info = data?.info?.[0];
