@@ -1,15 +1,14 @@
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { Feedback } from "@/components/Feedback";
-import { Analytics } from "@vercel/analytics/react";
 import cmsClient from "@/sanity/lib/client";
 import Head from "next/head";
 import { Footer } from "@/components/Footer";
+import { getCanonicalSiteOrigin, getUmamiConfig } from "@/lib/public-site";
 
-const VERCEL_DOMAIN = `${
-  process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : "https://palmwatch-v2.vercel.app"
-}`;
+const siteOrigin = getCanonicalSiteOrigin();
 
 export const metadata = {
   title: "PalmWatch: Tracking the Impact of Big Brands' Palm Oil Use",
@@ -18,14 +17,14 @@ export const metadata = {
   keywords:
     "PalmWatch, palm oil, deforestation, environmental impact, data science, open-source intelligence, global supply chain, Nestlé, PepsiCo, Unilever",
   robots: "index, follow",
-  metadataBase: new URL(`${VERCEL_DOMAIN}/`),
+  metadataBase: new URL(`${siteOrigin}/`),
   openGraph: {
-    url: `${VERCEL_DOMAIN}`,
+    url: `${siteOrigin}`,
     title: "PalmWatch:  Tracking the Impact of Big Brands' Palm Oil Use",
     description:
       "Discover how major brands' palm oil use drives deforestation and environmental change with PalmWatch, an open-access tool powered by data science and open-source intelligence.",
     images: {
-      url: `${VERCEL_DOMAIN}/og-image.png`,
+      url: `${siteOrigin}/og-image.png`,
       width: "1200",
       height: "630",
       alt: "PalmWatch: Tracking the Impact of Big Brands' Palm Oil Use",
@@ -37,7 +36,7 @@ export const metadata = {
     description:
       "PalmWatch reveals the environmental footprint of global palm oil consumption by brands like Nestlé, PepsiCo, and Unilever through advanced data analysis.",
     images: {
-      url: `${VERCEL_DOMAIN}/og-image.png`,
+      url: `${siteOrigin}/og-image.png`,
       width: "1200",
       height: "630",
       alt: "PalmWatch: Tracking the Impact of Big Brands' Palm Oil Use",
@@ -60,6 +59,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const footerContent = await cmsClient.getFooterContent();
+  const umami = getUmamiConfig();
   return (
     <html lang="en" data-theme="lemonade">
       <Head>
@@ -85,14 +85,18 @@ export default async function RootLayout({
         <meta name="msapplication-TileColor" content="#da532c" />
         <meta name="theme-color" content="#ffffff" />
       </Head>
-      <head>
-        <script defer src="https://core-facility-umami.vercel.app/script.js" data-website-id="c121bc2a-788e-40a0-a81e-346e799c279d" />
-      </head>
       <body className={inter.variable}>
+        {umami ? (
+          <Script
+            defer
+            src={umami.scriptSrc}
+            data-website-id={umami.websiteId}
+            strategy="afterInteractive"
+          />
+        ) : null}
         <NavBar />
         {children}
         <Footer footerContent={footerContent} />
-        <Analytics />
         <Feedback />
       </body>
     </html>

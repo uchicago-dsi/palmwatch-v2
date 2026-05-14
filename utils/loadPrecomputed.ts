@@ -1,6 +1,7 @@
 import path from "node:path";
 import { readFile } from "node:fs/promises";
 import { headers } from "next/headers";
+import { getCanonicalSiteOrigin } from "@/lib/public-site";
 
 const PRECOMPUTED_PREFIX = "/data/precomputed";
 
@@ -83,11 +84,7 @@ export async function loadPrecomputedJson<T>(
       origin = "";
     }
     if (!origin) {
-      const site = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-      if (site) origin = site;
-      else if (process.env.VERCEL_URL)
-        origin = `https://${process.env.VERCEL_URL.replace(/^https?:\/\//, "")}`;
-      else origin = "http://localhost:8787";
+      origin = getCanonicalSiteOrigin();
     }
   }
 

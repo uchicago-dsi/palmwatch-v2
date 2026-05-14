@@ -1,5 +1,6 @@
 import path from "node:path";
 import { headers } from "next/headers";
+import { getHostedDataOriginPrefix } from "@/lib/public-site";
 
 /**
  * Where Arquero should load `.arrow` files from.
@@ -31,11 +32,8 @@ export async function resolveMillDataBase(req?: Request): Promise<string> {
     /* non-request context */
   }
 
-  const publicSite = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  if (publicSite) return `${publicSite}/data`;
-
-  if (process.env.VERCEL_URL)
-    return `https://${process.env.VERCEL_URL.replace(/^https?:\/\//, "")}/data`;
+  const hosted = getHostedDataOriginPrefix();
+  if (hosted) return `${hosted}/data`;
 
   return path.join(process.cwd(), "public", "data");
 }
