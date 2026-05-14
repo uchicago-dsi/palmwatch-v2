@@ -1,56 +1,81 @@
----
-name: Vercel Blob Next.js Starter
-slug: blob-starter
-description: Simple Next.js template that uses Vercel Blob for image uploads
-framework: Next.js
-useCase: Starter
-css: Tailwind
-database: Vercel Blob
-deployUrl: https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fstorage%2Fblob-starter&project-name=blob-starter&repository-name=blob-starter&demo-title=Vercel%20Blob%20Next.js%20Starter&demo-description=Simple%20Next.js%20template%20that%20uses%20Vercel%20Blob%20for%20image%20uploads&demo-url=https%3A%2F%2Fblob-starter.vercel.app%2F&demo-image=https%3A%2F%2Fblob-starter.vercel.app%2Fopengraph-image.png&stores=%5B%7B"type"%3A"blob"%7D%5D
-demoUrl: https://blob-starter.vercel.app/
-relatedTemplates:
-  - kv-redis-starter
-  - postgres-starter
----
+# PalmWatch
 
-# Vercel Blob Next.js Starter
+Web app for exploring how palm oil supply chains relate to mill-level data and forest loss. Visitors can browse **consumer brands**, **mills**, **mill owners**, **mill groups**, and **countries**, with an interactive map and charts driven by precomputed datasets.
 
-Simple Next.js template that uses [Vercel Blob](https://vercel.com/blob)for image uploads
+## Stack
 
-## Demo
+- **Next.js** (App Router) and **React**
+- **Tailwind CSS** and **DaisyUI**
+- **Mapbox** / **react-map-gl** and **deck.gl** for the map
+- **Sanity** for editable marketing and editorial content (home, about, contact, footers, mill/brand copy, and so on)
+- **Arquero** for aggregations over mill data; output is written to static JSON under `public/data/precomputed/` so edge runtimes do not need to run heavy analytics at request time
+- **Cloudflare** deployment via **OpenNext** (`@opennextjs/cloudflare`, **Wrangler**); `CF_PAGES_URL` is used when `NEXT_PUBLIC_SITE_URL` is unset
 
-https://blob-starter.vercel.app/
+## Requirements
 
-## How to Use
+- **Node.js** `>= 22.12.0` (see `package.json` `engines`)
+- **pnpm** (repo uses `pnpm` scripts and lockfile conventions)
 
-You can choose from one of the following two methods to use this repository:
-
-### One-Click Deploy
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fstorage%2Fblob-starter&project-name=blob-starter&repository-name=blob-starter&demo-title=Vercel%20Blob%20Next.js%20Starter&demo-description=Simple%20Next.js%20template%20that%20uses%20Vercel%20Blob%20for%20image%20uploads&demo-url=https%3A%2F%2Fblob-starter.vercel.app%2F&demo-image=https%3A%2F%2Fblob-starter.vercel.app%2Fopengraph-image.png&stores=%5B%7B"type"%3A"blob"%7D%5D)
-
-### Clone and Deploy
-
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [pnpm](https://pnpm.io/installation) to bootstrap the example:
+## Setup
 
 ```bash
-pnpm create next-app --example https://github.com/vercel/examples/tree/main/storage/blob-starter
+pnpm install
 ```
 
-Once that's done, copy the .env.example file in this directory to .env.local (which will be ignored by Git):
+Create `.env.local` at the repo root (you can copy [`.env.example`](.env.example) as a template). At minimum you need Sanity and Mapbox values for the site to build and run; other variables depend on how you host the app.
 
-```bash
-cp .env.example .env.local
-```
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` | Sanity project id (required by `sanity/env.ts`) |
+| `NEXT_PUBLIC_SANITY_DATASET` | Sanity dataset name |
+| `NEXT_PUBLIC_SANITY_API_VERSION` | Optional; defaults to `2023-10-12` |
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | Mapbox access token for the map |
+| `NEXT_PUBLIC_MAPBOX_STYLE` | Optional Mapbox style URL; a default is used if unset |
+| `NEXT_PUBLIC_SITE_URL` | Optional canonical site origin (no trailing slash); metadata, OG URLs, and `/data` resolution when request headers are unavailable |
+| `NEXT_PUBLIC_UMAMI_SCRIPT_URL` | Optional Umami tracker script URL (e.g. `https://analytics.example.com/script.js`) |
+| `NEXT_PUBLIC_UMAMI_WEBSITE_ID` | Optional Umami site id; both Umami variables must be set for the tracker to load |
 
-Then open `.env.local` and set the environment variables to match the ones in your Vercel Storage Dashboard.
+On Cloudflare Pages you can rely on `CF_PAGES_URL` for previews and branch builds; set `NEXT_PUBLIC_SITE_URL` to your custom domain for stable canonical URLs in metadata.
 
-Next, run Next.js in development mode:
+Sanity CLI (`sanity` commands from this directory) reads the same `NEXT_PUBLIC_SANITY_*` variables from the environment.
+
+## Local development
 
 ```bash
 pnpm dev
 ```
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples) ([Documentation](https://nextjs.org/docs/deployment)).
+Starts Next.js with Turbopack. The CMS studio is available under the `(sanity)` route group (see `app/(sanity)/cms`).
+
+## Build and data pipeline
+
+`pnpm build` runs **`prebuild`** first:
+
+1. **`scripts/gen-treeloss-rollups.mjs`** — reads `public/data/year_meta.json` and regenerates `utils/treelossRollups.generated.ts` so Arquero rollups use literal column access (required for environments that disallow `eval` / `new Function`, e.g. Workers).
+2. **`scripts/precompute-worker-data.ts`** — loads mill data from `public/data`, runs aggregations, and writes JSON under `public/data/precomputed/` (search index, shards, summaries, and so on).
+
+To refresh precomputed JSON without a full Next build:
+
+```bash
+pnpm precompute
+```
+
+## Other scripts
+
+| Command | Description |
+| --- | --- |
+| `pnpm lint` | ESLint, zero warnings allowed |
+| `pnpm start` | Production server after `pnpm build` |
+| `pnpm preview:next` | `next build` then `next start` |
+| `pnpm preview` | OpenNext Cloudflare local preview |
+| `pnpm deploy` | OpenNext Cloudflare deploy |
+| `pnpm upload` | OpenNext Cloudflare upload |
+| `pnpm cf-typegen` | Regenerate `cloudflare-env.d.ts` from Wrangler |
+
+## Data layout
+
+Mill and related datasets live under **`public/data/`** (including `.arrow` sources and `year_meta.json`). Precomputed API payloads live under **`public/data/precomputed/`**. These paths are committed as needed for the app to run; updating source data implies re-running **`pnpm precompute`** (or **`pnpm build`**) so aggregates stay in sync.
+
+## License
+
+MIT (see `package.json`).
