@@ -1,6 +1,6 @@
 {
   "name": "palmwatch-site",
-  "repository": "https://github.com/vercel/examples.git",
+  "repository": "https://github.com/dsi-clinic/palmwatch-v2.git",
   "license": "MIT",
   "version": "0.0.1",
   "private": true,
@@ -37,8 +37,6 @@
     "@types/papaparse": "5.3.14",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
-    "@vercel/analytics": "1.1.1",
-    "@vercel/blob": "0.8.3",
     "arquero": "5.2.0",
     "autoprefixer": "10.4.14",
     "daisyui": "3.7.7",
