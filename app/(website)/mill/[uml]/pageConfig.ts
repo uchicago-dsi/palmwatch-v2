@@ -4,7 +4,7 @@ export const getStats = (
   latestYearForestLossKm2: number | string | null,
   currentRisk: number | string | null,
   pastRisk: number | string | null,
-  futureRisk: number | string | null,
+  futureRisk: number | string | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
   const stats = [];

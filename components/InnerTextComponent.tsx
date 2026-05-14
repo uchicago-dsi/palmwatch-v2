@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef } from "react";
-// @ts-ignore
+// @ts-expect-error
 import debounce from "lodash/debounce";
+import React, { useEffect, useMemo, useRef } from "react";
 
 export const InnerTextComponent: React.FC<{
   label: string;
@@ -32,11 +32,11 @@ export const InnerTextComponent: React.FC<{
   };
   return (
     <input
-      type="text"
-      placeholder={`Search for ${label} here`}
       className="input input-bordered w-full max-w-xs"
-      value={innerSearchTerm}
       onChange={(e) => handleInput(e.target.value)}
+      placeholder={`Search for ${label} here`}
+      type="text"
+      value={innerSearchTerm}
     />
   );
 };

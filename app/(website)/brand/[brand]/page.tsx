@@ -1,20 +1,23 @@
-import React from "react";
+import { ServerInfotable } from "@/components/InfoTable";
 import { ServerIqr } from "@/components/IqrOverTimeLineChart";
 import { ServerMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import { StatsBlock } from "@/components/StatsBlock";
-import { ServerInfotable } from "@/components/InfoTable";
-import { getDataDownload, getStats } from "./pageConfig";
+import brands from "@/config/brands";
+import type { BrandSchema } from "@/config/brands/types";
+import { latestTreelossKmColumn } from "@/config/years";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import brands from "@/config/brands";
-import { BrandSchema } from "@/config/brands/types";
 import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 import { precomputedSlug } from "@/utils/precomputedSlug";
-import { latestTreelossKmColumn } from "@/config/years";
+import { getDataDownload, getStats } from "./pageConfig";
 export const revalidate = 60;
 
-export default async function Page({ params }: { params: Promise<{ brand: string }> }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ brand: string }>;
+}) {
   const { brand: _brand } = await params;
   const brand = decodeURIComponent(_brand);
   const [brandPre, _brandInfo] = await Promise.all([
@@ -29,7 +32,7 @@ export default async function Page({ params }: { params: Promise<{ brand: string
     }>(`brand/${precomputedSlug(brand)}.json`),
     cmsClient.getBrandInfo(brand),
   ]);
-  const brandInfo = (_brandInfo || brands[brand]) as BrandSchema
+  const brandInfo = (_brandInfo || brands[brand]) as BrandSchema;
 
   const {
     averageCurrentRisk,
@@ -55,39 +58,40 @@ export default async function Page({ params }: { params: Promise<{ brand: string
     );
   }
 
-  const { disclosures, description, descriptionAttribution, altName } = brandInfo;
+  const { disclosures, description, descriptionAttribution, altName } =
+    brandInfo;
   return (
-    <main className="relative flex flex-col items-center justify-center w-[90%] mx-auto max-w-[90vw] 2xl:max-w-[1400px]">
-      <div className="flex flex-col space-y-4 my-8 w-full shadow-xl align-center justify-center prose max-w-none">
+    <main className="relative mx-auto flex w-[90%] max-w-[90vw] flex-col items-center justify-center 2xl:max-w-[1400px]">
+      <div className="prose my-8 flex w-full max-w-none flex-col justify-center space-y-4 align-center shadow-xl">
         <div className="p-4">
-          <h1 className="p-0 m-0">
+          <h1 className="m-0 p-0">
             {brand} {altName ? `(${altName})` : null}
           </h1>
-          <h2 className="p-0 m-0">Palm Oil Usage</h2>
+          <h2 className="m-0 p-0">Palm Oil Usage</h2>
         </div>
         <StatsBlock stats={stats} />
       </div>
       <QueryProvider>
-        <div className="flex flex-col space-y-4 w-full lg:flex-row lg:space-x-4 lg:space-y-0">
-          <div className="bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg m-0 w-full">
-            <h3 className="text-2xl m-4 font-bold">
+        <div className="flex w-full flex-col space-y-4 lg:flex-row lg:space-x-4 lg:space-y-0">
+          <div className="m-0 w-full rounded-lg bg-base-100 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
+            <h3 className="m-4 font-bold text-2xl">
               Mill Deforestation (KM<sup>2</sup> of Forest Loss)
             </h3>
-            <div className="h-[60vh] relative w-full">
+            <div className="relative h-[60vh] w-full">
               <ServerMap
-                dataUrl={`/api/brand/${brand}`}
-                geoDataUrl="/data/mill-catchment.geojson"
-                dataTable={[]}
-                geoIdColumn="UML ID"
-                dataIdColumn="UML ID"
                 choroplethColumn={latestTreelossKmColumn}
                 choroplethScheme="forestLoss"
+                dataIdColumn="UML ID"
+                dataTable={[]}
+                dataUrl={`/api/brand/${brand}`}
+                geoDataUrl="/data/mill-catchment.geojson"
+                geoIdColumn="UML ID"
               />
             </div>
           </div>
-          <div className="bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg m-0 w-full">
-            <div className="flex flex-row align-center items-center">
-              <h3 className="text-2xl m-4 font-bold">
+          <div className="m-0 w-full rounded-lg bg-base-100 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
+            <div className="flex flex-row items-center align-center">
+              <h3 className="m-4 font-bold text-2xl">
                 Forest Loss over time (KM<sup>2</sup>)
               </h3>
               <div
@@ -95,35 +99,33 @@ export default async function Page({ params }: { params: Promise<{ brand: string
                 data-tip="1st Quartile Mill represents the square kilometers of forest loss per year that 25% of the mills used by this brand fall under. Median Mill represents this value at which 50% of the mills used by this brand fall under. 3rd Quartile Mill represents the square kilometers of forest loss per year that 75% of the mills used by this brand fall under."
               >
                 <button
+                  className="btn btn-sm btn-outline btn-circle ml-2"
                   data-tooltip-target="tooltip-default"
                   type="button"
-                  className="btn btn-sm btn-outline ml-2 btn-circle"
                 >
                   ?
                 </button>
               </div>
             </div>
-            <div className="h-[60vh] relative w-full">
+            <div className="relative h-[60vh] w-full">
               <ServerIqr dataUrl={`/api/brand/${brand}`} type="brand" />
             </div>
           </div>
         </div>
-        <div className="bg-base-100 shadow-xl my-4 ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
+        <div className="mx-auto my-4 w-full rounded-lg bg-base-100 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
           <ServerInfotable
-            endpoint={`/api/brand/${brand}`}
-            dataAccessor="owners"
             columnMapping={{
               "Parent Company": "Mill Owner",
               Country: "Country",
               count: "No. Mills for Brand",
             }}
+            dataAccessor="owners"
+            endpoint={`/api/brand/${brand}`}
           />
         </div>
 
-        <div className="bg-base-100 shadow-xl my-4 ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
+        <div className="mx-auto my-4 w-full rounded-lg bg-base-100 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
           <ServerInfotable
-            endpoint={`/api/brand/${brand}`}
-            dataAccessor="umlInfo"
             columnMapping={{
               "Mill Name": "Name",
               risk_score_current: "Recent Deforestation Score",
@@ -132,10 +134,12 @@ export default async function Page({ params }: { params: Promise<{ brand: string
               District: "District",
               "Parent Company": "Parent Company",
             }}
+            dataAccessor="umlInfo"
+            endpoint={`/api/brand/${brand}`}
           />
         </div>
       </QueryProvider>
-      <div className="bg-base-100 m-0  px-4 flex flex-col lg:flex-row lg:space-x-4 lg:space-y-0 space-y-4 prose max-w-none shadow-xl">
+      <div className="prose m-0 flex max-w-none flex-col space-y-4 bg-base-100 px-4 shadow-xl lg:flex-row lg:space-x-4 lg:space-y-0">
         <div className="flex-1 basis-2/3">
           <h2 className="my-4">About {brand}</h2>
           <p>
@@ -152,10 +156,10 @@ export default async function Page({ params }: { params: Promise<{ brand: string
                   <li key={pdf.filename}>
                     <a
                       className="link-primary"
-                      href={`${pdf.filename}`}
-                      target="_blank"
-                      rel="noreferrer"
                       download
+                      href={`${pdf.filename}`}
+                      rel="noreferrer"
+                      target="_blank"
                     >
                       {pdf.year}
                     </a>
@@ -170,10 +174,10 @@ export default async function Page({ params }: { params: Promise<{ brand: string
               <li key={i}>
                 <a
                   className="link-primary"
-                  href={`${download.href}`}
-                  target="_blank"
-                  rel="noreferrer"
                   download
+                  href={`${download.href}`}
+                  rel="noreferrer"
+                  target="_blank"
                 >
                   {download.label}
                 </a>
@@ -181,11 +185,11 @@ export default async function Page({ params }: { params: Promise<{ brand: string
             ))}
           </ul>
 
-          <p></p>
+          <p />
         </div>
       </div>
       {!!brandInfo.content && (
-        <div className="prose bg-base-100 p-4 my-4 w-full shadow-xl max-w-none">
+        <div className="prose my-4 w-full max-w-none bg-base-100 p-4 shadow-xl">
           <PortableText value={brandInfo.content} />
         </div>
       )}
@@ -194,7 +198,8 @@ export default async function Page({ params }: { params: Promise<{ brand: string
           Note: Many brands source palm oil from the same mills. The total
           deforestation loss for each brand is not disaggregated based on the
           amount of palm oil each brand sources from an individual mill, because
-          this data is not disclosed. For more information on potential limitations, please visit our <a href="/about">about page.</a>
+          this data is not disclosed. For more information on potential
+          limitations, please visit our <a href="/about">about page.</a>
         </i>
       </p>
     </main>

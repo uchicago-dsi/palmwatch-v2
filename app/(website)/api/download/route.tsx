@@ -1,9 +1,9 @@
+import { NextResponse } from "next/server";
 import { mergeFullShards } from "@/utils/bboxCompute";
 import { readMillDataText } from "@/utils/readMillDataText";
-import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
-import { NextResponse } from "next/server";
-import { timestamp } from "@/utils/timestamp";
 import { cleanUnparse } from "@/utils/renameOutputColumns";
+import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
+import { timestamp } from "@/utils/timestamp";
 
 export async function GET(req: Request) {
   const output = new URL(req.url).searchParams.get("output");
@@ -12,12 +12,15 @@ export async function GET(req: Request) {
   console.log(data.length, "mills");
   switch (output) {
     case "geo": {
-      const geoDataRaw = await readMillDataText(dataDir, "mill-catchment.geojson");
+      const geoDataRaw = await readMillDataText(
+        dataDir,
+        "mill-catchment.geojson"
+      );
       const geoData = JSON.parse(geoDataRaw);
       const features = [];
       for (const row of data as Record<string, unknown>[]) {
         const feature = geoData.features.find(
-          // @ts-ignore
+          // @ts-expect-error
           (f: any) => f.properties["UML ID"] === row["UML ID"]
         );
         if (feature) {
@@ -26,12 +29,12 @@ export async function GET(req: Request) {
             geometry: feature.geometry,
             properties: {
               ...row,
-              // @ts-ignore
-              'Current Deforestation Score': row.risk_score_current,
-              // @ts-ignore
-              'Past Deforestation Score': row.risk_score_past,
-              // @ts-ignore
-              'Future Risk Score': row.risk_score_future,
+              // @ts-expect-error
+              "Current Deforestation Score": row.risk_score_current,
+              // @ts-expect-error
+              "Past Deforestation Score": row.risk_score_past,
+              // @ts-expect-error
+              "Future Risk Score": row.risk_score_future,
               risk_score_current: undefined,
               risk_score_past: undefined,
               risk_score_future: undefined,

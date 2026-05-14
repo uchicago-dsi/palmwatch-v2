@@ -1,8 +1,8 @@
-import { latestTreelossKmColumn } from "@/config/years";
-import { useTooltipStore } from "@/stores/tooltipStore";
-import { UmlData } from "@/utils/dataTypes";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { latestTreelossKmColumn } from "@/config/years";
+import { useTooltipStore } from "@/stores/tooltipStore";
+import type { UmlData } from "@/utils/dataTypes";
 
 const BASE_ROWS: Array<{ label: string; column: keyof UmlData }> = [
   { label: "Mill Name", column: "Mill Name" },
@@ -16,9 +16,10 @@ const RISK_ROWS: Array<{ label: string; column: keyof UmlData }> = [
   { label: "Future Deforestation Risk Score", column: "risk_score_future" },
 ];
 
-function forestLossRow(
-  choroplethColumn: string
-): { label: string; column: keyof UmlData } {
+function forestLossRow(choroplethColumn: string): {
+  label: string;
+  column: keyof UmlData;
+} {
   const kmCol = choroplethColumn.startsWith("treeloss_km_")
     ? choroplethColumn
     : latestTreelossKmColumn;
@@ -34,9 +35,10 @@ export const MapTooltip = () => {
   const tooltipStore = useTooltipStore();
   const { x, y, id, choroplethColumn } = tooltipStore;
 
-  const rows = useMemo(() => {
-    return [...BASE_ROWS, forestLossRow(choroplethColumn), ...RISK_ROWS];
-  }, [choroplethColumn]);
+  const rows = useMemo(
+    () => [...BASE_ROWS, forestLossRow(choroplethColumn), ...RISK_ROWS],
+    [choroplethColumn]
+  );
 
   const { data, isLoading, error } = useQuery<{ info: Array<UmlData> }>(
     [`millonly-${id}`],
@@ -48,40 +50,40 @@ export const MapTooltip = () => {
   );
 
   const _info = data?.info?.[0];
-  if (!id || x === null || y === null || (!_info && !isLoading)) {
+  if (!id || x === null || y === null || !(_info || isLoading)) {
     return null;
   }
   const info = _info!;
 
   return (
     <div
-      className="absolute max-w-96 bg-base-100 shadow-xl rounded-xl px-4 pointer-events-none prose z-40"
+      className="prose pointer-events-none absolute z-40 max-w-96 rounded-xl bg-base-100 px-4 shadow-xl"
       style={{ left: x + 10, top: y + 10 }}
     >
       {isLoading ? (
-        <div className="flex align-center py-4 justify-center">
+        <div className="flex justify-center py-4 align-center">
           <progress className="progress w-10" />
         </div>
-      ) : (<>
-      
-      <table className="table table-xs m-0">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th></th>
+      ) : (
+        <>
+          <table className="table-xs m-0 table">
+            <thead>
+              <tr>
+                <th />
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(({ label, column }) => (
+                <tr key={label}>
+                  <td>{label}</td>
+                  <td>{info[column]}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {rows.map(({ label, column }) => (
-                  <tr key={label}>
-                    <td>{label}</td>
-                    <td>{info[column]}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="text-xs p-0 pb-1">Click area on map to learn more</p>
-            </>
+              ))}
+            </tbody>
+          </table>
+          <p className="p-0 pb-1 text-xs">Click area on map to learn more</p>
+        </>
       )}
     </div>
   );

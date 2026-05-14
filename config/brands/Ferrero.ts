@@ -1,4 +1,4 @@
-import { BrandSchema } from "./types";
+import type { BrandSchema } from "./types";
 
 export const Ferrero: BrandSchema = {
   name: "Ferrero",
@@ -11,28 +11,28 @@ export const Ferrero: BrandSchema = {
   disclosures: [
     // 2017H! 2018H1 2019H1 2020H1 2020H2 2021H1
     {
-      year: '2017',
+      year: "2017",
       filename: "disclosures/ferrero/2017H1_ferrero.pdf",
     },
     {
-      year: '2018',
+      year: "2018",
       filename: "disclosures/ferrero/2018H1_ferrero.pdf",
     },
     {
-      year: '2019',
+      year: "2019",
       filename: "disclosures/ferrero/2019H1_ferrero.pdf",
     },
     {
-      year: '2020 (First Half)',
+      year: "2020 (First Half)",
       filename: "disclosures/ferrero/2020H1_ferrero.pdf",
     },
     {
-      year: '2020 (Second Half)',
+      year: "2020 (Second Half)",
       filename: "disclosures/ferrero/2020H2_ferrero.pdf",
     },
     {
-      year: '2021',
+      year: "2021",
       filename: "disclosures/ferrero/2021H1_ferrero.pdf",
-    }
+    },
   ],
 };

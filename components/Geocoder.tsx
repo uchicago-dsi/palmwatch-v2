@@ -1,11 +1,16 @@
 // via https://github.com/visgl/react-map-gl/blob/7.0-release/examples/geocoder/src/geocoder-control.tsx
-import * as React from 'react';
-import {useState} from 'react';
-import {useControl, Marker, MarkerProps, ControlPosition} from 'react-map-gl';
-// @ts-ignore
-import MapboxGeocoder, {GeocoderOptions} from '@mapbox/mapbox-gl-geocoder';
-import "@/app/styles/mapbox-geocoder.css";
 
+// @ts-expect-error
+import MapboxGeocoder, {
+  type GeocoderOptions,
+} from "@mapbox/mapbox-gl-geocoder";
+import { useState } from "react";
+import {
+  type ControlPosition,
+  type MarkerProps,
+  useControl,
+} from "react-map-gl";
+import "@/app/styles/mapbox-geocoder.css";
 
 const noop = () => {};
 
@@ -45,49 +50,58 @@ export default function GeocoderControl(_props: GeocoderControlProps) {
     onResults: noop,
     onResult: noop,
     onError: noop,
-    ..._props
-  }
+    ..._props,
+  };
 
   const geocoder = useControl<MapboxGeocoder>(
     () => {
-
       const ctrl = new MapboxGeocoder({
         ...props,
         marker: false,
-        accessToken: props.mapboxAccessToken
+        accessToken: props.mapboxAccessToken,
       });
-      ctrl.on('loading', props.onLoading);
-      ctrl.on('results', props.onResults);
-      ctrl.on('result', (evt: any) => {
+      ctrl.on("loading", props.onLoading);
+      ctrl.on("results", props.onResults);
+      ctrl.on("result", (evt: any) => {
         props?.onResult && props.onResult(evt);
 
-        const {result} = evt;
+        const { result } = evt;
         const location =
           result &&
-          (result.center || (result.geometry?.type === 'Point' && result.geometry.coordinates));
+          (result.center ||
+            (result.geometry?.type === "Point" && result.geometry.coordinates));
         // if (location && props.marker) {
         //   setMarker(<Marker {...props.marker} longitude={location[0]} latitude={location[1]} />);
         // } else {
         //   setMarker(null);
         // }
       });
-      ctrl.on('error', props.onError);
+      ctrl.on("error", props.onError);
       return ctrl;
     },
     {
-      position: props.position
+      position: props.position,
     }
   );
 
-  // @ts-ignore (TS2339) private member
+  // @ts-expect-error (TS2339) private member
   if (geocoder._map) {
-    if (geocoder.getProximity() !== props.proximity && props.proximity !== undefined) {
+    if (
+      geocoder.getProximity() !== props.proximity &&
+      props.proximity !== undefined
+    ) {
       geocoder.setProximity(props.proximity);
     }
-    if (geocoder.getRenderFunction() !== props.render && props.render !== undefined) {
+    if (
+      geocoder.getRenderFunction() !== props.render &&
+      props.render !== undefined
+    ) {
       geocoder.setRenderFunction(props.render);
     }
-    if (geocoder.getLanguage() !== props.language && props.language !== undefined) {
+    if (
+      geocoder.getLanguage() !== props.language &&
+      props.language !== undefined
+    ) {
       geocoder.setLanguage(props.language);
     }
     if (geocoder.getZoom() !== props.zoom && props.zoom !== undefined) {
@@ -96,16 +110,25 @@ export default function GeocoderControl(_props: GeocoderControlProps) {
     // if (geocoder.getFlyTo() !== props.flyTo && props.flyTo !== undefined) {
     //   geocoder.setFlyTo(props.flyTo);
     // }
-    if (geocoder.getPlaceholder() !== props.placeholder && props.placeholder !== undefined) {
+    if (
+      geocoder.getPlaceholder() !== props.placeholder &&
+      props.placeholder !== undefined
+    ) {
       geocoder.setPlaceholder(props.placeholder);
     }
-    if (geocoder.getCountries() !== props.countries && props.countries !== undefined) {
+    if (
+      geocoder.getCountries() !== props.countries &&
+      props.countries !== undefined
+    ) {
       geocoder.setCountries(props.countries);
     }
     if (geocoder.getTypes() !== props.types && props.types !== undefined) {
       geocoder.setTypes(props.types);
     }
-    if (geocoder.getMinLength() !== props.minLength && props.minLength !== undefined) {
+    if (
+      geocoder.getMinLength() !== props.minLength &&
+      props.minLength !== undefined
+    ) {
       geocoder.setMinLength(props.minLength);
     }
     if (geocoder.getLimit() !== props.limit && props.limit !== undefined) {

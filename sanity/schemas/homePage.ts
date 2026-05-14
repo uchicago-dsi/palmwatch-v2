@@ -26,7 +26,7 @@ const homePage = {
       title: "Intro Content",
     },
     {
-    // list of fields with image and title and body text
+      // list of fields with image and title and body text
       name: "useCases",
       title: "Use Cases",
       type: "array",
@@ -56,7 +56,7 @@ const homePage = {
     {
       ...getGenericContentConfig("content"),
       name: "mapDescription",
-      title: "Map Description"
+      title: "Map Description",
     },
   ],
 };

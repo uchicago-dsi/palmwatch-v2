@@ -1,15 +1,15 @@
 "use client";
+import type React from "react";
 import { useDropdownStore } from "@/stores/superDropdownStore";
-import React from "react";
 import { SearchableListLayout } from "./SearchableListLayout";
 
 interface NavBarSuperDropdownProps {
+  description?: string;
   icon: React.ReactNode;
   label: string;
   options: Array<{ label: string; href: string; imgPath?: string }>;
   path: string;
   showText?: boolean;
-  description?: string;
 }
 
 export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
@@ -32,7 +32,7 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
           onClick={() => setcurrentDropdown(label)}
         >
           <svg
-            className="w-6 h-6 fill-base-content"
+            className="h-6 w-6 fill-base-content"
             version="1.1"
             viewBox="0 0 100 100"
             xmlns="http://www.w3.org/2000/svg"
@@ -45,15 +45,15 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
       {isActive && (
         <>
           <button
+            className="absolute top-[100%] left-0 h-[100vh] w-full bg-black opacity-30 shadow-xl"
             onClick={() => setcurrentDropdown("")}
-            className="w-full h-[100vh] absolute top-[100%] left-0 bg-black opacity-30 shadow-xl"
-          ></button>
-          <div className="w-full absolute top-[100%] p-4 left-0 bg-base-100 shadow-xl pr-4">
+          />
+          <div className="absolute top-[100%] left-0 w-full bg-base-100 p-4 pr-4 shadow-xl">
             <SearchableListLayout
+              description={description}
               label={label}
               options={options}
               path={path}
-              description={description}
               setcurrentDropdown={setcurrentDropdown}
             />
           </div>

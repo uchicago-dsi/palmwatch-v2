@@ -1,25 +1,31 @@
 "use client";
-import { IconLayer, GeoJsonLayer } from "@deck.gl/layers/typed";
-import { MapboxOverlay, MapboxOverlayProps } from "@deck.gl/mapbox/typed";
-//@ts-ignore
-import Map, {
-  NavigationControl,
-  useControl,
-  AttributionControl,
-} from "react-map-gl";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { GeoJsonLayer, IconLayer } from "@deck.gl/layers/typed";
+import { MapboxOverlay, type MapboxOverlayProps } from "@deck.gl/mapbox/typed";
+import { fitBounds } from "@math.gl/web-mercator";
 import { useQuery } from "@tanstack/react-query";
 import bbox from "@turf/bbox";
-import { fitBounds } from "@math.gl/web-mercator";
-import GeocoderControl from "./Geocoder";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+//@ts-expect-error
+import Map, {
+  AttributionControl,
+  NavigationControl,
+  useControl,
+} from "react-map-gl";
 import { colorFunctions } from "@/utils/colorFunction";
+import GeocoderControl from "./Geocoder";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useActiveUmlStore } from "@/stores/activeUml";
-import { Legend } from "./Legend";
-import { DataProvider } from "./DataProvider";
-import { useTooltipStore } from "@/stores/tooltipStore";
-import { MapTooltip } from "./MapTooltip";
 import { fullYearRange, latestTreelossKmColumn } from "@/config/years";
+import { useActiveUmlStore } from "@/stores/activeUml";
+import { useTooltipStore } from "@/stores/tooltipStore";
+import { DataProvider } from "./DataProvider";
+import { Legend } from "./Legend";
+import { MapTooltip } from "./MapTooltip";
 
 const DEFAULT_MAP_STYLE = "mapbox://styles/dhalpern/cln0e32pu06ba01qxcgrp4gv9";
 const MAP_STYLE = process.env.NEXT_PUBLIC_MAPBOX_STYLE || DEFAULT_MAP_STYLE;
@@ -49,14 +55,16 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   choroplethScheme,
   showLayerStepper,
   onMapMove,
-  noFlyMap
+  noFlyMap,
 }) => {
   const mapRef = React.useRef<typeof Map>(null);
   const [mapZoom, setMapZoom] = useState(0);
   const lastRoundedZoomRef = useRef<number | null>(null);
   const syncZoomFromView = useCallback((z: number) => {
     const rounded = Math.round(z);
-    if (lastRoundedZoomRef.current === rounded) return;
+    if (lastRoundedZoomRef.current === rounded) {
+      return;
+    }
     lastRoundedZoomRef.current = rounded;
     setMapZoom(rounded);
   }, []);
@@ -66,7 +74,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     useState(choroplethColumn);
   const currentYear = currentChoroplethColumn.includes("score")
     ? -1
-    : parseInt(currentChoroplethColumn?.split("_")?.[2]);
+    : Number.parseInt(currentChoroplethColumn?.split("_")?.[2]);
   const [showLayerPanel, setShowLayerPanel] = useState(false);
   const { colorFunction, scale } = colorFunctions[currentChoroplethScheme];
   const setData = useTooltipStore((state) => state.setData);
@@ -83,9 +91,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   };
   const { data, isLoading, isError } = useQuery<GeoJSON.FeatureCollection>(
     ["geoData"],
-    async () => {
-      return await fetch(geoDataUrl).then((res) => res.json());
-    }
+    async () => await fetch(geoDataUrl).then((res) => res.json())
   );
   const { initialMapView, dataDict } = useMemo(() => {
     if (isLoading || isError) {
@@ -93,7 +99,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     }
     const dataDict: { [key: string]: unknown } = {};
     for (const row of dataTable) {
-      // @ts-ignore
+      // @ts-expect-error
       dataDict[row[dataIdColumn] as string] = row;
     }
 
@@ -148,7 +154,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     }
 
     const { longitude, latitude, zoom } =
-      bounds[0][0] === Infinity || !Number.isFinite(bounds[0][0])
+      bounds[0][0] === Number.POSITIVE_INFINITY ||
+      !Number.isFinite(bounds[0][0])
         ? { latitude: 0, longitude: 0, zoom: 1.5 }
         : fitBounds({
             width: 800,
@@ -167,10 +174,14 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   }, [data, dataTable, dataIdColumn, geoIdColumn, isLoading, isError]);
 
   const millPinFeatures = useMemo(() => {
-    if (!data?.features || !dataDict) return [];
+    if (!(data?.features && dataDict)) {
+      return [];
+    }
     return data.features.filter((f) => {
       const id = f.properties![geoIdColumn] as string;
-      if (!(id in dataDict)) return false;
+      if (!(id in dataDict)) {
+        return false;
+      }
       const row = dataDict[id] as Record<string, unknown>;
       const lng = Number(row.Longitude);
       const lat = Number(row.Latitude);
@@ -184,10 +195,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   }, [data, dataDict, geoIdColumn]);
 
   useEffect(() => {
-    if (
-      initialMapView?.zoom != null &&
-      Number.isFinite(initialMapView.zoom)
-    ) {
+    if (initialMapView?.zoom != null && Number.isFinite(initialMapView.zoom)) {
       syncZoomFromView(initialMapView.zoom);
     }
   }, [
@@ -202,11 +210,12 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   }, [currentChoroplethColumn, setChoroplethColumnInTooltip]);
 
   useEffect(() => {
-    // @ts-ignore
-    !noFlyMap && mapRef?.current?.flyTo({
-      center: [initialMapView?.longitude, initialMapView?.latitude],
-      zoom: initialMapView?.zoom,
-    });
+    // @ts-expect-error
+    !noFlyMap &&
+      mapRef?.current?.flyTo({
+        center: [initialMapView?.longitude, initialMapView?.latitude],
+        zoom: initialMapView?.zoom,
+      });
   }, [
     initialMapView?.latitude,
     initialMapView?.longitude,
@@ -225,8 +234,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       wireframe: false,
       pickable: true,
       // Pixels: a huge meter width (e.g. 1000m) made the selected polygon swallow the map for picking.
-      getLineWidth: (d) =>
-        d?.properties?.[geoIdColumn] === activeUml ? 4 : 1,
+      getLineWidth: (d) => (d?.properties?.[geoIdColumn] === activeUml ? 4 : 1),
       lineWidthUnits: "pixels",
       getLineColor: [0, 0, 0, 255],
       lineWidthMinPixels: 0.5,
@@ -246,18 +254,23 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         return color as [number, number, number, number];
       },
       updateTriggers: {
-        getFillColor: [dataDict, currentChoroplethColumn, currentChoroplethScheme],
+        getFillColor: [
+          dataDict,
+          currentChoroplethColumn,
+          currentChoroplethScheme,
+        ],
         getLineWidth: [activeUml],
       },
     }),
-    
+
     new IconLayer({
       id: "mill-point",
       data: millPinFeatures,
       getPosition: (d) => {
-        const row = dataDict?.[
-          d.properties![geoIdColumn] as string
-        ] as Record<string, unknown>;
+        const row = dataDict?.[d.properties![geoIdColumn] as string] as Record<
+          string,
+          unknown
+        >;
         return [Number(row.Longitude), Number(row.Latitude)];
       },
       iconAtlas: "/icons/pin.png",
@@ -301,48 +314,35 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-row">
+    <div className="flex h-full w-full flex-row">
       <div
         className={`${
           showLayerPanel
-            ? "w-96 opacity-100 transition-all "
-            : "w-0 opacity-0 px-0"
+            ? "w-96 opacity-100 transition-all"
+            : "w-0 px-0 opacity-0"
         } prose`}
       >
         <div className="px-2">
           <h3>Map Data Layers</h3>
-          <ul className="menu p-0 w-full rounded-box">
+          <ul className="menu w-full rounded-box p-0">
             <li>
               <button
+                className={`m-0 p-2 ${currentYear === -1 ? "" : "btn-active"}`}
                 onClick={() => handleVariable(latestTreelossKmColumn)}
-                className={`p-2 m-0 ${currentYear === -1 ? "" : "btn-active"}`}
               >
                 Deforestation By Year
               </button>
             </li>
             <li>
               <button
+                className={`m-0 p-2 ${currentYear === -1 ? "btn-active" : ""}`}
                 onClick={() => handleVariable("risk_score_current")}
-                className={`p-2 m-0 ${currentYear !== -1 ? "" : "btn-active"}`}
               >
                 Deforestation Scores
               </button>
             </li>
           </ul>
-          {currentYear !== -1 ? (
-            <>
-              <h4>Data Year</h4>
-              <div className="join w-full max-w-none">
-                <button className="join-item btn" onClick={decrementYear}>
-                  «
-                </button>
-                <button className="join-item btn">{currentYear}</button>
-                <button className="join-item btn" onClick={incrementYear}>
-                  »
-                </button>
-              </div>
-            </>
-          ) : (
+          {currentYear === -1 ? (
             <>
               <h4>Deforestation Score</h4>
               <div className="join join-vertical">
@@ -361,12 +361,12 @@ export const PalmwatchMap: React.FC<MapProps> = ({
                   },
                 ].map((variable) => (
                   <button
-                    key={variable.value}
                     className={`join-item btn ${
                       currentChoroplethColumn === variable.value
                         ? "btn-active"
                         : ""
                     }`}
+                    key={variable.value}
                     onClick={() => handleVariable(variable.value)}
                   >
                     {variable.label}
@@ -374,37 +374,40 @@ export const PalmwatchMap: React.FC<MapProps> = ({
                 ))}
               </div>
             </>
+          ) : (
+            <>
+              <h4>Data Year</h4>
+              <div className="join w-full max-w-none">
+                <button className="join-item btn" onClick={decrementYear}>
+                  «
+                </button>
+                <button className="join-item btn">{currentYear}</button>
+                <button className="join-item btn" onClick={incrementYear}>
+                  »
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>
-      <div className="w-full h-full relative">
+      <div className="relative h-full w-full">
         <button
-          onClick={() => setShowLayerPanel((p) => !p)}
           aria-label="Toggle Layer Panel"
-          className="btn absolute left-2 py-0 top-[50%] z-10 bg-base-100 translate-y-[-50%] shadow-xl rounded-r-lg"
+          className="btn absolute top-[50%] left-2 z-10 translate-y-[-50%] rounded-r-lg bg-base-100 py-0 shadow-xl"
+          onClick={() => setShowLayerPanel((p) => !p)}
         >
           <svg
-            width="24px"
+            className="dark:fill-white"
             height="24px"
             version="1.1"
             viewBox="0 0 100 100"
+            width="24px"
             xmlns="http://www.w3.org/2000/svg"
-            className="dark:fill-white"
           >
             <path d="m3.5 67.75c-0.011719 1.125 0.58594 2.1719 1.5625 2.7344l43.375 24c0.94141 0.52344 2.0898 0.52344 3.0312 0l43.422-24c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-43.328-24c-0.94141-0.52344-2.0898-0.52344-3.0312 0l-43.422 24c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99219 0.55078-1.6094 1.5977-1.6094 2.7344zm9.5781-37.5 36.922-20.422 36.922 20.422-11.922 6.6406-25 13.781-24.922-13.781zm10.484 31.703 25 13.781c0.94141 0.52344 2.0898 0.52344 3.0312 0l25-13.781 10.484 5.7969-37.078 20.422-36.922-20.422z" />
           </svg>
         </button>
         <Map
-          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-          mapStyle={MAP_STYLE}
-          projection={MAP_PROJECTION}
-          onLoad={(e) => syncZoomFromView(e.target.getZoom())}
-          onMove={(e) => syncZoomFromView(e.viewState.zoom)}
-          onMoveEnd={(e) => {
-            syncZoomFromView(e.viewState.zoom);
-            onMapMove && onMapMove(e);
-          }}
-          pitch={0}
           bearing={0}
           initialViewState={{
             latitude: 0,
@@ -414,7 +417,17 @@ export const PalmwatchMap: React.FC<MapProps> = ({
             bearing: 0,
             ...initialMapView,
           }}
-          // @ts-ignore
+          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+          mapStyle={MAP_STYLE}
+          onLoad={(e) => syncZoomFromView(e.target.getZoom())}
+          onMove={(e) => syncZoomFromView(e.viewState.zoom)}
+          onMoveEnd={(e) => {
+            syncZoomFromView(e.viewState.zoom);
+            onMapMove && onMapMove(e);
+          }}
+          pitch={0}
+          projection={MAP_PROJECTION}
+          // @ts-expect-error
           ref={mapRef}
           reuseMaps={true}
         >
@@ -428,15 +441,15 @@ export const PalmwatchMap: React.FC<MapProps> = ({
             customAttribution={["© The University of Chicago"]}
           />
 
-          <DeckGLOverlay layers={layers} interleaved={true} />
+          <DeckGLOverlay interleaved={true} layers={layers} />
         </Map>
         <MapTooltip />
         <Legend
           colorStops={scale}
           label={
-            currentYear !== -1
-              ? `Deforestation ${currentYear} (km2)`
-              : `Risk score`
+            currentYear === -1
+              ? "Risk score"
+              : `Deforestation ${currentYear} (km2)`
           }
         />
       </div>
@@ -457,15 +470,11 @@ function DeckGLOverlay(
 export const ServerMap: React.FC<{ dataUrl: string } & MapProps> = ({
   dataUrl,
   ...props
-}) => {
-  return (
-    <DataProvider<{ umlInfo: MapProps["dataTable"] }> dataUrl={dataUrl}>
-      {(data) => {
-        return <PalmwatchMap {...props} dataTable={data.umlInfo} />;
-      }}
-    </DataProvider>
-  );
-};
+}) => (
+  <DataProvider<{ umlInfo: MapProps["dataTable"] }> dataUrl={dataUrl}>
+    {(data) => <PalmwatchMap {...props} dataTable={data.umlInfo} />}
+  </DataProvider>
+);
 
 const MapLayerStepper: React.FC<{
   setChoroplethColumn: (column: string) => void;
@@ -477,6 +486,4 @@ const MapLayerStepper: React.FC<{
   setChoroplethScheme,
   choroplethColumn,
   choroplethScheme,
-}) => {
-  return <div></div>;
-};
+}) => <div />;

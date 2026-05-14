@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { InnerTextComponent } from "./InnerTextComponent";
 import React, { useEffect, useMemo } from "react";
+import { InnerTextComponent } from "./InnerTextComponent";
 
 const paginateOptions = (
   _options: any[],
@@ -14,7 +14,7 @@ const paginateOptions = (
   const filterFunc =
     filter && filterProp && filterProp?.length > 2
       ? (s: object) =>
-          // @ts-ignore
+          // @ts-expect-error
           s?.[filterProp]?.toLowerCase().includes(filter.toLowerCase())
       : (s: any) => true;
   const options = filter ? _options.filter(filterFunc) : _options;
@@ -32,7 +32,7 @@ const paginateOptions = (
     }
     items.push(page);
   }
-  if (items.length === 0)
+  if (items.length === 0) {
     items.push([
       [
         {
@@ -41,6 +41,7 @@ const paginateOptions = (
         },
       ],
     ]);
+  }
   return {
     hasPages,
     items,
@@ -77,10 +78,7 @@ export const SearchableListLayout: React.FC<{
   const displayRows = options.length > 32 ? manyRows || 16 : rows || 8;
   const displayColumns = columns || 4;
   const alphabeticalOptions = useMemo(
-    () =>
-      options.sort((a, b) => {
-        return a.label.localeCompare(b.label);
-      }),
+    () => options.sort((a, b) => a.label.localeCompare(b.label)),
     [options]
   );
   const { hasPages, items } = useMemo(
@@ -100,7 +98,9 @@ export const SearchableListLayout: React.FC<{
   const currentItems = items?.[currentPage];
   const pages = items?.length;
 
-  if (!currentItems) return null;
+  if (!currentItems) {
+    return null;
+  }
 
   const pageAction = (action: "next" | "prev") => {
     setCurrentPage((page) => {
@@ -117,19 +117,21 @@ export const SearchableListLayout: React.FC<{
   const closeDropdown = () => setcurrentDropdown && setcurrentDropdown("");
   return (
     <div
-      className={`flex flex-row overflow-x-auto space-x-4 prose max-w-none w-full`}
+      className={
+        "prose flex w-full max-w-none flex-row space-x-4 overflow-x-auto"
+      }
     >
-      <div className="p-4 flex-col justify-around border-r-2 border-r-base-300 space-y-4">
+      <div className="flex-col justify-around space-y-4 border-r-2 border-r-base-300 p-4">
         <h3 className="m-0">{label}</h3>
         {!!description && <p className="m-0 max-w-[20ch]">{description}</p>}
         {!!path && (
           <div>
-            <Link href={path} className="btn-link m-0" onClick={closeDropdown}>
+            <Link className="btn-link m-0" href={path} onClick={closeDropdown}>
               {label} Overview
             </Link>
           </div>
         )}
-        <InnerTextComponent onChange={setSearchTerm} label={label} />
+        <InnerTextComponent label={label} onChange={setSearchTerm} />
         {hasPages && (
           <div>
             <button
@@ -154,7 +156,7 @@ export const SearchableListLayout: React.FC<{
         <p>Loading, please wait...</p>
       ) : (
         currentItems.map((column: any[], idx: number) => (
-          <div className="flex flex-col space-y-1 flex-1 m-0 p-0" key={idx}>
+          <div className="m-0 flex flex-1 flex-col space-y-1 p-0" key={idx}>
             {column.map((option) => (
               <div key={option.label}>
                 <Link
@@ -165,11 +167,11 @@ export const SearchableListLayout: React.FC<{
                   <div className="flex flex-col">
                     {Boolean(option.imgPath) && (
                       <Image
-                        src={option.imgPath!}
                         alt={option.label}
-                        width={80}
+                        className="h-20 w-20 object-contain"
                         height={80}
-                        className="w-20 h-20 object-contain"
+                        src={option.imgPath!}
+                        width={80}
                       />
                     )}
                     {option.label.toLowerCase()}

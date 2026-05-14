@@ -9,7 +9,8 @@ const brandInfo = {
       name: "name",
       title: "Name",
       type: "string",
-      description: "This is an ID used to match the data and must be the same as the navigation / data brand name."
+      description:
+        "This is an ID used to match the data and must be the same as the navigation / data brand name.",
     },
     {
       name: "altName",
@@ -67,11 +68,10 @@ const brandInfo = {
       type: "url",
     },
     {
-      
       ...getGenericContentConfig("content"),
-      name: 'content',
-      title: 'Additional Content',
-    }
+      name: "content",
+      title: "Additional Content",
+    },
   ],
 };
 

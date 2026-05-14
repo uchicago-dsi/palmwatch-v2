@@ -1,12 +1,15 @@
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { SearchableListLayout } from "@/components/SearchableListLayout";
-import React from "react";
-import { basicStatsConfig, forestStatsConfig, rspoStatsConfig } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 import type { SearchListPayload } from "@/types/searchList";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import {
+  basicStatsConfig,
+  forestStatsConfig,
+  rspoStatsConfig,
+} from "./pageConfig";
 
 export const revalidate = 60;
 
@@ -50,43 +53,40 @@ export default async function Page() {
     millCount,
     brandCount,
     countryCount,
-    companyCount,
-  )
+    companyCount
+  );
   const forestStats = forestStatsConfig(
     totalForestArea,
     totalForestLoss,
-    totalArea,
-  )
-  const rspoStats = rspoStatsConfig(
-    rspoCertified,
-    notRspoCertified,
-  )
+    totalArea
+  );
+  const rspoStats = rspoStatsConfig(rspoCertified, notRspoCertified);
 
   return (
     <main className="mx-auto">
-      <section className="prose flex flex-col py-4 max-w-none">
-        <h1 className="p-0 m-0">Mills</h1>
+      <section className="prose flex max-w-none flex-col py-4">
+        <h1 className="m-0 p-0">Mills</h1>
         {!!landingPageContent?.content && (
           <div className="prose max-w-none">
             <PortableText value={landingPageContent.content} />
           </div>
         )}
         <StatsBlock stats={basicStats} />
-        <hr className="py-0 my-0" />
+        <hr className="my-0 py-0" />
         <StatsBlock stats={rspoStats} />
-        <hr className="py-0 my-0" />
+        <hr className="my-0 py-0" />
         <StatsBlock stats={forestStats} />
-        <hr className="py-0 my-0" />
+        <hr className="my-0 py-0" />
         <div className="h-96">
           <IqrOverTime data={timeseries} type="brand" />
         </div>
       </section>
       <div>
         <SearchableListLayout
-          // @ts-ignore
-          options={options}
-          label="Mills"
           columns={2}
+          label="Mills"
+          // @ts-expect-error
+          options={options}
           rows={20}
         />
       </div>

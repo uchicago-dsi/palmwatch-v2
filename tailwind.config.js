@@ -15,6 +15,9 @@ module.exports = {
       },
     },
   },
-  plugins: [require("daisyui"), require("@tailwindcss/typography"), require('tailwind-capitalize-first-letter')],
+  plugins: [
+    require("daisyui"),
+    require("@tailwindcss/typography"),
+    require("tailwind-capitalize-first-letter"),
+  ],
 };
-

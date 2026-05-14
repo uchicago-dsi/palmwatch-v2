@@ -30,14 +30,14 @@ const aboutPage = {
               type: "string",
             },
             getGenericContentConfig("body"),
-          ]
+          ],
         },
       ],
     },
     {
       ...getGenericContentConfig("contributors"),
       title: "Contributors",
-      description: "List of contributors to the project. Displays after FAQ."
+      description: "List of contributors to the project. Displays after FAQ.",
     },
   ],
 };

@@ -1,42 +1,44 @@
-import { QueryProvider } from "@/components/QueryProvider";
-import { MillInfo } from "@/components/MillInfo";
-import { BrandInfoClient } from "@/components/BrandInfoClient";
 import Image from "next/image";
 import Link from "next/link";
+import { BrandInfoClient } from "@/components/BrandInfoClient";
+import { HomePageMap } from "@/components/HomePageMap";
+import { MillInfo } from "@/components/MillInfo";
+import { QueryProvider } from "@/components/QueryProvider";
 import { ScrollToButton } from "@/components/ScrollToButton";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText, urlFor } from "@/sanity/lib/components";
-import { HomePageMap } from "@/components/HomePageMap";
 
 export const revalidate = 60;
 
 export default async function Home() {
   const homeContent = await cmsClient.getHomeContent();
-  const { mapDescription, useCases, introContent, heroSubtitle, heroTitle } = homeContent || {};
+  const { mapDescription, useCases, introContent, heroSubtitle, heroTitle } =
+    homeContent || {};
 
   return (
-    <main className="flex flex-col items-center justify-center h-auto">
+    <main className="flex h-auto flex-col items-center justify-center">
       {/* fullheight hero div */}
-      <section className="relative w-full h-[100vh] overflow-hidden bg-black">
+      <section className="relative h-[100vh] w-full overflow-hidden bg-black">
         <video
           autoPlay
-          muted
+          className="absolute top-0 left-0 h-full w-full object-cover opacity-25"
           loop
-          className="absolute top-0 left-0 w-full h-full object-cover opacity-25"
+          muted
         >
-          <source src="cover-video.mp4" type="video/mp4"></source>
+          <source src="cover-video.mp4" type="video/mp4" />
           {/* <source src="path/to/video.webm" type="video/webm"></source> */}
           {/* Your browser does not support the video tag. */}
         </video>
-        <div className="relative z-[0] flex flex-col justify-center items-center h-full p-4 text-white">
-          <h1 className="text-6xl font-bold">{heroTitle || 'PalmWatch'}</h1>
+        <div className="relative z-[0] flex h-full flex-col items-center justify-center p-4 text-white">
+          <h1 className="font-bold text-6xl">{heroTitle || "PalmWatch"}</h1>
           <h2 className="text-3xl">
-            {heroSubtitle || 'Explore the impact of palm oil production on deforestation'}
+            {heroSubtitle ||
+              "Explore the impact of palm oil production on deforestation"}
           </h2>
-          <div className="flex flex-col space-y-4 mt-10 items-center">
+          <div className="mt-10 flex flex-col items-center space-y-4">
             {/* search by consumer brand, mill, mill owner, mill group */}
             <p>Explore by</p>
-            <div className="flex flex-col space-y-4 mb-4 lg:flex-row lg:space-y-0 lg:space-x-4">
+            <div className="mb-4 flex flex-col space-y-4 lg:flex-row lg:space-x-4 lg:space-y-0">
               <Link className="btn btn-outline btn-info" href="/brands">
                 Brands
               </Link>
@@ -63,35 +65,32 @@ export default async function Home() {
           </div>
         </div>
         <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.youtube.com/watch?v=YKJcN81mZgA"
           // text rotates 90deg
-          className="absolute bottom-1 right-1 text-white/50 text-xs z-[1] translate-y-[-25vh] translate-x-[48%]  rotate-90"
+          className="absolute right-1 bottom-1 z-[1] translate-x-[48%] translate-y-[-25vh] rotate-90 text-white/50 text-xs"
+          href="https://www.youtube.com/watch?v=YKJcN81mZgA"
+          rel="noopener noreferrer"
+          target="_blank"
         >
           Cover Video by Sum Mayyah Channel | Creative Commons Attribution
         </a>
       </section>
       {!!introContent?.length && (
-        <section className="max-w-none w-full py-4 flex flex-col space-y-4 mb-4 prose justify-center items-center lg:py-4 lg:min-h-[50vh] lg:flex-row lg:space-x-4 lg:space-y-0">
+        <section className="prose mb-4 flex w-full max-w-none flex-col items-center justify-center space-y-4 py-4 lg:min-h-[50vh] lg:flex-row lg:space-x-4 lg:space-y-0 lg:py-4">
           <div className="mx-auto my-0 max-w-[75%]">
             <PortableText value={introContent} />
           </div>
         </section>
       )}
       {!!useCases?.length && (
-        <section
-          className="
-      max-w-none w-full py-10 flex flex-col space-y-4 bg-base-200 mb-4 prose justify-center items-center lg:py-4 lg:min-h-[50vh] lg:flex-row lg:space-x-4 lg:space-y-0"
-        >
+        <section className="prose mb-4 flex w-full max-w-none flex-col items-center justify-center space-y-4 bg-base-200 py-10 lg:min-h-[50vh] lg:flex-row lg:space-x-4 lg:space-y-0 lg:py-4">
           {useCases?.map((useCase: any, index: number) => (
-            <div key={index} className="w-full text-center lg:w-1/3">
+            <div className="w-full text-center lg:w-1/3" key={index}>
               <Image
-                src={urlFor(useCase?.image?.asset?._ref || "")}
                 alt={`${useCase.title} icon`}
-                width={160}
+                className="mx-auto my-0 h-auto max-h-40 w-auto"
                 height={160}
-                className="mx-auto my-0 w-auto h-auto max-h-40"
+                src={urlFor(useCase?.image?.asset?._ref || "")}
+                width={160}
               />
               <h3>{useCase.title}</h3>
               <div className="mx-auto my-0 max-w-[75%]">
@@ -102,15 +101,15 @@ export default async function Home() {
         </section>
       )}
       <section
+        className="relative mx-auto block w-[90%] rounded-lg bg-base-200 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg"
         id="homepage-map"
-        className="bg-base-200 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] relative block"
       >
-        <div className="prose p-4 max-w-none">
+        <div className="prose max-w-none p-4">
           {!!mapDescription?.length && <PortableText value={mapDescription} />}
         </div>
         <QueryProvider>
           <HomePageMap />
-          <div className="p-0 w-full flex flex-col space-y-4 lg:flex-row lg:space-x-4">
+          <div className="flex w-full flex-col space-y-4 p-0 lg:flex-row lg:space-x-4">
             <MillInfo />
             <BrandInfoClient />
           </div>

@@ -1,14 +1,14 @@
-import { type SchemaTypeDefinition } from 'sanity'
-import brandInfo from './schemas/brandInfo'
-import millInfo from './schemas/millInfo'
-import ownerInfo from './schemas/ownerInfo'
-import countryInfo from './schemas/countryInfo'
-import aboutPage from './schemas/aboutPage'
-import contactPage from './schemas/contactPage'
-import footerInfo from './schemas/footerInfo'
-import homePage from './schemas/homePage'
-import groupInfo from './schemas/groupInfo'
-import landingPageContent from './schemas/landingPageContent'
+import type { SchemaTypeDefinition } from "sanity";
+import aboutPage from "./schemas/aboutPage";
+import brandInfo from "./schemas/brandInfo";
+import contactPage from "./schemas/contactPage";
+import countryInfo from "./schemas/countryInfo";
+import footerInfo from "./schemas/footerInfo";
+import groupInfo from "./schemas/groupInfo";
+import homePage from "./schemas/homePage";
+import landingPageContent from "./schemas/landingPageContent";
+import millInfo from "./schemas/millInfo";
+import ownerInfo from "./schemas/ownerInfo";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -21,7 +21,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     countryInfo,
     millInfo,
     ownerInfo,
-    groupInfo
+    groupInfo,
   ],
-}
-
+};

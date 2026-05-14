@@ -1,23 +1,31 @@
-import React from "react";
-import { BrandData, BrandInfo } from "@/components/BrandInfo";
+import { BarShareChartForests } from "@/components/BarShareChartForests";
+import { type BrandData, BrandInfo } from "@/components/BrandInfo";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
-import { QueryProvider } from "@/components/QueryProvider";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
-import { precomputedSlug } from "@/utils/precomputedSlug";
-import { UmlData } from "@/utils/dataTypes";
 import { MillInfo } from "@/components/MillInfo";
-import { getStats } from "./pageConfig";
+import { QueryProvider } from "@/components/QueryProvider";
 import { StatsBlock } from "@/components/StatsBlock";
-import { sumForestLoss } from "@/utils/sumForestloss";
-import { fullYearRange, latestTreelossKmColumn, maxYear, minYear } from "@/config/years";
-import { BarShareChartForests } from "@/components/BarShareChartForests";
+import {
+  fullYearRange,
+  latestTreelossKmColumn,
+  maxYear,
+  minYear,
+} from "@/config/years";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
+import type { UmlData } from "@/utils/dataTypes";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import { precomputedSlug } from "@/utils/precomputedSlug";
+import { sumForestLoss } from "@/utils/sumForestloss";
+import { getStats } from "./pageConfig";
 
 export const revalidate = 60;
 
-export default async function Page({ params }: { params: Promise<{ uml: string }> }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ uml: string }>;
+}) {
   const { uml: _uml } = await params;
   const uml = decodeURIComponent(_uml);
 
@@ -26,7 +34,9 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
     loadPrecomputedJson<{ info: UmlData[]; brands: BrandData }>(
       `mill/${slug}.json`
     ),
-    loadPrecomputedJson<Record<string, number>[]>("aggregates/median-mill.json"),
+    loadPrecomputedJson<Record<string, number>[]>(
+      "aggregates/median-mill.json"
+    ),
     cmsClient.getUmlInfo(uml),
   ]);
   const data = millPayload.info;
@@ -38,15 +48,15 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
   }
 
   // reshape stats
-  // @ts-ignore
+  // @ts-expect-error
   const umlId = entry?.["UML ID"];
   const millName = entry?.["Mill Name"];
   const brandData = millPayload.brands;
   const lineChartData = fullYearRange.map((year) => ({
     year,
-    // @ts-ignore
+    // @ts-expect-error
     "Mill Tree Loss (km2)": entry?.[`treeloss_km_${year}`],
-    // @ts-ignore
+    // @ts-expect-error
     "Overall Median Mill Tree Loss (km2)": medianMillData?.[`median${year}`],
   }));
 
@@ -59,13 +69,13 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
   );
   const totalForestLoss = sumForestLoss(entry);
   return (
-    <main className="relative flex flex-col items-center justify-center w-[90%] max-w-full mx-auto">
-      <div className="p-4 flex flex-row my-0 w-full shadow-xl">
-        <div className="flex flex-col w-full">
+    <main className="relative mx-auto flex w-[90%] max-w-full flex-col items-center justify-center">
+      <div className="my-0 flex w-full flex-row p-4 shadow-xl">
+        <div className="flex w-full flex-col">
           <div className="flex-1">
             <h2 className="text-xl">Palm Oil Impact</h2>
-            <h1 className="text-4xl font-bold">{millName}</h1>
-            <div className="stats flex-1 w-full mt-4">
+            <h1 className="font-bold text-4xl">{millName}</h1>
+            <div className="stats mt-4 w-full flex-1">
               <div className="stat">
                 <div className="stat-title">Total Forest Loss</div>
                 <div className="stat-value">
@@ -102,41 +112,41 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
           />
         </div>
       </div>
-      <div className="my-4 p-4 bg-surface/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
-        <h3 className="text-xl my-4 font-bold">
+      <div className="my-4 w-full rounded-lg bg-surface/30 p-4 shadow-xl ring-1 ring-gray-900/5">
+        <h3 className="my-4 font-bold text-xl">
           Palm Oil Mill Deforestation Map: Forest Loss in KM2
         </h3>
         <div className="relative h-[60vh] w-full">
           <QueryProvider>
             <PalmwatchMap
-              geoDataUrl="/data/mill-catchment.geojson"
-              dataTable={data}
-              geoIdColumn="UML ID"
-              dataIdColumn="UML ID"
               choroplethColumn={latestTreelossKmColumn}
               choroplethScheme="forestLoss"
+              dataIdColumn="UML ID"
+              dataTable={data}
+              geoDataUrl="/data/mill-catchment.geojson"
+              geoIdColumn="UML ID"
             />
           </QueryProvider>
         </div>
       </div>
-      <div className="flex flex-row space-x-4 w-full">
-        <div className="p-4 bg-surface/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto  w-full">
+      <div className="flex w-full flex-row space-x-4">
+        <div className="mx-auto w-full rounded-lg bg-surface/30 p-4 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
           <BrandInfo data={brandData} />
         </div>
-        <div className="bg-surface/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full prose">
-          <div className="h-[40vh] relative w-full">
-            <h3 className="ml-4 my-4">Forest Loss Over Time (km2)</h3>
-            <IqrOverTime type="mill" data={lineChartData} showMedian={true} />
+        <div className="prose mx-auto w-full rounded-lg bg-surface/30 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
+          <div className="relative h-[40vh] w-full">
+            <h3 className="my-4 ml-4">Forest Loss Over Time (km2)</h3>
+            <IqrOverTime data={lineChartData} showMedian={true} type="mill" />
           </div>
         </div>
       </div>
-      <div className="my-4 p-4 bg-surface/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
+      <div className="mx-auto my-4 w-full rounded-lg bg-surface/30 p-4 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
         <QueryProvider>
-          <MillInfo millOverride={uml} dataOverride={[entry]} />
+          <MillInfo dataOverride={[entry]} millOverride={uml} />
         </QueryProvider>
       </div>
       {!!millContent?.content && (
-        <div className="prose bg-base-100 p-4 my-4 w-full shadow-xl max-w-none">
+        <div className="prose my-4 w-full max-w-none bg-base-100 p-4 shadow-xl">
           <PortableText value={millContent.content} />
         </div>
       )}

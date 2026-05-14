@@ -1,15 +1,30 @@
-import { createClient } from 'next-sanity'
-import { brandInfoQuery, aboutPageQuery, contactPageQuery, footerInfoQuery, umlInfoQuery, homePageQuery, countyInfoQuery, groupInfoQuery, landingPageContentQuery } from "./groq";
-import { BrandSchema } from "@/config/brands/types";
+import { createClient } from "next-sanity";
+import type { SanityClient } from "sanity";
+import type { BrandSchema } from "@/config/brands/types";
 
-import { apiVersion, dataset, projectId, useCdn } from '../env'
-import { AboutPageContent, ContactPageContent, HomePageContent } from './types';
-import { SanityClient } from 'sanity';
+import { apiVersion, dataset, projectId, useCdn } from "../env";
+import {
+  aboutPageQuery,
+  brandInfoQuery,
+  contactPageQuery,
+  countyInfoQuery,
+  footerInfoQuery,
+  groupInfoQuery,
+  homePageQuery,
+  landingPageContentQuery,
+  umlInfoQuery,
+} from "./groq";
+import type {
+  AboutPageContent,
+  ContactPageContent,
+  HomePageContent,
+} from "./types";
+
 class CmsClient {
   client: SanityClient;
-  brandData: Record<string, BrandSchema> = {}
-  umlData: Record<string, Partial<BrandSchema>> = {}
-  
+  brandData: Record<string, BrandSchema> = {};
+  umlData: Record<string, Partial<BrandSchema>> = {};
+
   constructor() {
     this.client = createClient({
       apiVersion,
@@ -32,35 +47,44 @@ class CmsClient {
     if (this.umlData[uml]) {
       return this.umlData[uml];
     }
-    const data = await this.client.fetch<Partial<BrandSchema>>(umlInfoQuery, { uml });
+    const data = await this.client.fetch<Partial<BrandSchema>>(umlInfoQuery, {
+      uml,
+    });
     this.umlData[uml] = data;
     return data;
   }
 
   async getCountryInfo(country: string) {
-    return await this.client.fetch<Partial<BrandSchema>>(countyInfoQuery, { country });
+    return await this.client.fetch<Partial<BrandSchema>>(countyInfoQuery, {
+      country,
+    });
   }
   async getGroupInfo(group: string) {
-    return await this.client.fetch<Partial<BrandSchema>>(groupInfoQuery, { group });
+    return await this.client.fetch<Partial<BrandSchema>>(groupInfoQuery, {
+      group,
+    });
   }
   async getLandingPageContent(page: string) {
-    return await this.client.fetch<{content?: any[]; disclaimer?:any[]}>(landingPageContentQuery, { page });
+    return await this.client.fetch<{ content?: any[]; disclaimer?: any[] }>(
+      landingPageContentQuery,
+      { page }
+    );
   }
   async getAboutPage() {
     return await this.client.fetch<AboutPageContent>(aboutPageQuery);
   }
 
-  async getContactPage(){
+  async getContactPage() {
     return await this.client.fetch<ContactPageContent>(contactPageQuery);
   }
   async getFooterContent() {
     return await this.client.fetch(footerInfoQuery);
   }
   async getHomeContent() {
-    return await this.client.fetch<HomePageContent>(homePageQuery)
+    return await this.client.fetch<HomePageContent>(homePageQuery);
   }
 }
 
-const client =  new CmsClient();
+const client = new CmsClient();
 
 export default client;

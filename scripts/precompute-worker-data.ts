@@ -2,13 +2,14 @@
  * Node-only: loads Arquero + mill data, writes `public/data/precomputed/**` JSON
  * so Cloudflare Workers never execute Arquero at request time.
  */
-import path from "node:path";
+
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import queryClient from "../utils/getMillData";
+import path from "node:path";
 import { fullYearRangeColumns } from "../config/years";
+import type { SearchListPayload } from "../types/searchList";
+import queryClient from "../utils/getMillData";
 import { stringifyForPrecompute } from "../utils/jsonBigInt";
 import { precomputedSlug } from "../utils/precomputedSlug";
-import type { SearchListPayload } from "../types/searchList";
 
 const ROOT = process.cwd();
 const DATA_DIR = path.join(ROOT, "public", "data");
@@ -42,10 +43,7 @@ async function main() {
     "aggregates/ranking-brands.json",
     queryClient.getRankingOfBrandsByCurrentImpactScore()
   );
-  await writeJson(
-    "aggregates/median-mill.json",
-    queryClient.getMedianMill()
-  );
+  await writeJson("aggregates/median-mill.json", queryClient.getMedianMill());
 
   const companies = queryClient.getCompaniesObjects();
   await writeJson("companies.json", companies);
@@ -69,7 +67,9 @@ async function main() {
   const umlSeen = new Set<string>();
   for (const row of fullRows as { [k: string]: unknown }[]) {
     const id = row["UML ID"];
-    if (typeof id !== "string" || umlSeen.has(id)) continue;
+    if (typeof id !== "string" || umlSeen.has(id)) {
+      continue;
+    }
     umlSeen.add(id);
     const slug = precomputedSlug(id);
     const info = queryClient.getUml(id).objects();

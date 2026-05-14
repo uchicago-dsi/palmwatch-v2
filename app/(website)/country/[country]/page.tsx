@@ -1,19 +1,17 @@
-import React from "react";
-import { BrandData, BrandInfo } from "@/components/BrandInfo";
-import type { UmlData } from "@/utils/dataTypes";
+import { type BrandData, BrandInfo } from "@/components/BrandInfo";
+import { CmsContent } from "@/components/CmsContent";
+import { CmsDescription } from "@/components/CmsDescription";
+import { InfoTable } from "@/components/InfoTable";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
+import { StatsBlock } from "@/components/StatsBlock";
+import { latestTreelossKmColumn } from "@/config/years";
+import cmsClient from "@/sanity/lib/client";
+import type { UmlData } from "@/utils/dataTypes";
 import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 import { precomputedSlug } from "@/utils/precomputedSlug";
 import { getStats } from "./pageConfig";
-import { StatsBlock } from "@/components/StatsBlock";
-import { InfoTable } from "@/components/InfoTable";
-import cmsClient from "@/sanity/lib/client";
-import { PortableText } from "@/sanity/lib/components";
-import { CmsDescription } from "@/components/CmsDescription";
-import { CmsContent } from "@/components/CmsContent";
-import { latestTreelossKmColumn } from "@/config/years";
 
 export const revalidate = 60;
 
@@ -27,13 +25,7 @@ export default async function Page({
 
   const countryInfo = await cmsClient.getCountryInfo(country);
 
-  const {
-    description,
-    externalLink,
-    content
-  } = countryInfo || {}
-  
-
+  const { description, externalLink, content } = countryInfo || {};
 
   const {
     mills,
@@ -51,19 +43,15 @@ export default async function Page({
     totalForestLoss: number;
   }>(`country/${precomputedSlug(country)}.json`);
 
-  const stats = getStats(
-    uniqueMills,
-    averageCurrentRisk,
-    totalForestLoss
-  );
+  const stats = getStats(uniqueMills, averageCurrentRisk, totalForestLoss);
 
   return (
-    <main className="relative flex flex-col items-center justify-center w-[90%] max-w-full mx-auto">
-      <div className="p-4 flex flex-row my-0 w-full shadow-xl">
-        <div className="flex flex-col w-full">
+    <main className="relative mx-auto flex w-[90%] max-w-full flex-col items-center justify-center">
+      <div className="my-0 flex w-full flex-row p-4 shadow-xl">
+        <div className="flex w-full flex-col">
           <div className="flex-1">
             <h2 className="text-xl">Palm Oil Impact</h2>
-            <h1 className="text-4xl font-bold">{country}</h1>
+            <h1 className="font-bold text-4xl">{country}</h1>
           </div>
           <hr className="mt-4 block" />
 
@@ -78,38 +66,37 @@ export default async function Page({
         description={description}
         externalLink={externalLink}
         linkText={`Click here for more info about ${country}`}
-        />
-      <div className="my-4 p-4 bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
-        <h3 className="text-xl my-4 font-bold">
+      />
+      <div className="my-4 w-full rounded-lg bg-base-100 p-4 shadow-xl ring-1 ring-gray-900/5">
+        <h3 className="my-4 font-bold text-xl">
           Palm Oil Mill Deforestation Map: Forest Loss in KM2
         </h3>
         <div className="relative h-[60vh] w-full">
           <QueryProvider>
             <PalmwatchMap
-              geoDataUrl="/data/mill-catchment.geojson"
-              dataTable={mills}
-              geoIdColumn="UML ID"
-              dataIdColumn="UML ID"
               choroplethColumn={latestTreelossKmColumn}
               choroplethScheme="forestLoss"
+              dataIdColumn="UML ID"
+              dataTable={mills}
+              geoDataUrl="/data/mill-catchment.geojson"
+              geoIdColumn="UML ID"
             />
           </QueryProvider>
         </div>
       </div>
-      <div className="flex flex-row space-x-4 w-full">
-        <div className="p-4 bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto  w-full">
+      <div className="flex w-full flex-row space-x-4">
+        <div className="mx-auto w-full rounded-lg bg-base-100 p-4 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
           <BrandInfo data={brandUsage as BrandData} />
         </div>
-        <div className="bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full prose">
-          <div className="h-[40vh] relative w-full">
-            <h3 className="ml-4 my-4">Forest Loss Over Time (km2)</h3>
-            <IqrOverTime type="brand" data={timeseries} />
+        <div className="prose mx-auto w-full rounded-lg bg-base-100 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
+          <div className="relative h-[40vh] w-full">
+            <h3 className="my-4 ml-4">Forest Loss Over Time (km2)</h3>
+            <IqrOverTime data={timeseries} type="brand" />
           </div>
         </div>
       </div>
-      <div className="my-4 p-4 bg-base-100 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-full">
+      <div className="mx-auto my-4 w-full rounded-lg bg-base-100 p-4 shadow-xl ring-1 ring-gray-900/5 backdrop-blur-lg">
         <InfoTable
-          data={mills}
           columnMapping={{
             "Mill Name": "Name",
             risk_score_current: "Recent Deforestation Score",
@@ -118,6 +105,7 @@ export default async function Page({
             District: "District",
             "Parent Company": "Parent Company",
           }}
+          data={mills}
         />
       </div>
       <CmsContent content={content} />

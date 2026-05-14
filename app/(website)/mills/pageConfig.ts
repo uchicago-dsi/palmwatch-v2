@@ -40,7 +40,7 @@ export const basicStatsConfig = (
 export const forestStatsConfig = (
   totalForestArea: number | null,
   totalForestLoss: number | null,
-  totalArea: number | null,
+  totalArea: number | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
   const stats = [];
@@ -50,34 +50,37 @@ export const forestStatsConfig = (
       stat: formatter.format(totalArea),
       className: "",
     });
-  if (totalForestArea !== null) {
-    stats.push({
-      title: "Total Forest Area (km2)",
-      stat: formatter.format(totalForestArea),
-      className: "",
-    });
-  }
-  if (totalForestLoss !== null) {
-    stats.push({
-      title: "Total Forest Loss (km2)",
-      stat: formatter.format(totalForestLoss),
-      className: "text-error",
-    });
     if (totalForestArea !== null) {
       stats.push({
-        title: "Percent Forest Loss",
-        stat: formatter.format((totalArea - totalForestArea)/totalForestArea*100) + "%",
+        title: "Total Forest Area (km2)",
+        stat: formatter.format(totalForestArea),
         className: "",
       });
     }
-  }
+    if (totalForestLoss !== null) {
+      stats.push({
+        title: "Total Forest Loss (km2)",
+        stat: formatter.format(totalForestLoss),
+        className: "text-error",
+      });
+      if (totalForestArea !== null) {
+        stats.push({
+          title: "Percent Forest Loss",
+          stat:
+            formatter.format(
+              ((totalArea - totalForestArea) / totalForestArea) * 100
+            ) + "%",
+          className: "",
+        });
+      }
+    }
   }
   return stats;
-}
+};
 
 export const rspoStatsConfig = (
   rspoCertified: number | null,
-  notRspoCertified: number | null,
+  notRspoCertified: number | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
   const stats = [];
@@ -96,4 +99,4 @@ export const rspoStatsConfig = (
     });
   }
   return stats;
-}
+};

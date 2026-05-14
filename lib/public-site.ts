@@ -8,10 +8,14 @@ function trimTrailingSlash(s: string): string {
  */
 export function getHostedDataOriginPrefix(): string | null {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) return trimTrailingSlash(explicit);
+  if (explicit) {
+    return trimTrailingSlash(explicit);
+  }
 
   const pages = process.env.CF_PAGES_URL?.trim();
-  if (pages) return trimTrailingSlash(pages);
+  if (pages) {
+    return trimTrailingSlash(pages);
+  }
 
   return null;
 }
@@ -28,11 +32,14 @@ export function getCanonicalSiteOrigin(): string {
 }
 
 /** Both must be set for the Umami snippet to render. */
-export function getUmamiConfig():
-  | { scriptSrc: string; websiteId: string }
-  | null {
+export function getUmamiConfig(): {
+  scriptSrc: string;
+  websiteId: string;
+} | null {
   const scriptSrc = process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL?.trim();
   const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID?.trim();
-  if (!scriptSrc || !websiteId) return null;
+  if (!(scriptSrc && websiteId)) {
+    return null;
+  }
   return { scriptSrc, websiteId };
 }

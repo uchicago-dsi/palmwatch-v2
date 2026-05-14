@@ -1,15 +1,14 @@
 "use client";
 
+import { WebMercatorViewport } from "@deck.gl/core/typed";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { InfoTable } from "@/components/InfoTable";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
-import { QueryClient, useQuery } from "@tanstack/react-query";
-import { Viewport } from "maplibre-gl";
-import { useState } from "react";
-import { WebMercatorViewport } from "@deck.gl/core/typed";
-import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
-import { InfoTable } from "@/components/InfoTable";
 import { latestTreelossKmColumn } from "@/config/years";
+import { getStats } from "./pageConfig";
 
 function getBounds(
   latitude: number,
@@ -18,7 +17,7 @@ function getBounds(
   width: number,
   height: number
 ) {
-  if (!latitude || !longitude || !zoom || !width || !height) {
+  if (!(latitude && longitude && zoom && width && height)) {
     return {
       minX: 0,
       minY: 0,
@@ -33,8 +32,8 @@ function getBounds(
     width,
     height,
   });
-  const [minX, maxY] = viewport.unproject([width*.2, height*.2]);
-  const [maxX, minY] = viewport.unproject([width*.8, height*.8]);
+  const [minX, maxY] = viewport.unproject([width * 0.2, height * 0.2]);
+  const [maxX, minY] = viewport.unproject([width * 0.8, height * 0.8]);
   return {
     minX,
     minY,
@@ -81,26 +80,23 @@ function BboxInner() {
     data?.uniqueCountries,
     data?.averageCurrentRisk,
     data?.totalForestLoss
-  )
+  );
   return (
     <div>
-
-    <div className="h-[60vh] relative w-full">
-      <PalmwatchMap
-        geoDataUrl="/data/mill-catchment.geojson"
-        dataTable={data?.mills || []}
-        geoIdColumn="UML ID"
-        dataIdColumn="UML ID"
-        choroplethColumn={latestTreelossKmColumn}
-        choroplethScheme="forestLoss"
-        onMapMove={setViewState}
-        noFlyMap
+      <div className="relative h-[60vh] w-full">
+        <PalmwatchMap
+          choroplethColumn={latestTreelossKmColumn}
+          choroplethScheme="forestLoss"
+          dataIdColumn="UML ID"
+          dataTable={data?.mills || []}
+          geoDataUrl="/data/mill-catchment.geojson"
+          geoIdColumn="UML ID"
+          noFlyMap
+          onMapMove={setViewState}
         />
-    </div>
+      </div>
       <StatsBlock stats={stats} />
       <InfoTable
-      
-        data={data?.mills || []}
         columnMapping={{
           "Mill Name": "Name",
           risk_score_current: "Recent Deforestation Score",
@@ -109,7 +105,8 @@ function BboxInner() {
           District: "District",
           "Parent Company": "Parent Company",
         }}
-        />
-      </div>
+        data={data?.mills || []}
+      />
+    </div>
   );
 }

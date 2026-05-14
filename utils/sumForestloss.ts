@@ -1,9 +1,9 @@
 import { fullYearRange } from "@/config/years";
-import { UmlData } from "./dataTypes";
+import type { UmlData } from "./dataTypes";
 
 export const sumForestLoss = (data: UmlData) => {
   const sum = fullYearRange.reduce((acc, year) => {
-    // @ts-ignore
+    // @ts-expect-error
     const loss = data[`treeloss_km_${year}`];
     if (loss) {
       return acc + loss;
@@ -11,4 +11,4 @@ export const sumForestLoss = (data: UmlData) => {
     return acc;
   }, 0);
   return sum;
-}
+};

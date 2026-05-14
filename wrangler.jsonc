@@ -1,21 +1,18 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": ".open-next/worker.js",
-	"name": "palmwatch-v2",
-	"compatibility_date": "2026-05-11",
-	"compatibility_flags": [
-		"nodejs_compat",
-		"global_fetch_strictly_public"
-	],
-	"assets": {
-		"directory": ".open-next/assets",
-		"binding": "ASSETS"
-	},
-	"services": [
-		{
-			// Self-reference: `service` must match this file's top-level `name`
-			"binding": "WORKER_SELF_REFERENCE",
-			"service": "palmwatch-v2"
-		}
-	]
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "palmwatch-v2",
+  "compatibility_date": "2026-05-11",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      // Self-reference: `service` must match this file's top-level `name`
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "palmwatch-v2"
+    }
+  ]
 }

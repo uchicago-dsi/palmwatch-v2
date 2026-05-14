@@ -1,22 +1,22 @@
-import imageUrlBuilder from "@sanity/image-url";
 import { PortableText as OgPortableText } from "@portabletext/react";
+import imageUrlBuilder from "@sanity/image-url";
 import Image from "next/image";
-import React from "react";
+import type React from "react";
 import client from "./client";
 
 export function urlFor(source: string) {
-  return imageUrlBuilder(client.client).image(source).url()
+  return imageUrlBuilder(client.client).image(source).url();
 }
 
 export const myPortableTextComponents = {
   marks: {
-    // @ts-ignore
+    // @ts-expect-error
     link: ({ value, children }) => {
       const href = value?.href || "";
       const target = value?.blank ? "_blank" : "";
       const referrer = value?.blank ? "noopener noreferrer" : "";
       return (
-        <a href={href} target={target} rel={referrer}>
+        <a href={href} rel={referrer} target={target}>
           {children}
         </a>
       );
@@ -26,33 +26,34 @@ export const myPortableTextComponents = {
     image: (v: any) => {
       const alt = v?.value?.alt || "";
       const ref = v?.value?.asset?._ref || "";
-      if (!ref) return null;
+      if (!ref) {
+        return null;
+      }
       const src = urlFor(ref);
       const href = v?.value?.link;
       const img = (
         <Image
-          src={src}
           alt={alt}
-          width={1200}
+          className="h-auto max-w-full"
           height={800}
-          className="max-w-full h-auto"
           sizes="(max-width: 1200px) 100vw, 1200px"
+          src={src}
+          width={1200}
         />
       );
       if (href) {
         return (
-          <a href={href} target="_blank" rel="noopener noreferrer">
+          <a href={href} rel="noopener noreferrer" target="_blank">
             {img}
           </a>
         );
-      } else {
-        return img;
       }
+      return img;
     },
   },
 };
 
-export const PortableText: React.FC<{value: any}> = ({value}) => {
-  // @ts-ignore
-  return <OgPortableText value={value} components={myPortableTextComponents}/>
-}
+export const PortableText: React.FC<{ value: any }> = ({ value }) => {
+  // @ts-expect-error
+  return <OgPortableText components={myPortableTextComponents} value={value} />;
+};

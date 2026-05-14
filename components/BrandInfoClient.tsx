@@ -1,21 +1,19 @@
 "use client";
-import React from "react";
 import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { maxYear, minYear } from "@/config/years";
 import { useActiveUmlStore } from "@/stores/activeUml";
-import { maxYear, minYear, yearRange } from "@/config/years";
-import { BrandData, BrandInfo } from "./BrandInfo";
+import { type BrandData, BrandInfo } from "./BrandInfo";
 import { Preloader } from "./Preloader";
-
 
 export const BrandInfoClient: React.FC = () => {
   const uml = useActiveUmlStore((state) => state.currentUml);
   const { data, isLoading, isError } = useQuery<{ brands: BrandData }>(
     [`mill-${uml}`],
-    async () => {
-      return await fetch(`/api/mill/${encodeURIComponent(uml!)}`).then((res) =>
+    async () =>
+      await fetch(`/api/mill/${encodeURIComponent(uml!)}`).then((res) =>
         res.json()
-      );
-    },
+      ),
     { enabled: !!uml }
   );
 
@@ -24,7 +22,7 @@ export const BrandInfoClient: React.FC = () => {
   }
 
   if (isLoading || isError) {
-    return <Preloader/>
+    return <Preloader />;
   }
   if (!data?.brands?.length) {
     return (

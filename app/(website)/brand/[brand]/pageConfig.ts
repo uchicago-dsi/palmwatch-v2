@@ -5,7 +5,7 @@ export const getStats = (
   uniqueMills: number | null,
   uniqueCountries: number | null,
   uniqueOwners: number | null,
-  uniqueGroups: number | null,
+  uniqueGroups: number | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
   const stats = [];
@@ -48,25 +48,21 @@ export const getStats = (
   return stats;
 };
 
-export const getDataDownload = (
-  brand: string
-) => {
-  return [
-    {
-      label: "Geospatial Data (GeoJSON)",
-      href: `/api/brand/${brand}?output=geo`,
-    },
-    {
-      label: "Forest Loss Over Time (CSV)",
-      href: `/api/brand/${brand}?output=loss`,
-    },
-    {
-      label: "Mills Used (CSV)",
-      href: `/api/brand/${brand}?output=mills`,
-    },
-    {
-      label: "Mill Owners Used (CSV)",
-      href: `/api/brand/${brand}?output=owners`,
-    }
-  ]
-}
+export const getDataDownload = (brand: string) => [
+  {
+    label: "Geospatial Data (GeoJSON)",
+    href: `/api/brand/${brand}?output=geo`,
+  },
+  {
+    label: "Forest Loss Over Time (CSV)",
+    href: `/api/brand/${brand}?output=loss`,
+  },
+  {
+    label: "Mills Used (CSV)",
+    href: `/api/brand/${brand}?output=mills`,
+  },
+  {
+    label: "Mill Owners Used (CSV)",
+    href: `/api/brand/${brand}?output=owners`,
+  },
+];

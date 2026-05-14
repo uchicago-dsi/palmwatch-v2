@@ -10,6 +10,7 @@ Web app for exploring how palm oil supply chains relate to mill-level data and f
 - **Sanity** for editable marketing and editorial content (home, about, contact, footers, mill/brand copy, and so on)
 - **Arquero** for aggregations over mill data; output is written to static JSON under `public/data/precomputed/` so edge runtimes do not need to run heavy analytics at request time
 - **Cloudflare** deployment via **OpenNext** (`@opennextjs/cloudflare`, **Wrangler**); `CF_PAGES_URL` is used when `NEXT_PUBLIC_SITE_URL` is unset
+- **Ultracite** and **Biome** for formatting and lint (`pnpm check`, `pnpm fix`, `pnpm format`)
 
 ## Requirements
 
@@ -64,6 +65,11 @@ pnpm precompute
 
 | Command | Description |
 | --- | --- |
+| `pnpm check` | Ultracite / Biome: lint without writing files |
+| `pnpm fix` | Apply safe auto-fixes |
+| `pnpm ultracite:fix:unsafe` | Same as `fix`, plus unsafe Biome fixes (review diff) |
+| `pnpm format` | Format the repo with Biome (`--write`) |
+| `pnpm format:check` | Fail if any file would be reformatted |
 | `pnpm lint` | ESLint, zero warnings allowed |
 | `pnpm start` | Production server after `pnpm build` |
 | `pnpm preview:next` | `next build` then `next start` |

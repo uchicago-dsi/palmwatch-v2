@@ -1,12 +1,11 @@
 "use client";
-import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useActiveUmlStore } from "@/stores/activeUml";
-import { yearRange } from "@/config/years";
-import { UmlData } from "@/utils/dataTypes";
+import type React from "react";
 import { millInfoColumns } from "@/config/millInfo";
-import { Preloader } from "./Preloader";
+import { useActiveUmlStore } from "@/stores/activeUml";
+import type { UmlData } from "@/utils/dataTypes";
 import { IconLink } from "./IconLink";
+import { Preloader } from "./Preloader";
 
 type InfoData = {
   info: UmlData;
@@ -21,19 +20,19 @@ export const MillInfo: React.FC<{
     [`mill-${uml}${dataOverride ? "-data-override" : ""}`],
     async () => {
       if (dataOverride) {
-        // @ts-ignore
+        // @ts-expect-error
         return { info: dataOverride } as InfoData;
       }
-      return await fetch(
-        `/api/mill/${encodeURIComponent(uml as string)}`
-      ).then((res) => res.json());
+      return await fetch(`/api/mill/${encodeURIComponent(uml as string)}`).then(
+        (res) => res.json()
+      );
     },
     { enabled: !!uml }
   );
 
   if (!uml) {
     return (
-      <div className="prose mt-4 max-w-none block text-center w-full">
+      <div className="prose mt-4 block w-full max-w-none text-center">
         <p>Click a mill on the map to learn more.</p>
       </div>
     );
@@ -49,13 +48,13 @@ export const MillInfo: React.FC<{
   }
   return (
     <div className="prose w-full max-w-none">
-      <h3 className="text-capitalize inline">
+      <h3 className="inline text-capitalize">
         {info["Mill Name"]}
         {/* @ts-ignore */}
       </h3>
       <IconLink href={`/mill/${uml}`} label={info["Mill Name"]} />
-      <div className="overflow-x-auto max-h-96 card pt-0 shadow-xl bg-base-200 w-full">
-        <table className="table table-pin-rows">
+      <div className="card max-h-96 w-full overflow-x-auto bg-base-200 pt-0 shadow-xl">
+        <table className="table-pin-rows table">
           <thead>
             <tr>
               <th>Mill Property</th>
@@ -70,9 +69,9 @@ export const MillInfo: React.FC<{
                     {infoSpec.label}
                     {infoSpec.linkFormat ? (
                       <IconLink
-                        // @ts-ignore
+                        // @ts-expect-error
                         href={infoSpec.linkFormat(info[infoSpec.column])}
-                        // @ts-ignore
+                        // @ts-expect-error
                         label={info[infoSpec.column]}
                       />
                     ) : null}

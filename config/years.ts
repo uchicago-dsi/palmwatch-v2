@@ -10,7 +10,9 @@ const range = (start: number, end: number) => {
 };
 
 /** Inclusive tree-loss years used by charts and aggregations (from year_meta.json). */
-const fullYearRange = yearRange.length ? range(minYear, maxYear + 1) : range(2001, 2023);
+const fullYearRange = yearRange.length
+  ? range(minYear, maxYear + 1)
+  : range(2001, 2023);
 
 const fullYearRangeColumns = fullYearRange.map((y) => `treeloss_km_${y}`);
 
@@ -18,10 +20,10 @@ const fullYearRangeColumns = fullYearRange.map((y) => `treeloss_km_${y}`);
 const latestTreelossKmColumn = `treeloss_km_${maxYear}`;
 
 export {
-  yearRange,
   fullYearRange,
   fullYearRangeColumns,
   latestTreelossKmColumn,
-  minYear,
   maxYear,
+  minYear,
+  yearRange,
 };

@@ -2,7 +2,7 @@ export const getStats = (
   uniqueMills: number | string | null,
   uniqueCountries: number | string | null,
   averageCurrentRisk: number | string | null,
-  totalForestLoss: number | string | null,
+  totalForestLoss: number | string | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
   const stats = [];

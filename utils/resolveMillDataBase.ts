@@ -33,7 +33,9 @@ export async function resolveMillDataBase(req?: Request): Promise<string> {
   }
 
   const hosted = getHostedDataOriginPrefix();
-  if (hosted) return `${hosted}/data`;
+  if (hosted) {
+    return `${hosted}/data`;
+  }
 
   return path.join(process.cwd(), "public", "data");
 }

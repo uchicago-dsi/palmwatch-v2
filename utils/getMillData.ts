@@ -1,18 +1,20 @@
 import path from "node:path";
-import { loadArrow, all, desc, op, escape } from "arquero";
-import ColumnTable from "arquero/dist/types/table/column-table";
-import { CompanyData, UmlData } from "./dataTypes";
+import { all, desc, escape, loadArrow, op } from "arquero";
+import type ColumnTable from "arquero/dist/types/table/column-table";
 import { fullYearRangeColumns } from "@/config/years";
+import type { CompanyData, UmlData } from "./dataTypes";
 import { buildTreelossRollups } from "./treelossRollups.generated";
 
 class MillDataQuery {
   companies?: ColumnTable;
   uml?: ColumnTable;
-  initialized: boolean = false;
+  initialized = false;
   cache: Record<string, any> = {};
 
   async init(basePath: string = path.join(process.cwd(), "public", "data")) {
-    if (this.initialized) return;
+    if (this.initialized) {
+      return;
+    }
     const root = basePath.replace(/\/$/, "");
     const [uml, companies] = await Promise.all([
       loadArrow(`${root}/uml.arrow`, { columns: all() }),
@@ -147,7 +149,7 @@ class MillDataQuery {
       .rollup({
         totlaForestLoss: (d: UmlData) => op.sum(d.sum_of_treeloss_km as any),
       })
-      // @ts-ignore
+      // @ts-expect-error
       .objects()[0].totlaForestLoss;
     return {
       ...summaryStats,
@@ -185,7 +187,7 @@ class MillDataQuery {
     const quantileResults: Record<string, any>[] = [];
     for (const col of cols) {
       const colParts = col.split("_");
-      const year = parseInt(colParts.at(-1) || "0");
+      const year = Number.parseInt(colParts.at(-1) || "0");
       const quantileRollup = quantiles.reduce(
         (acc, q) => ({
           ...acc,
@@ -337,8 +339,8 @@ class MillDataQuery {
     const result = {
       Brands: brandList,
       Mills: millList,
-      'Mill Owners': comapniesList,
-      'Mill Groups': groupsList,
+      "Mill Owners": comapniesList,
+      "Mill Groups": groupsList,
       Countries: countryList,
     } as const;
 
@@ -351,9 +353,8 @@ class MillDataQuery {
   filterUniqueList(v: any, i: number, a: any[]) {
     return a.indexOf(v) === i;
   }
-  filterUniqueByKey = (key: string) => (v: any, i: number, a: any[]) => {
-    return a.findIndex((d) => d[key] === v[key]) === i;
-  };
+  filterUniqueByKey = (key: string) => (v: any, i: number, a: any[]) =>
+    a.findIndex((d) => d[key] === v[key]) === i;
   sortObject(data: { [key: string]: number[] }, key: string) {
     return Object.entries(data)
       .sort(([k, v]) => v.length)
@@ -470,7 +471,7 @@ class MillDataQuery {
         count: () => op.count(),
       })
       .objects()[0] as { count: number };
-    // @ts-ignore
+    // @ts-expect-error
     const rspoCertified = uniqueCounts.millCount - notRspoCertified.count;
     return {
       ...millStats,
@@ -480,30 +481,40 @@ class MillDataQuery {
       timeseries,
     };
   }
-  
+
   @cache("countrySummaryStats")
   getCountriesSummary() {
-    const countryStats = this.uml!.
-      groupby("Country")
-        .rollup({
-          count: () => op.count(),
-          totalForestLoss: (d: UmlData) => op.round(op.sum(d.sum_of_treeloss_km as any) * 100) / 100,
-          totalArea: (d: UmlData) => op.round(op.sum(d.km_area as any) * 100) / 100,
-          totalForestArea: (d: UmlData) => op.round(op.sum(d.km_forest_area_00 as any) * 100) / 100,
-          pctForestLoss: (d: UmlData) => op.round(op.sum(d.sum_of_treeloss_km as any) / op.sum(d.km_forest_area_00 as any) * 1000)/10,
-          pctForestLossString: (d: UmlData) => `${op.round(op.sum(d.sum_of_treeloss_km as any) / op.sum(d.km_forest_area_00 as any) * 1000)/10} %`,
-          currentRisk: (d: UmlData) => op.round(op.mean(d.risk_score_current) * 100) / 100,
-          futureRisk: (d: UmlData) => op.round(op.mean(d.risk_score_future) * 100) / 100,
-          pastRisk: (d: UmlData) => op.round(op.mean(d.risk_score_past) * 100) / 100,
-        })
-        .orderby(desc("count"))
-        .objects();
-      return {
-        countryStats
-      }
-
+    const countryStats = this.uml!.groupby("Country")
+      .rollup({
+        count: () => op.count(),
+        totalForestLoss: (d: UmlData) =>
+          op.round(op.sum(d.sum_of_treeloss_km as any) * 100) / 100,
+        totalArea: (d: UmlData) =>
+          op.round(op.sum(d.km_area as any) * 100) / 100,
+        totalForestArea: (d: UmlData) =>
+          op.round(op.sum(d.km_forest_area_00 as any) * 100) / 100,
+        pctForestLoss: (d: UmlData) =>
+          op.round(
+            (op.sum(d.sum_of_treeloss_km as any) /
+              op.sum(d.km_forest_area_00 as any)) *
+              1000
+          ) / 10,
+        pctForestLossString: (d: UmlData) =>
+          `${op.round((op.sum(d.sum_of_treeloss_km as any) / op.sum(d.km_forest_area_00 as any)) * 1000) / 10} %`,
+        currentRisk: (d: UmlData) =>
+          op.round(op.mean(d.risk_score_current) * 100) / 100,
+        futureRisk: (d: UmlData) =>
+          op.round(op.mean(d.risk_score_future) * 100) / 100,
+        pastRisk: (d: UmlData) =>
+          op.round(op.mean(d.risk_score_past) * 100) / 100,
+      })
+      .orderby(desc("count"))
+      .objects();
+    return {
+      countryStats,
+    };
   }
-  
+
   getRankingOfMillsCurrentImpactScore() {}
 
   rollups = buildTreelossRollups();
@@ -513,11 +524,11 @@ const queryClient = new MillDataQuery();
 export default queryClient;
 
 function cache(key: string) {
-  return function (
+  return (
     _target: any,
     _propertyKey: string,
     descriptor: PropertyDescriptor
-  ) {
+  ) => {
     const originalMethod = descriptor.value;
     descriptor.value = function (...args: any[]) {
       if ((this as MillDataQuery).cache && (this as MillDataQuery).cache[key]) {

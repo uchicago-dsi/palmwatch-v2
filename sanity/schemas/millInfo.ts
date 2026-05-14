@@ -22,9 +22,9 @@ const millInfo = {
     },
     {
       ...getGenericContentConfig("content"),
-      name: 'content',
-      title: 'Additional Content',
-    }
+      name: "content",
+      title: "Additional Content",
+    },
   ],
 };
 

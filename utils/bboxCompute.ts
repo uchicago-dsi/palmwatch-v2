@@ -10,7 +10,9 @@ export type FullManifest = {
 
 function mean(nums: number[]): number {
   const v = nums.filter((x) => Number.isFinite(x));
-  if (!v.length) return NaN;
+  if (!v.length) {
+    return Number.NaN;
+  }
   return v.reduce((a, b) => a + b, 0) / v.length;
 }
 
@@ -19,11 +21,15 @@ function round2(n: number) {
 }
 
 function quantileSorted(sorted: number[], q: number): number {
-  if (!sorted.length) return NaN;
+  if (!sorted.length) {
+    return Number.NaN;
+  }
   const pos = (sorted.length - 1) * q;
   const lo = Math.floor(pos);
   const hi = Math.ceil(pos);
-  if (lo === hi) return sorted[lo]!;
+  if (lo === hi) {
+    return sorted[lo]!;
+  }
   return sorted[lo]! + (sorted[hi]! - sorted[lo]!) * (pos - lo);
 }
 
@@ -36,7 +42,9 @@ function computeBrandUsage(companies: CompanyData[]) {
   const map = new Map<string, Set<number>>();
   for (const c of companies) {
     const b = c.consumer_brand;
-    if (!map.has(b)) map.set(b, new Set());
+    if (!map.has(b)) {
+      map.set(b, new Set());
+    }
     map.get(b)!.add(Number(c.report_year));
   }
   return [...map.entries()]
@@ -52,8 +60,10 @@ function computeQuantileTimeseries(mills: UmlData[]) {
   const out: Record<string, number | string>[] = [];
   for (const col of fullYearRangeColumns) {
     const colParts = col.split("_");
-    const year = parseInt(colParts.at(-1) || "0", 10);
-    const values = mills.map((d) => Number((d as any)[col])).filter(Number.isFinite);
+    const year = Number.parseInt(colParts.at(-1) || "0", 10);
+    const values = mills
+      .map((d) => Number((d as any)[col]))
+      .filter(Number.isFinite);
     const row: Record<string, number | string> = { year };
     for (const q of quantiles) {
       row[`q${q}`] = quantile(values, q);
@@ -64,7 +74,9 @@ function computeQuantileTimeseries(mills: UmlData[]) {
 }
 
 function summaryStats(mills: UmlData[]) {
-  const risks = mills.map((d) => parseFloat(String(d.risk_score_current)));
+  const risks = mills.map((d) =>
+    Number.parseFloat(String(d.risk_score_current))
+  );
   return {
     averageCurrentRisk: round2(mean(risks)),
     uniqueMills: mills.length,
@@ -119,7 +131,9 @@ export async function computeBboxPayload(
   });
 
   const byUml = new Map<string, UmlData>();
-  for (const m of inBox) byUml.set(m["UML ID"], m);
+  for (const m of inBox) {
+    byUml.set(m["UML ID"], m);
+  }
   const mills = [...byUml.values()];
 
   const millIds = new Set(mills.map((m) => m["UML ID"]));

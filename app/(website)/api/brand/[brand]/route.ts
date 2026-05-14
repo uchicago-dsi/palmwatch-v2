@@ -1,20 +1,24 @@
-import { readMillDataText } from "@/utils/readMillDataText";
-import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
+import { type NextRequest, NextResponse } from "next/server";
+import removeAccents from "remove-accents";
 import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 import { precomputedSlug } from "@/utils/precomputedSlug";
-import { NextRequest, NextResponse } from "next/server";
-import { timestamp } from "@/utils/timestamp";
+import { readMillDataText } from "@/utils/readMillDataText";
 import { cleanLossData, cleanUnparse } from "@/utils/renameOutputColumns";
-import removeAccents from "remove-accents";
+import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
+import { timestamp } from "@/utils/timestamp";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ brand: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ brand: string }> }
+) {
   const { brand } = await params;
   const output = new URL(req.url).searchParams.get("output");
-  if (!brand)
+  if (!brand) {
     return NextResponse.json(
       { error: new Error("No brand provided") },
       { status: 400 }
     );
+  }
   const dataDir = await resolveMillDataBase(req);
   const slug = precomputedSlug(decodeURIComponent(brand));
   const data = await loadPrecomputedJson<{
@@ -26,12 +30,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ bran
   const sanitizedBrand = removeAccents(brand);
   switch (output) {
     case "geo": {
-      const geoDataRaw = await readMillDataText(dataDir, "mill-catchment.geojson");
+      const geoDataRaw = await readMillDataText(
+        dataDir,
+        "mill-catchment.geojson"
+      );
       const geoData = JSON.parse(geoDataRaw);
       const features = [];
       for (const row of data.umlInfo as Record<string, unknown>[]) {
         const feature = geoData.features.find(
-          // @ts-ignore
+          // @ts-expect-error
           (f: any) => f.properties["UML ID"] === row["UML ID"]
         );
         if (feature) {
@@ -40,11 +47,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ bran
             geometry: feature.geometry,
             properties: {
               ...row,
-              // @ts-ignore
+              // @ts-expect-error
               "Current Deforestation Score": row.risk_score_current,
-              // @ts-ignore
+              // @ts-expect-error
               "Past Deforestation Score": row.risk_score_past,
-              // @ts-ignore
+              // @ts-expect-error
               "Future Risk Score": row.risk_score_future,
               risk_score_current: undefined,
               risk_score_past: undefined,

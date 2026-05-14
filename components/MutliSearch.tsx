@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useMemo, useRef } from "react";
-// @ts-ignore
+// @ts-expect-error
 import debounce from "lodash.debounce";
 import Link from "next/link";
+import React, { useEffect, useMemo, useRef } from "react";
 
 export const MultiSearch: React.FC<{
   options: { [key: string]: { label: string; href: string }[] };
@@ -14,7 +14,9 @@ export const MultiSearch: React.FC<{
   const [menuOpen, setMenuOpen] = React.useState<boolean>(true);
 
   const currentListItems = useMemo(() => {
-    if (!currentListSearch?.length) return [];
+    if (!currentListSearch?.length) {
+      return [];
+    }
     return options[currentOption]
       .filter((item) =>
         item.label.toLowerCase().includes(currentListSearch.toLowerCase())
@@ -54,8 +56,8 @@ export const MultiSearch: React.FC<{
     <div className="relative">
       <div className="flex flex-row">
         <details className="dropdown mb-32">
-          <summary className="m-0 btn btn-ghost">{currentOption}...</summary>
-          <ul className="p-0 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52 ">
+          <summary className="btn btn-ghost m-0">{currentOption}...</summary>
+          <ul className="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-0 shadow">
             {Object.keys(options).map((option) => (
               <li key={option}>
                 <a onClick={() => setCurrentOption(option)}>{option}</a>
@@ -63,17 +65,17 @@ export const MultiSearch: React.FC<{
             ))}
           </ul>
         </details>
-        <div className="max-w-sm w-full">
+        <div className="w-full max-w-sm">
           <input
-            type="text"
-            onChange={(e) => handleSearch(e.target.value)}
+            className="input input-bordered w-full max-w-xs"
             onBlur={debouncedClosed}
+            onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => setMenuOpen(true)}
             placeholder={`Search for ${currentOption}`}
-            className="input input-bordered w-full max-w-xs"
+            type="text"
           />
           {Boolean(menuOpen && currentListItems.length) && (
-            <div className="absolute z-[1] w-full bg-base-100 rounded-box shadow-lg flex flex-col">
+            <div className="absolute z-[1] flex w-full flex-col rounded-box bg-base-100 shadow-lg">
               {currentListItems.map((item) => (
                 <Link className="p-2" href={item.href} key={item.label}>
                   {item.label}

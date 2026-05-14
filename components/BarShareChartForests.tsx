@@ -1,5 +1,6 @@
-import { UmlData } from "@/utils/dataTypes";
+import type { UmlData } from "@/utils/dataTypes";
 import { BarShareChart } from "./BarShareChart";
+
 // s {
 //   data: Record<string, unknown>[];
 //   bars: {
@@ -40,7 +41,9 @@ const remainingForestBarConfig = [
   },
 ];
 function clampPct(n: number): number {
-  if (!Number.isFinite(n)) return 0;
+  if (!Number.isFinite(n)) {
+    return 0;
+  }
   return Math.max(0, Math.min(100, Math.round(n)));
 }
 
@@ -55,15 +58,12 @@ export const BarShareChartForests: React.FC<BarShareChartForestProps> = ({
   const sumLoss =
     Number.isFinite(summedLoss) && summedLoss >= 0 ? summedLoss : columnLoss;
 
-  const pctForest =
-    kmArea > 0 ? clampPct((kmForest0 / kmArea) * 100) : 0;
+  const pctForest = kmArea > 0 ? clampPct((kmForest0 / kmArea) * 100) : 0;
   const pctNonForest = clampPct(100 - pctForest);
 
   // Share of *original* forest that remains vs cumulative loss (both as % of km_forest_area_00).
   const pctForestRemaining =
-    kmForest0 > 0
-      ? clampPct(((kmForest0 - sumLoss) / kmForest0) * 100)
-      : 0;
+    kmForest0 > 0 ? clampPct(((kmForest0 - sumLoss) / kmForest0) * 100) : 0;
   const pctForestLost = clampPct(100 - pctForestRemaining);
 
   const forestAmountData = [
@@ -81,23 +81,23 @@ export const BarShareChartForests: React.FC<BarShareChartForestProps> = ({
     },
   ];
   return (
-    <div className="w-full flex flex-col space-y-4 lg:flex-row lg:space-x-10 lg:space-y-0 prose max-w-full">
-      <div className="flex-1 min-w-0">
+    <div className="prose flex w-full max-w-full flex-col space-y-4 lg:flex-row lg:space-x-10 lg:space-y-0">
+      <div className="min-w-0 flex-1">
         <h3>Forest and Non-Forest Area Composition (%)</h3>
-        <div className="h-40 w-full min-h-[10rem]">
+        <div className="h-40 min-h-[10rem] w-full">
           <BarShareChart
-            data={forestAmountData}
             bars={forestAmountBarConfig}
+            data={forestAmountData}
             domain={[0, 100]}
           />
         </div>
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <h3>Remaining Forest Area (%)</h3>
-        <div className="h-40 w-full min-h-[10rem]">
+        <div className="h-40 min-h-[10rem] w-full">
           <BarShareChart
-            data={remainingForestData}
             bars={remainingForestBarConfig}
+            data={remainingForestData}
             domain={[0, 100]}
           />
         </div>

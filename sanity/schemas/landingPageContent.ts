@@ -14,7 +14,8 @@ const landingPageContent = {
       name: "page",
       title: "Page Path",
       type: "string",
-      description: "This is used to match the content here to the page. Eg. palmwatch.idi.net/brands should be 'brands' (no quotes)."
+      description:
+        "This is used to match the content here to the page. Eg. palmwatch.idi.net/brands should be 'brands' (no quotes).",
     },
     {
       ...getGenericContentConfig("content"),
@@ -23,7 +24,7 @@ const landingPageContent = {
     {
       ...getGenericContentConfig("disclaimer"),
       title: "Disclaimer / Bottom Content",
-    }
+    },
   ],
 };
 

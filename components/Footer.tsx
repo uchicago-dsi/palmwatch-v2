@@ -1,12 +1,9 @@
 import { PortableText } from "@/sanity/lib/components";
-import Link from "next/link";
 
-export const Footer: React.FC<{footerContent: any}> = ({
-  footerContent
-}) => {
+export const Footer: React.FC<{ footerContent: any }> = ({ footerContent }) => {
   const year = new Date().getFullYear();
   return (
-    <footer className="flex flex-col space-y-10 mt-10 p-10 bg-base-200 shadow-xl prose w-full max-w-none lg:flex-row lg:space-y-0 lg:space-x-10">
+    <footer className="prose mt-10 flex w-full max-w-none flex-col space-y-10 bg-base-200 p-10 shadow-xl lg:flex-row lg:space-x-10 lg:space-y-0">
       <div className="flex-1 basis-1/3">
         <PortableText value={footerContent.column1} />
       </div>

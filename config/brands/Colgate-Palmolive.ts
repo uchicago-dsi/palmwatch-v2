@@ -1,4 +1,4 @@
-import { BrandSchema } from "./types";
+import type { BrandSchema } from "./types";
 
 export const ColgatePalmolive: BrandSchema = {
   name: "Colgate-Palmolive Company",

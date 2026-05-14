@@ -1,6 +1,6 @@
-"use client"
-import React from "react";
+"use client";
+import type React from "react";
 
-export const ClientComponent: React.FC<{data: Array<Record<string, any>>}> = ({data}) => {
-  return null
-}
+export const ClientComponent: React.FC<{
+  data: Array<Record<string, any>>;
+}> = ({ data }) => null;

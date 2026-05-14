@@ -1,5 +1,5 @@
 export const getGenericContentConfig = (name: string) => ({
-  name: name,
+  name,
   title: name,
   type: "array",
   of: [
@@ -22,7 +22,7 @@ export const getGenericContentConfig = (name: string) => ({
                 name: "blank",
                 description: "Read https://css-tricks.com/use-target_blank/",
                 type: "boolean",
-                default: true
+                default: true,
               },
             ],
           },
@@ -40,7 +40,7 @@ export const getGenericContentConfig = (name: string) => ({
               be they blind, color-blind, low-sighted; 
               alternative text is of great help for those 
               people that can rely on it to have a good idea of 
-              what\'s on your page.`,
+              what's on your page.`,
           options: {
             isHighlighted: true,
           },
@@ -49,7 +49,7 @@ export const getGenericContentConfig = (name: string) => ({
           type: "text",
           name: "link",
           title: "Image Link",
-          description: `Optionally, this image can link somewhere`,
+          description: "Optionally, this image can link somewhere",
         },
       ],
     },

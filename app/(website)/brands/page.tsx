@@ -1,12 +1,11 @@
 import { InfoTable } from "@/components/InfoTable";
 import { SearchableListLayout } from "@/components/SearchableListLayout";
 import { StatsBlock } from "@/components/StatsBlock";
-import React from "react";
-import { getStatConfig } from "./pageConfig";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 import type { SearchListPayload } from "@/types/searchList";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import { getStatConfig } from "./pageConfig";
 
 export const revalidate = 60;
 
@@ -40,18 +39,19 @@ export default async function Page() {
 
   return (
     <main className="mx-auto">
-      <section className="prose flex flex-col py-4 max-w-none space-y-4">
-        <h1 className="p-0 m-0">Consumer Brands</h1>
+      <section className="prose flex max-w-none flex-col space-y-4 py-4">
+        <h1 className="m-0 p-0">Consumer Brands</h1>
         {!!landingPageContent?.content && (
           <div className="prose max-w-none">
             <PortableText value={landingPageContent.content} />
           </div>
         )}
         <StatsBlock stats={statConfig} />
-        <br/>
-        <h3 className="mt-4 mb-0 py-0">Average Deforestation Scores by Brand (1 best, 5 worst)</h3>
+        <br />
+        <h3 className="mt-4 mb-0 py-0">
+          Average Deforestation Scores by Brand (1 best, 5 worst)
+        </h3>
         <InfoTable
-          data={rankedTable}
           columnMapping={{
             consumer_brand: "Brand",
             averageFutureRisk: "Future Deforestation Risk",
@@ -59,6 +59,7 @@ export default async function Page() {
             averagePastRisk: "Past Deforestation Score",
             totalForestLoss: "Total Forest Loss (km2)",
           }}
+          data={rankedTable}
           fullHeight
         />
         <h3>Consumer Brands</h3>
@@ -69,13 +70,13 @@ export default async function Page() {
       </section>
       <div>
         <SearchableListLayout
-          options={options}
-          label="Brands"
           columns={2}
+          label="Brands"
+          options={options}
           rows={20}
         />
       </div>
-      <br/>
+      <br />
       <div className="prose my-4 max-w-none">
         {!!landingPageContent?.disclaimer && (
           <PortableText value={landingPageContent.disclaimer} />

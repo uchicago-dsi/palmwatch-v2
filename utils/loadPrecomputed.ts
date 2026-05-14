@@ -1,5 +1,5 @@
-import path from "node:path";
 import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { headers } from "next/headers";
 import { getCanonicalSiteOrigin } from "@/lib/public-site";
 
@@ -20,8 +20,13 @@ async function tryLoadPrecomputedFromAssetsBinding<T>(
     const { getCloudflareContext } = await import("@opennextjs/cloudflare");
     const { env } = await getCloudflareContext({ async: true });
     const assets = (env as { ASSETS?: { fetch: typeof fetch } }).ASSETS;
-    if (!assets) return null;
-    const url = new URL(`${PRECOMPUTED_PREFIX}/${clean}`, "https://assets.local");
+    if (!assets) {
+      return null;
+    }
+    const url = new URL(
+      `${PRECOMPUTED_PREFIX}/${clean}`,
+      "https://assets.local"
+    );
     const res = await assets.fetch(new Request(url));
     if (!res.ok) {
       await res.body?.cancel?.().catch(() => {});
@@ -62,10 +67,14 @@ export async function loadPrecomputedJson<T>(
   }
 
   const fromAssets = await tryLoadPrecomputedFromAssetsBinding<T>(clean);
-  if (fromAssets !== null) return fromAssets;
+  if (fromAssets !== null) {
+    return fromAssets;
+  }
 
   const fromDisk = await tryReadPrecomputedFromPublicDir<T>(clean);
-  if (fromDisk !== null) return fromDisk;
+  if (fromDisk !== null) {
+    return fromDisk;
+  }
 
   let origin: string;
   if (req?.url) {
@@ -90,7 +99,8 @@ export async function loadPrecomputedJson<T>(
 
   const url = `${origin}${PRECOMPUTED_PREFIX}/${clean}`;
   const res = await fetch(url);
-  if (!res.ok)
+  if (!res.ok) {
     throw new Error(`precomputed fetch failed ${res.status}: ${url}`);
+  }
   return (await res.json()) as T;
 }

@@ -1,25 +1,25 @@
 "use client";
-import React from "react";
+import type React from "react";
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
   Legend,
   ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 interface BarShareChartProps {
-  data: Record<string, unknown>[];
   bars: {
     dataKey: string;
     label: string;
     stackId?: string;
     fill?: string;
   }[];
-  domain?: [number, number]
+  data: Record<string, unknown>[];
+  domain?: [number, number];
 }
 
 export const BarShareChart: React.FC<BarShareChartProps> = ({
@@ -29,30 +29,30 @@ export const BarShareChart: React.FC<BarShareChartProps> = ({
 }) => {
   const xDomain = domain ?? [0, 100];
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer height="100%" width="100%">
       <BarChart
-        layout="vertical"
-        width={500}
-        height={300}
         data={data}
+        height={300}
+        layout="vertical"
         margin={{
           top: 8,
           right: 8,
           left: 8,
           bottom: 8,
         }}
+        width={500}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis type="number" domain={xDomain} hide />
-        <YAxis dataKey="name" type="category" hide width={1} />
+        <XAxis domain={xDomain} hide type="number" />
+        <YAxis dataKey="name" hide type="category" width={1} />
         <Tooltip />
         <Legend />
         {bars.map((bar) => (
           <Bar
-            key={bar.dataKey}
             dataKey={bar.dataKey}
-            stackId={bar.stackId || "a"}
             fill={bar.fill}
+            key={bar.dataKey}
+            stackId={bar.stackId || "a"}
           />
         ))}
       </BarChart>

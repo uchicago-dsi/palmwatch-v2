@@ -16,7 +16,9 @@ const yearRange = [...yearMeta].sort((a, b) => a - b);
 const minYear = yearRange.length ? Math.min(...yearRange) : 2001;
 const maxYear = yearRange.length ? Math.max(...yearRange) : 2022;
 const fullYearRange = [];
-for (let y = minYear; y <= maxYear; y++) fullYearRange.push(y);
+for (let y = minYear; y <= maxYear; y++) {
+  fullYearRange.push(y);
+}
 
 function linesForSum() {
   return fullYearRange
@@ -58,4 +60,11 @@ ${linesForMean()}
 `;
 
 fs.writeFileSync(outPath, header + body, "utf8");
-console.log("wrote", path.relative(root, outPath), "years", minYear, "–", maxYear);
+console.log(
+  "wrote",
+  path.relative(root, outPath),
+  "years",
+  minYear,
+  "–",
+  maxYear
+);

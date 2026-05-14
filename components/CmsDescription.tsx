@@ -9,13 +9,15 @@ export const CmsDescription: React.FC<CmsDescriptionProps> = ({
   externalLink,
   linkText,
 }) => {
-  if (!description) return null;
+  if (!description) {
+    return null;
+  }
 
   return (
-    <div className="prose bg-base-100 p-4 my-4 w-full shadow-xl max-w-none">
+    <div className="prose my-4 w-full max-w-none bg-base-100 p-4 shadow-xl">
       <p>{description}</p>
       {!!externalLink && (
-        <a href={externalLink} target="_blank" rel="noreferrer">
+        <a href={externalLink} rel="noreferrer" target="_blank">
           {linkText ? linkText : "Learn more"}
         </a>
       )}

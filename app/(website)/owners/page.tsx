@@ -1,10 +1,9 @@
 import { SearchableListLayout } from "@/components/SearchableListLayout";
-import React from "react";
 
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 import type { SearchListPayload } from "@/types/searchList";
+import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 export const revalidate = 60;
 
 export default async function Page() {
@@ -15,22 +14,21 @@ export default async function Page() {
   const options = searchList["Mill Owners"];
 
   return (
-    <main className="max-w-3xl mx-auto">
+    <main className="mx-auto max-w-3xl">
       <section className="prose flex flex-col py-4">
-        <h1 className="p-0 m-0">Mill Companies</h1>
+        <h1 className="m-0 p-0">Mill Companies</h1>
         {!!landingPageContent?.content && (
           <div className="prose max-w-none">
             <PortableText value={landingPageContent.content} />
           </div>
         )}
-
       </section>
       <div>
         <SearchableListLayout
-        // @ts-ignore
-          options={options}
-          label="Mill Owners"
           columns={2}
+          label="Mill Owners"
+          // @ts-expect-error
+          options={options}
           rows={20}
         />
       </div>

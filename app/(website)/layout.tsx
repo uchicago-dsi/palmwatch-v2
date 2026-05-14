@@ -1,12 +1,12 @@
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import { NavBar } from "@/components/NavBar";
-import { Feedback } from "@/components/Feedback";
-import cmsClient from "@/sanity/lib/client";
 import Head from "next/head";
+import { Feedback } from "@/components/Feedback";
 import { Footer } from "@/components/Footer";
+import { NavBar } from "@/components/NavBar";
 import { getCanonicalSiteOrigin, getUmamiConfig } from "@/lib/public-site";
+import cmsClient from "@/sanity/lib/client";
 
 const siteOrigin = getCanonicalSiteOrigin();
 
@@ -61,36 +61,36 @@ export default async function RootLayout({
   const footerContent = await cmsClient.getFooterContent();
   const umami = getUmamiConfig();
   return (
-    <html lang="en" data-theme="lemonade">
+    <html data-theme="lemonade" lang="en">
       <Head>
         <link
+          href="/apple-touch-icon.png"
           rel="apple-touch-icon"
           sizes="180x180"
-          href="/apple-touch-icon.png"
         />
         <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
           href="/favicon-32x32.png"
+          rel="icon"
+          sizes="32x32"
+          type="image/png"
         />
         <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
           href="/favicon-16x16.png"
+          rel="icon"
+          sizes="16x16"
+          type="image/png"
         />
-        <link rel="manifest" href="/site.webmanifest" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
-        <meta name="msapplication-TileColor" content="#da532c" />
-        <meta name="theme-color" content="#ffffff" />
+        <link href="/site.webmanifest" rel="manifest" />
+        <link color="#5bbad5" href="/safari-pinned-tab.svg" rel="mask-icon" />
+        <meta content="#da532c" name="msapplication-TileColor" />
+        <meta content="#ffffff" name="theme-color" />
       </Head>
       <body className={inter.variable}>
         {umami ? (
           <Script
+            data-website-id={umami.websiteId}
             defer
             src={umami.scriptSrc}
-            data-website-id={umami.websiteId}
             strategy="afterInteractive"
           />
         ) : null}

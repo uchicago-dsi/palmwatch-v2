@@ -1,7 +1,7 @@
 "use client";
-import { PalmwatchMap } from "./Map";
 import { useQuery } from "@tanstack/react-query";
 import { latestTreelossKmColumn } from "@/config/years";
+import { PalmwatchMap } from "./Map";
 
 export const HomePageMap = () => {
   const { data, isLoading, isError } = useQuery(["full-data"], async () => {
@@ -9,17 +9,17 @@ export const HomePageMap = () => {
     return res.json();
   });
   return (
-    <div className="h-[80vh] relative w-full">
+    <div className="relative h-[80vh] w-full">
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <PalmwatchMap
-          geoDataUrl="/data/mill-catchment.geojson"
-          dataTable={data!}
-          geoIdColumn="UML ID"
-          dataIdColumn="UML ID"
           choroplethColumn={latestTreelossKmColumn}
           choroplethScheme="forestLoss"
+          dataIdColumn="UML ID"
+          dataTable={data!}
+          geoDataUrl="/data/mill-catchment.geojson"
+          geoIdColumn="UML ID"
         />
       )}
     </div>

@@ -1,4 +1,5 @@
-import React from "react";
+import type React from "react";
+
 interface StatsBlockProps {
   stats: Array<{
     title: string;
@@ -7,16 +8,14 @@ interface StatsBlockProps {
     description?: string;
   }>;
 }
-export const StatsBlock: React.FC<StatsBlockProps> = ({ stats }) => {
-  return (
-    <div className="stats stats-vertical lg:stats-horizontal">
-      {stats.map(({ title, stat, className, description }) => (
-        <div className="stat" key={title}>
-          <div className="stat-title">{title}</div>
-          <div className={`stat-value ${className}`}>{stat}</div>
-          {!!description && <div className="stat-desc">{description}</div>}
-        </div>
-      ))}
-    </div>
-  );
-};
+export const StatsBlock: React.FC<StatsBlockProps> = ({ stats }) => (
+  <div className="stats stats-vertical lg:stats-horizontal">
+    {stats.map(({ title, stat, className, description }) => (
+      <div className="stat" key={title}>
+        <div className="stat-title">{title}</div>
+        <div className={`stat-value ${className}`}>{stat}</div>
+        {!!description && <div className="stat-desc">{description}</div>}
+      </div>
+    ))}
+  </div>
+);

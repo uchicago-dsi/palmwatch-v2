@@ -5,9 +5,11 @@ interface CmsContent {
 }
 
 export const CmsContent: React.FC<CmsContent> = ({ content }) => {
-  if (!content) return null;
+  if (!content) {
+    return null;
+  }
   return (
-    <div className="prose bg-base-100 p-4 my-4 w-full shadow-xl max-w-none">
+    <div className="prose my-4 w-full max-w-none bg-base-100 p-4 shadow-xl">
       <PortableText value={content} />
     </div>
   );

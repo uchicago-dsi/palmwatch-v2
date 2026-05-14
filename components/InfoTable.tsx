@@ -1,44 +1,44 @@
-"use client"
-import React from "react";
+"use client";
+import type React from "react";
 import { DataProvider } from "./DataProvider";
 
 interface ServerInfoTableProps {
-  endpoint: string;
-  dataAccessor: string;
   columnMapping?: Record<string, string>;
+  dataAccessor: string;
+  endpoint: string;
 }
 
 export const ServerInfotable: React.FC<ServerInfoTableProps> = ({
   endpoint,
   dataAccessor,
   columnMapping,
-}) => {
-  return (
-    <DataProvider<{ [key: string]: any }> dataUrl={endpoint}>
-      {(data) => {
-        return (
-          <InfoTable
-            data={dataAccessor ? data[dataAccessor] : data}
-            columnMapping={columnMapping}
-          />
-        );
-      }}
-    </DataProvider>
-  );
-};
+}) => (
+  <DataProvider<{ [key: string]: any }> dataUrl={endpoint}>
+    {(data) => (
+      <InfoTable
+        columnMapping={columnMapping}
+        data={dataAccessor ? data[dataAccessor] : data}
+      />
+    )}
+  </DataProvider>
+);
 
 interface InfoTable {
-  data: Record<string, any>[];
   columnMapping?: Record<string, string>;
+  data: Record<string, any>[];
   fullHeight?: boolean;
 }
 
-export const InfoTable: React.FC<InfoTable> = ({ data, columnMapping, fullHeight }) => {
+export const InfoTable: React.FC<InfoTable> = ({
+  data,
+  columnMapping,
+  fullHeight,
+}) => {
   const rawColumns = Object.keys(columnMapping || data[0]);
   const columns = rawColumns.map((key) => columnMapping?.[key] || key);
   return (
-    <div className={`overflow-x-auto ${fullHeight ? 'h-full' : 'h-96'} w-full`}>
-      <table className="table table-pin-rows">
+    <div className={`overflow-x-auto ${fullHeight ? "h-full" : "h-96"} w-full`}>
+      <table className="table-pin-rows table">
         <thead>
           <tr>
             {columns.map((column) => (

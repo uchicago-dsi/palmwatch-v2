@@ -21,10 +21,10 @@ const ownerInfo = {
       type: "url",
     },
     {
-      ...getGenericContentConfig('content'),
-      name: 'content',
-      title: 'Additional Content',
-    }
+      ...getGenericContentConfig("content"),
+      name: "content",
+      title: "Additional Content",
+    },
   ],
 };
 

@@ -1,15 +1,15 @@
 "use client";
-import React from "react";
+import type React from "react";
 import {
+  Area,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
   Line,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  Area,
-  ComposedChart,
 } from "recharts";
 import { DataProvider } from "./DataProvider";
 
@@ -19,87 +19,97 @@ export type IqrOverTimeProps = {
   showMedian?: boolean;
 };
 
-export const IqrOverTime: React.FC<IqrOverTimeProps> = ({ data, type, showMedian }) => {
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <ComposedChart
-        width={500}
-        height={300}
-        data={data}
-        margin={{
-          top: 30,
-          right: 30,
-          left: 20,
-          bottom: 5,
+export const IqrOverTime: React.FC<IqrOverTimeProps> = ({
+  data,
+  type,
+  showMedian,
+}) => (
+  <ResponsiveContainer height="100%" width="100%">
+    <ComposedChart
+      data={data}
+      height={300}
+      margin={{
+        top: 30,
+        right: 30,
+        left: 20,
+        bottom: 5,
+      }}
+      width={500}
+    >
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="year" />
+      <YAxis
+        label={{
+          value: "Square KM of Forest Loss Per Year",
+          angle: -90,
+          dx: -10,
         }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="year" />
-        <YAxis label={{ value: "Square KM of Forest Loss Per Year", angle: -90, dx:-10 }}  />
-        <Tooltip />
-        <Legend />
-        {showMedian ? 
-        <Line 
-          isAnimationActive={false}
-          type="monotone"
+      />
+      <Tooltip />
+      <Legend />
+      {showMedian ? (
+        <Line
+          activeDot={{ r: 4 }}
           dataKey="Overall Median Mill Tree Loss (km2)"
+          isAnimationActive={false}
           stroke="darkgray"
           strokeWidth={2}
-          activeDot={{ r: 4 }}
+          type="monotone"
         />
-        : null}
-        {type === 'brand' ? (<>
-        
+      ) : null}
+      {type === "brand" ? (
+        <>
           <Area
-          isAnimationActive={false}
-          type="monotone"
-          dataKey="q0.25"
-          name="1st Quartile Mill (lowest 25%)"
-          stackId="1"
-          stroke="#acacac"
-          fill="rgba(0, 0, 0, 0)"
-          />
-        <Area
+            dataKey="q0.25"
+            fill="rgba(0, 0, 0, 0)"
             isAnimationActive={false}
-          name="3rd Quartile Mill (highest 25%)"
-          type="monotone"
-          dataKey="q0.75"
-          stackId="1"
-          stroke="#acacac"
-          fill="#55555555"
+            name="1st Quartile Mill (lowest 25%)"
+            stackId="1"
+            stroke="#acacac"
+            type="monotone"
+          />
+          <Area
+            dataKey="q0.75"
+            fill="#55555555"
+            isAnimationActive={false}
+            name="3rd Quartile Mill (highest 25%)"
+            stackId="1"
+            stroke="#acacac"
+            type="monotone"
           />
 
-        <Line
-          isAnimationActive={false}
-          name="Median Mill"
-          type="monotone"
-          dataKey="q0.5"
-          stroke="rgb(248, 114, 114)"
-          strokeWidth={5}
-          activeDot={{ r: 8 }}
-        /></>): (
           <Line
-          isAnimationActive={false}
-          type="monotone"
+            activeDot={{ r: 8 }}
+            dataKey="q0.5"
+            isAnimationActive={false}
+            name="Median Mill"
+            stroke="rgb(248, 114, 114)"
+            strokeWidth={5}
+            type="monotone"
+          />
+        </>
+      ) : (
+        <Line
+          activeDot={{ r: 8 }}
           dataKey="Mill Tree Loss (km2)"
+          isAnimationActive={false}
           stroke="#ff0000"
           strokeWidth={5}
-          activeDot={{ r: 8 }}
+          type="monotone"
         />
-        )}
-      </ComposedChart>
-    </ResponsiveContainer>
-  );
-};
+      )}
+    </ComposedChart>
+  </ResponsiveContainer>
+);
 
 export const ServerIqr: React.FC<{
   dataUrl: string;
   type: IqrOverTimeProps["type"];
-}> = ({ dataUrl, type='brand' }) => {
+}> = ({ dataUrl, type = "brand" }) => {
   return (
     <DataProvider<{ timeseries: any }> dataUrl={dataUrl}>
       {(data) => {
-        // @ts-ignore
+        // @ts-expect-error
         return <IqrOverTime data={data.timeseries} type={type} />;
       }}
     </DataProvider>

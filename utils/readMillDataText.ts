@@ -9,8 +9,11 @@ export async function readMillDataText(
   const root = dataDir.replace(/\/$/, "");
   if (/^https?:\/\//i.test(root)) {
     const res = await fetch(`${root}/${filename}`);
-    if (!res.ok)
-      throw new Error(`Failed to fetch ${root}/${filename}: HTTP ${res.status}`);
+    if (!res.ok) {
+      throw new Error(
+        `Failed to fetch ${root}/${filename}: HTTP ${res.status}`
+      );
+    }
     return res.text();
   }
   return readFileSync(path.join(root, filename), "utf8");

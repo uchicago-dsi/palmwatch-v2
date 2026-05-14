@@ -1,14 +1,14 @@
-import { TypedObject } from "sanity";
+import type { TypedObject } from "sanity";
 
 export type BrandSchema = {
   /*
-  * The name of the brand.
-  */
+   * The name of the brand.
+   */
   name: string;
   altName?: string;
   /*
-  * List of disclosure PDFs by year
-  */
+   * List of disclosure PDFs by year
+   */
   disclosures: {
     year: string;
     filename: string;

@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
 import { usePathname } from "next/navigation";
+import React from "react";
 export const Feedback = () => {
   const path = usePathname();
   const url = path === "/" ? "Homepage" : decodeURI(path);
@@ -16,30 +16,30 @@ export const Feedback = () => {
   };
   const handleOpen = () => {
     setModalOpen(true);
-  }
+  };
   return (
     <>
       <button
-        className="btn btn-sm normal-case rounded-r-none fixed right-0 bottom-[50%] bg-accent rounded-full shadow-xl z-50 dark:text-black"
-        // @ts-ignore
+        className="btn btn-sm fixed right-0 bottom-[50%] z-50 rounded-full rounded-r-none bg-accent normal-case shadow-xl dark:text-black"
+        // @ts-expect-error
         onClick={handleOpen}
       >
         Feedback
       </button>
-      <dialog className={`modal ${modalOpen ? 'modal-open' : ''} `}>
-        <div className="modal-box prose flex flex-col h-full">
-          <h3 className="font-bold text-lg flex-0">PalmWatch Feedback Form</h3>
+      <dialog className={`modal ${modalOpen ? "modal-open" : ""} `}>
+        <div className="modal-box prose flex h-full flex-col">
+          <h3 className="flex-0 font-bold text-lg">PalmWatch Feedback Form</h3>
           <p className="flex-0">
             Thank you for testing the PalmWatch Beta and providing feedback.
             Please copy and paste the web link below into the form so we can
             better identify the issue.
           </p>
           {/* add copy paste functionality */}
-          <div className="flex-0 flex flex-row space-x-4 justify-center items-center">
+          <div className="flex flex-0 flex-row items-center justify-center space-x-4">
             <p>PalmWatch website URL: </p>
             <pre className="flex-1">{url}</pre>
             <div
-              className={`flex-0 tooltip ${
+              className={`tooltip flex-0 ${
                 showTooltip ? "tooltip-open" : "disabled"
               }`}
               data-tip={showTooltip ? "Copied!" : null}
@@ -50,22 +50,23 @@ export const Feedback = () => {
             </div>
           </div>
           <iframe
+            className="flex-1 border-base-300 shadow-inner"
             src="https://docs.google.com/forms/d/e/1FAIpQLSc_bWuT5T4WKu0kfU4rbuUqaSlbCtNfTTWdRrt2pc7AmShqUQ/viewform?embedded=true"
-            className="flex-1 shadow-inner border-base-300"
           >
             Loading…
           </iframe>
           <div className="modal-action">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
-              <button className="btn" onClick={() => setModalOpen(false)}>Close</button>
+              <button className="btn" onClick={() => setModalOpen(false)}>
+                Close
+              </button>
             </form>
-
           </div>
         </div>
-            <form method="dialog" className="modal-backdrop">
-              <button onClick={() => setModalOpen(false)}>close</button>
-            </form>
+        <form className="modal-backdrop" method="dialog">
+          <button onClick={() => setModalOpen(false)}>close</button>
+        </form>
       </dialog>
     </>
   );

@@ -1,20 +1,24 @@
-import { readMillDataText } from "@/utils/readMillDataText";
-import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
+import { type NextRequest, NextResponse } from "next/server";
+import { unparse } from "papaparse";
 import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 import { precomputedSlug } from "@/utils/precomputedSlug";
-import { NextRequest, NextResponse } from "next/server";
-import { unparse } from "papaparse";
+import { readMillDataText } from "@/utils/readMillDataText";
+import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
 import { timestamp } from "@/utils/timestamp";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ owner: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ owner: string }> }
+) {
   const { owner: _owner } = await params;
   const owner = decodeURIComponent(_owner);
   const output = new URL(req.url).searchParams.get("output");
-  if (!owner)
+  if (!owner) {
     return NextResponse.json(
       { error: new Error("No owner provided") },
       { status: 400 }
     );
+  }
   const dataDir = await resolveMillDataBase(req);
   const slug = precomputedSlug(owner);
   const data = await loadPrecomputedJson<{
@@ -25,12 +29,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ owne
 
   switch (output) {
     case "geo": {
-      const geoDataRaw = await readMillDataText(dataDir, "mill-catchment.geojson");
+      const geoDataRaw = await readMillDataText(
+        dataDir,
+        "mill-catchment.geojson"
+      );
       const geoData = JSON.parse(geoDataRaw);
       const features = [];
       for (const row of data.umlInfo as Record<string, unknown>[]) {
         const feature = geoData.features.find(
-          // @ts-ignore
+          // @ts-expect-error
           (f: any) => f.properties["UML ID"] === row["UML ID"]
         );
         if (feature) {
