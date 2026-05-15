@@ -10,7 +10,17 @@ Web app for exploring how palm oil supply chains relate to mill-level data and f
 - **Sanity** for editable marketing and editorial content (home, about, contact, footers, mill/brand copy, and so on)
 - **Arquero** for aggregations over mill data; output is written to static JSON under `public/data/precomputed/` so edge runtimes do not need to run heavy analytics at request time
 - **Cloudflare** deployment via **OpenNext** (`@opennextjs/cloudflare`, **Wrangler**); `CF_PAGES_URL` is used when `NEXT_PUBLIC_SITE_URL` is unset
-- **Ultracite** and **Biome** for formatting and lint (`pnpm check`, `pnpm fix`, `pnpm format`)
+- **Ultracite** and **Biome** for formatting and lint (`pnpm check`, `pnpm fix`, `pnpm format`). **`pnpm check` is not yet clean on the whole tree** (legacy diagnostics); **`pnpm exec tsc --noEmit`** and **`pnpm lint`** are the recommended merge gates until Ultracite is fully aligned.
+
+## Quality gates
+
+For PRs and CI, prefer:
+
+```bash
+pnpm exec tsc --noEmit && pnpm lint
+```
+
+Run `pnpm check` locally when touching files it covers; expect unrelated backlog until rules and styles are tightened repo-wide.
 
 ## Requirements
 
@@ -52,7 +62,7 @@ Starts Next.js with Turbopack. The CMS studio is available under the `(sanity)` 
 
 `pnpm build` runs **`prebuild`** first:
 
-1. **`scripts/gen-treeloss-rollups.mjs`** — reads `public/data/year_meta.json` and regenerates `utils/treelossRollups.generated.ts` so Arquero rollups use literal column access (required for environments that disallow `eval` / `new Function`, e.g. Workers).
+1. **`scripts/gen-treeloss-rollups.mjs`** — reads `public/data/year_meta.json` and regenerates `lib/server/treeloss-rollups.generated.ts` so Arquero rollups use literal column access (required for environments that disallow `eval` / `new Function`, e.g. Workers).
 2. **`scripts/precompute-worker-data.ts`** — loads mill data from `public/data`, runs aggregations, and writes JSON under `public/data/precomputed/` (search index, shards, summaries, and so on).
 
 To refresh precomputed JSON without a full Next build:
