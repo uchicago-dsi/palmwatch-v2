@@ -4,7 +4,11 @@ import type React from "react";
 import { Preloader } from "@/components/preloader";
 import { maxYear, minYear } from "@/config/years";
 import { useActiveUmlStore } from "@/hooks/use-active-uml-store";
-import { type BrandData, BrandInfo } from "./brand-info";
+import {
+  BRAND_INFO_SECTION_TITLE,
+  type BrandData,
+  BrandInfo,
+} from "./brand-info";
 
 export const BrandInfoClient: React.FC = () => {
   const uml = useActiveUmlStore((state) => state.currentUml);
@@ -22,13 +26,21 @@ export const BrandInfoClient: React.FC = () => {
   }
 
   if (isLoading || isError) {
-    return <Preloader />;
+    return (
+      <div className="prose w-full max-w-none [&_h3]:mt-0 [&_h3]:mb-3">
+        <h3>{BRAND_INFO_SECTION_TITLE}</h3>
+        <Preloader />
+      </div>
+    );
   }
   if (!data?.brands?.length) {
     return (
-      <p>
-        No brand usage found for this mill from {minYear} to {maxYear}.
-      </p>
+      <div className="prose w-full max-w-none [&_h3]:mt-0 [&_h3]:mb-3">
+        <h3>{BRAND_INFO_SECTION_TITLE}</h3>
+        <p>
+          No brand usage found for this mill from {minYear} to {maxYear}.
+        </p>
+      </div>
     );
   }
 
