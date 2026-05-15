@@ -1,18 +1,58 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React from "react";
+import styles from "@/app/(website)/_shell/site-chrome.module.css";
 import { MENU_ITEMS } from "@/components/nav-bar-menu";
 import type { SearchListPayload } from "@/domain";
+import { useDropdownStore } from "@/hooks/super-dropdown-store";
 import { NavBarSuperDropdown } from "./nav-bar-super-dropdown";
 
 interface NavbarProps {
-  children?: React.ReactNode;
   searchList?: SearchListPayload;
 }
 
-export const NavBar: React.FC<NavbarProps> = ({ searchList, children }) => {
+export const NavBar: React.FC<NavbarProps> = ({ searchList }) => {
   const [innerSearchList, setInnerSearchList] =
     React.useState<NavbarProps["searchList"]>();
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const pathname = usePathname();
+  const searchBarRef = React.useRef<HTMLDivElement>(null);
+  const currentMegaMenu = useDropdownStore((s) => s.currentDropdown);
+  const setMegaMenu = useDropdownStore((s) => s.setcurrentDropdown);
+
+  React.useEffect(() => {
+    if (!currentMegaMenu) {
+      return;
+    }
+    function onPointerDown(ev: PointerEvent) {
+      const root = searchBarRef.current;
+      if (root && !root.contains(ev.target as Node)) {
+        setMegaMenu("");
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () =>
+      document.removeEventListener("pointerdown", onPointerDown, true);
+  }, [currentMegaMenu, setMegaMenu]);
+
+  React.useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("keydown", onKeyDown, { capture: true });
+    return () =>
+      document.removeEventListener("keydown", onKeyDown, { capture: true });
+  }, [menuOpen]);
 
   React.useEffect(() => {
     if (innerSearchList !== undefined) {
@@ -36,102 +76,118 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList, children }) => {
   }, [searchList, innerSearchList]);
 
   return (
-    <div className="drawer z-50">
-      <input className="drawer-toggle" id="my-drawer-3" type="checkbox" />
-      <div className="drawer-content flex max-w-full flex-col">
-        <div className="navbar relative z-10 w-full bg-base-300">
-          <div className="flex-none lg:hidden">
-            <label
-              aria-label="open sidebar"
-              className="btn btn-square btn-ghost"
-              htmlFor="my-drawer-3"
-            >
-              <svg
-                aria-hidden={true}
-                className="inline-block h-6 w-6 stroke-current"
-                fill="none"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+    <>
+      <header className={styles.siteHeader}>
+        <div className={styles.topbarUtility}>
+          <div className={styles.topbarUtilityInner}>
+            <Link className={styles.logoUtility} href="/">
+              PalmWatch
+            </Link>
+            <div className={styles.topbarUtilityRight}>
+              <button
+                aria-expanded={menuOpen}
+                aria-label="Open menu"
+                className={styles.hamburger}
+                onClick={() => setMenuOpen(true)}
+                type="button"
               >
-                <path
-                  d="M4 6h16M4 12h16M4 18h16"
+                <svg
+                  aria-hidden
+                  fill="none"
+                  height="20"
+                  stroke="currentColor"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                />
-              </svg>
-            </label>
-          </div>
-          <div className="mx-2 flex-none px-2">
-            <ul className="menu menu-horizontal">
-              <li>
-                <Link className="font-bold" href="/">
-                  PalmWatch
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div className="hidden flex-1 px-2 lg:block">
-            <div className="mx-auto block w-fit">
-              <ul className="menu menu-horizontal rounded-xl bg-base-100 p-0">
-                <li className="pointer-events-none">
-                  <p>Search:</p>
-                </li>
-                {MENU_ITEMS.map((item) => (
-                  <NavBarSuperDropdown
-                    description={item.description}
-                    icon={item.icon}
-                    key={item.label}
-                    label={item.label}
-                    options={(innerSearchList?.[item.label] as []) || []}
-                    path={item.path}
-                  />
-                ))}
-              </ul>
+                  viewBox="0 0 24 24"
+                  width="20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <nav
+                aria-label="Utility navigation"
+                className={styles.topbarUtilityNav}
+              >
+                <Link href="/about">About</Link>
+                <Link href="/contact">Contact</Link>
+              </nav>
             </div>
           </div>
-          <div className="hidden flex-none lg:block">
-            <ul className="menu menu-horizontal">
-              <li>
-                <Link href="/about">About</Link>
-              </li>
-              <li>
-                <Link href="/contact">Contact</Link>
-              </li>
-            </ul>
+        </div>
+
+        <div className={styles.topbarMain}>
+          <div className={styles.topbarMainInner}>
+            <div className={styles.searchBar} ref={searchBarRef}>
+              {MENU_ITEMS.map((item) => (
+                <NavBarSuperDropdown
+                  description={item.description}
+                  icon={item.icon}
+                  key={item.label}
+                  label={item.label}
+                  options={(innerSearchList?.[item.label] as []) || []}
+                  path={item.path}
+                />
+              ))}
+            </div>
           </div>
         </div>
-        {children}
-      </div>
-      <div className="drawer-side">
-        <label
-          aria-label="close sidebar"
-          className="drawer-overlay"
-          htmlFor="my-drawer-3"
+      </header>
+
+      {menuOpen && (
+        <div
+          aria-hidden
+          className={styles.mobileBackdrop}
+          onClick={() => setMenuOpen(false)}
         />
-        <ul className="menu min-h-full w-80 bg-base-200 p-4">
-          <ul className="menu menu-vertical rounded-xl bg-base-100 p-0 pt-24">
-            <li>
-              <Link className="mb-8 font-bold" href="/">
-                PalmWatch
-              </Link>
-            </li>
-            {MENU_ITEMS.map((item) => (
-              <li key={item.label}>
-                <Link href={`${item.path}`}>{item.label}</Link>
-              </li>
-            ))}
-            <li>
-              <Link className="mt-8" href="/about">
-                About
-              </Link>
-            </li>
-            <li>
-              <Link href="/contact">Contact</Link>
-            </li>
-          </ul>
-        </ul>
-      </div>
-    </div>
+      )}
+
+      <aside
+        aria-label="Site navigation"
+        className={`${styles.mobilePanel} ${menuOpen ? styles.mobilePanelOpen : ""}`}
+      >
+        <button
+          aria-label="Close menu"
+          className={styles.mobileClose}
+          onClick={() => setMenuOpen(false)}
+          type="button"
+        >
+          <svg
+            aria-hidden
+            fill="none"
+            height="18"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            width="18"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+
+        <nav className={styles.mobilePanelNav}>
+          {MENU_ITEMS.map((item) => (
+            <Link
+              className={styles.mobileLink}
+              href={item.path}
+              key={item.label}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <div className={styles.mobileDivider} />
+          <Link className={styles.mobileLink} href="/about">
+            About
+          </Link>
+          <Link className={styles.mobileLink} href="/contact">
+            Contact
+          </Link>
+        </nav>
+      </aside>
+    </>
   );
 };

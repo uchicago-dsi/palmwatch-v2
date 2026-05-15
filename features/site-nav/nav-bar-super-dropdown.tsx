@@ -1,5 +1,6 @@
 "use client";
 import type React from "react";
+import styles from "@/app/(website)/_shell/site-chrome.module.css";
 import { SearchableListLayout } from "@/components/searchable-list-layout";
 import { useDropdownStore } from "@/hooks/super-dropdown-store";
 
@@ -9,15 +10,14 @@ interface NavBarSuperDropdownProps {
   label: string;
   options: Array<{ label: string; href: string; imgPath?: string }>;
   path: string;
-  showText?: boolean;
 }
 
+/** Desktop: label + chevron (reference site style); panel lists still use searchable layout. `icon` is unused but kept for menu config compatibility. */
 export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
-  icon,
+  icon: _icon,
   label,
   options,
   path,
-  showText,
   description,
 }) => {
   const { currentDropdown, setcurrentDropdown } = useDropdownStore();
@@ -25,42 +25,43 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
 
   return (
     <>
-      <li>
-        <button
-          className={`tooltip tooltip-bottom ${isActive ? "bg-info" : ""}`}
-          data-tip={label}
-          onClick={() => setcurrentDropdown(label)}
-          type="button"
+      <button
+        aria-expanded={isActive}
+        aria-haspopup="dialog"
+        className={`${styles.navMenuTrigger} ${isActive ? styles.navMenuTriggerActive : ""}`}
+        onClick={() => setcurrentDropdown(isActive ? "" : label)}
+        type="button"
+      >
+        <span className={styles.navMenuTriggerLabel}>{label}</span>
+        <svg
+          aria-hidden
+          className={`${styles.navMenuChevron} ${isActive ? styles.navMenuChevronOpen : ""}`}
+          fill="none"
+          height="10"
+          viewBox="0 0 12 12"
+          width="10"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <svg
-            aria-hidden={true}
-            className="h-6 w-6 fill-base-content"
-            version="1.1"
-            viewBox="0 0 100 100"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {icon}
-          </svg>
-          {showText ? <span className="ml-2">{label}</span> : null}
-        </button>
-      </li>
-      {isActive ? (
-        <>
-          <button
-            className="absolute top-[100%] left-0 h-[100vh] w-full bg-black opacity-30 shadow-xl"
-            onClick={() => setcurrentDropdown("")}
-            type="button"
+          <path
+            d="M2 4.5 6 8 10 4.5"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.5"
           />
-          <div className="absolute top-[100%] left-0 w-full bg-base-100 p-4 pr-4 shadow-xl">
-            <SearchableListLayout
-              description={description}
-              label={label}
-              options={options}
-              path={path}
-              setcurrentDropdown={setcurrentDropdown}
-            />
-          </div>
-        </>
+        </svg>
+      </button>
+      {isActive ? (
+        <div className={styles.navDropdownPanel}>
+          <SearchableListLayout
+            description={description}
+            label={label}
+            navPanel
+            options={options}
+            path={path}
+            setcurrentDropdown={setcurrentDropdown}
+          />
+        </div>
       ) : null}
     </>
   );

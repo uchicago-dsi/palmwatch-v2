@@ -1,0 +1,506 @@
+/* ─── Site header (utility bar + main nav) ───────────────────────────────── */
+
+.siteHeader {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* Upper tier — black strip: wordmark + utility links / mobile menu */
+.topbarUtility {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0 var(--page-gutter, 16px);
+  color: #fff;
+  background: #0a0a0a;
+}
+
+.topbarUtilityInner {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--content-max-wide, 1320px);
+  min-height: 42px;
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .topbarUtilityInner {
+    min-height: 38px;
+  }
+}
+
+.topbarUtilityRight {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.topbarUtilityNav {
+  display: none;
+  gap: 22px;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .topbarUtilityNav {
+    display: flex;
+  }
+}
+
+.topbarUtilityNav a {
+  font-size: 13px;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  opacity: 0.95;
+  transition: opacity 0.15s ease;
+}
+
+.topbarUtilityNav a:hover {
+  opacity: 0.75;
+}
+
+/* Wordmark on black bar */
+.logoUtility {
+  flex-shrink: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.logoUtility:hover {
+  opacity: 0.9;
+}
+
+/* Lower tier — white main navigation (mega-menu triggers only; hidden on small screens) */
+.topbarMain {
+  box-sizing: border-box;
+  display: none;
+  width: 100%;
+  padding: 0 var(--page-gutter, 16px);
+  color: #111;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+@media (min-width: 1024px) {
+  .topbarMain {
+    display: block;
+  }
+}
+
+.topbarMainInner {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  max-width: var(--content-max-wide, 1320px);
+  min-height: 56px;
+  margin: 0 auto;
+}
+
+/* Logo — removed from white bar (wordmark lives on utility strip) */
+.searchBar {
+  position: relative;
+  display: none;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+}
+
+@media (min-width: 1024px) {
+  .searchBar {
+    display: flex;
+  }
+}
+
+.navMenuTrigger {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.navMenuTrigger:hover {
+  color: var(--site-nav-accent);
+}
+
+.navMenuTriggerActive {
+  color: var(--site-nav-accent);
+}
+
+.navMenuTriggerLabel {
+  white-space: nowrap;
+}
+
+.navMenuChevron {
+  flex-shrink: 0;
+  color: currentColor;
+  opacity: 0.85;
+  transition: transform 0.2s ease;
+}
+
+.navMenuChevronOpen {
+  transform: rotate(180deg);
+}
+
+.navDropdownPanel {
+  position: absolute;
+  top: calc(100% + 1px);
+  right: 0;
+  left: 0;
+  z-index: 95;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 16px;
+  /* Page theme uses light --bc for dark backgrounds; mega-menu is white — force readable copy */
+  color: #171717;
+  background: #fff;
+  border-top: 1px solid #e8e8e8;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.navDropdownPanel :global(.prose) {
+  color: #171717;
+}
+
+.navDropdownPanel :global(.prose h3) {
+  font-weight: 700;
+  color: #0a0a0a;
+}
+
+.navDropdownPanel :global(.prose p) {
+  color: #3a3a3a;
+}
+
+.navDropdownPanel :global(a.btn-link) {
+  color: #1e293b;
+}
+
+.navDropdownPanel :global(a.btn-link:hover) {
+  color: var(--site-nav-accent);
+}
+
+/* Pagination in mega-menu left column — theme `.btn` is dark; outline style on white panel */
+.navDropdownPanel :global(button.btn.join-item) {
+  box-sizing: border-box;
+  font-weight: 500;
+  color: #1e293b !important;
+  background: #fff !important;
+  border: 1px solid #d4d4d8;
+}
+
+.navDropdownPanel :global(button.btn.join-item:hover) {
+  background: #f4f4f5 !important;
+  border-color: #a8a29e;
+}
+
+.navDropdownPanel :global(button.btn.join-item:active) {
+  background: #e7e5e4 !important;
+}
+
+.searchBarLabel {
+  flex-shrink: 0;
+  margin-right: 4px;
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Hamburger — white on black utility bar; hidden on desktop */
+
+.hamburger {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  color: #fff;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.hamburger:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 1024px) {
+  .hamburger {
+    display: none;
+  }
+}
+
+/* ─── Mobile menu backdrop ────────────────────────────────────────────────── */
+
+.mobileBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+/* ─── Mobile menu slide-out panel ─────────────────────────────────────────── */
+
+.mobilePanel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 120;
+  display: flex;
+  /* Hidden from accessibility tree when closed */
+  visibility: hidden;
+  flex-direction: column;
+  width: 280px;
+  padding: 12px 16px 32px;
+  background: oklch(var(--b2));
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobilePanelOpen {
+  visibility: visible;
+  transform: translateX(0);
+}
+
+/* ─── Mobile menu close button ────────────────────────────────────────────── */
+
+.mobileClose {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  align-self: flex-end;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin-bottom: 16px;
+  color: #888;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.mobileClose:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Mobile menu nav links ───────────────────────────────────────────────── */
+
+.mobilePanelNav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobileLink {
+  display: block;
+  padding: 10px 8px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #ccc;
+  text-decoration: none;
+  border-radius: 6px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.mobileLink:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.mobileDivider {
+  height: 1px;
+  margin: 8px 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Footer (main band + accent copyright strip) ─────────────────────────── */
+
+.footer {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 100%;
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.footerMain {
+  padding: 36px var(--page-gutter, 16px) 32px;
+  color: #fff;
+  background: oklch(0.22 0.04 215);
+}
+
+.footerMainInner {
+  max-width: var(--content-max-wide, 1320px);
+  margin: 0 auto;
+}
+
+.footerGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(140px, 0.42fr) minmax(0, 1fr);
+  gap: 36px 40px;
+  align-items: start;
+}
+
+/* Left: acknowledgements */
+.footerAckTitleWrap {
+  display: inline-block;
+  padding: 8px 14px;
+  margin-bottom: 14px;
+  background: oklch(0.28 0.045 215);
+}
+
+.footerAckTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.footerAckText {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Center: quick links */
+.footerQuick {
+  padding-top: 2px;
+}
+
+.footerQuickTitle {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.footerQuickList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.footerQuickLink {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.footerQuickLink:hover {
+  opacity: 0.85;
+}
+
+/* Right: logos from /public/logos */
+.footerBrand {
+  align-self: start;
+  justify-self: end;
+}
+
+.footerLogosRow {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 14px;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.footerLogoLink {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.94;
+  transition: opacity 0.15s ease;
+}
+
+.footerLogoLink:hover {
+  opacity: 1;
+}
+
+.footerLogoImg {
+  display: block;
+  width: auto;
+  max-width: min(280px, 100%);
+  height: auto;
+  max-height: 96px;
+}
+
+.footerCopyrightStrip {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px var(--page-gutter, 16px);
+  text-align: center;
+  background: oklch(0.48 0.1 200);
+}
+
+.footerCopyrightInner {
+  max-width: var(--content-max-wide, 1320px);
+  margin: 0 auto;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+@media (max-width: 900px) {
+  .footerGrid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .footerBrand {
+    justify-self: start;
+  }
+
+  .footerLogosRow {
+    align-items: flex-start;
+  }
+}
