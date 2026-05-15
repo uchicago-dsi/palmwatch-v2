@@ -2,12 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Page chrome uses DaisyUI theme tokens from html[data-theme] (layout: dark). */
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  @apply min-h-screen bg-base-200 text-base-content;
 }

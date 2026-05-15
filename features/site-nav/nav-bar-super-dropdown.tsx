@@ -25,7 +25,7 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
 
   return (
     <>
-      <li key={label}>
+      <li>
         <button
           className={`tooltip tooltip-bottom ${isActive ? "bg-info" : ""}`}
           data-tip={label}
@@ -41,10 +41,10 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
           >
             {icon}
           </svg>
-          {showText && <span className="ml-2">{label}</span>}
+          {showText ? <span className="ml-2">{label}</span> : null}
         </button>
       </li>
-      {isActive && (
+      {isActive ? (
         <>
           <button
             className="absolute top-[100%] left-0 h-[100vh] w-full bg-black opacity-30 shadow-xl"
@@ -61,7 +61,7 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
             />
           </div>
         </>
-      )}
+      ) : null}
     </>
   );
 };

@@ -61,7 +61,7 @@ export default async function RootLayout({
   const footerContent = await cmsClient.getFooterContent();
   const umami = getUmamiConfig();
   return (
-    <html data-theme="lemonade" lang="en">
+    <html data-theme="dark" lang="en">
       <Head>
         <link
           href="/apple-touch-icon.png"
@@ -83,7 +83,7 @@ export default async function RootLayout({
         <link href="/site.webmanifest" rel="manifest" />
         <link color="#5bbad5" href="/safari-pinned-tab.svg" rel="mask-icon" />
         <meta content="#da532c" name="msapplication-TileColor" />
-        <meta content="#ffffff" name="theme-color" />
+        <meta content="#1d232a" name="theme-color" />
       </Head>
       <body className={inter.variable}>
         {umami ? (
