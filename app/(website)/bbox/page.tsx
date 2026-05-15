@@ -4,6 +4,7 @@ import { WebMercatorViewport } from "@deck.gl/core/typed";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { InfoTable } from "@/components/info-table";
+import pageStyles from "@/components/page-layout.module.css";
 import { QueryProvider } from "@/components/query-provider";
 import { StatsBlock } from "@/components/stats-block";
 import { latestTreelossKmColumn } from "@/config/years";
@@ -82,31 +83,33 @@ function BboxInner() {
     data?.totalForestLoss
   );
   return (
-    <div>
-      <div className="relative h-[60vh] w-full">
-        <PalmwatchMap
-          choroplethColumn={latestTreelossKmColumn}
-          choroplethScheme="forestLoss"
-          dataIdColumn="UML ID"
-          dataTable={data?.mills || []}
-          geoDataUrl="/data/mill-catchment.geojson"
-          geoIdColumn="UML ID"
-          noFlyMap
-          onMapMove={setViewState}
+    <main className={pageStyles.pageShell}>
+      <div className={pageStyles.pageInner}>
+        <div className="relative h-[60vh] w-full">
+          <PalmwatchMap
+            choroplethColumn={latestTreelossKmColumn}
+            choroplethScheme="forestLoss"
+            dataIdColumn="UML ID"
+            dataTable={data?.mills || []}
+            geoDataUrl="/data/mill-catchment.geojson"
+            geoIdColumn="UML ID"
+            noFlyMap
+            onMapMove={setViewState}
+          />
+        </div>
+        <StatsBlock stats={stats} />
+        <InfoTable
+          columnMapping={{
+            "Mill Name": "Name",
+            risk_score_current: "Recent Deforestation Score",
+            Country: "Country",
+            Province: "Province",
+            District: "District",
+            "Parent Company": "Parent Company",
+          }}
+          data={data?.mills || []}
         />
       </div>
-      <StatsBlock stats={stats} />
-      <InfoTable
-        columnMapping={{
-          "Mill Name": "Name",
-          risk_score_current: "Recent Deforestation Score",
-          Country: "Country",
-          Province: "Province",
-          District: "District",
-          "Parent Company": "Parent Company",
-        }}
-        data={data?.mills || []}
-      />
-    </div>
+    </main>
   );
 }
