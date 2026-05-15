@@ -17,20 +17,20 @@ import { Unilever } from "./Unilever";
 
 const brands: { [key: string]: BrandSchema } = {
   "Colgate-Palmolive": ColgatePalmolive,
-  Ferrero: Ferrero,
-  FrieslandCampina: FrieslandCampina,
+  Ferrero,
+  FrieslandCampina,
   "General Mills": GeneralMills,
-  Hershey: Hershey,
+  Hershey,
   "Johnson & Johnson": JohnsonAndJohnson,
-  Kellogg: Kellogg,
+  Kellogg,
   "L'ORÉAL": LOreal,
-  Mars: Mars,
-  Mondelez: Mondelez,
+  Mars,
+  Mondelez,
   Nestlé: Nestle,
-  PepsiCo: PepsiCo,
+  PepsiCo,
   "Procter & Gamble": ProcterAndGamble,
   "Reckitt Benckiser (RB)": ReckittBenckiser,
-  Unilever: Unilever,
+  Unilever,
 };
 
 export default brands;

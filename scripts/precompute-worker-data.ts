@@ -6,10 +6,10 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fullYearRangeColumns } from "../config/years";
-import type { SearchListPayload } from "../types/searchList";
-import queryClient from "../utils/getMillData";
-import { stringifyForPrecompute } from "../utils/jsonBigInt";
-import { precomputedSlug } from "../utils/precomputedSlug";
+import type { SearchListPayload } from "../domain/search-list";
+import { stringifyForPrecompute } from "../lib/json-big-int";
+import { precomputedSlug } from "../lib/precomputed-slug";
+import queryClient from "../lib/server/mill-data-query";
 
 const ROOT = process.cwd();
 const DATA_DIR = path.join(ROOT, "public", "data");
