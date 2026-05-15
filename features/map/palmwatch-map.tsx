@@ -103,7 +103,19 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       dataDict[row[dataIdColumn] as string] = row;
     }
 
-    /** Prefer mill lon/lat — catchment polygons can span the globe and break fitBounds zoom. */
+    const filteredGeoFeatures =
+      data?.features?.filter((feature) => {
+        const id = feature.properties![geoIdColumn] as string;
+        return id in dataDict;
+      }) ?? [];
+
+    /**
+     * Mill detail passes one row. Framing from lon/lat uses ±0.02° — far tighter than the
+     * catchment. Prefer polygon bbox, extra padding, a max zoom cap, then ease out.
+     */
+    const singleMillFocus = dataTable.length === 1;
+
+    /** With many mills, prefer point extents — merged polygons can span oddly. */
     const lngs: number[] = [];
     const lats: number[] = [];
     for (const row of dataTable) {
@@ -122,7 +134,19 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     }
 
     let bounds: [[number, number], [number, number]];
-    if (lngs.length > 0) {
+    let usePolygonFit = false;
+
+    if (singleMillFocus && filteredGeoFeatures.length > 0) {
+      const mapBbox = bbox({
+        type: "FeatureCollection",
+        features: filteredGeoFeatures,
+      });
+      bounds = [
+        [mapBbox[0], mapBbox[1]],
+        [mapBbox[2], mapBbox[3]],
+      ];
+      usePolygonFit = true;
+    } else if (lngs.length > 0) {
       let minLng = Math.min(...lngs);
       let maxLng = Math.max(...lngs);
       let minLat = Math.min(...lats);
@@ -139,30 +163,55 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         [minLng, minLat],
         [maxLng, maxLat],
       ];
-    } else {
+    } else if (filteredGeoFeatures.length > 0) {
       const filteredData = {
-        type: "FeatureCollection",
-        features: data!.features.filter(
-          (feature) => feature.properties![geoIdColumn] in dataDict
-        ),
+        type: "FeatureCollection" as const,
+        features: filteredGeoFeatures,
       };
       const mapBbox = bbox(filteredData);
       bounds = [
         [mapBbox[0], mapBbox[1]],
         [mapBbox[2], mapBbox[3]],
       ];
+    } else {
+      bounds = [
+        [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY],
+        [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY],
+      ];
     }
 
-    const { longitude, latitude, zoom } =
+    let longitude: number;
+    let latitude: number;
+    let zoom: number;
+    if (
       bounds[0][0] === Number.POSITIVE_INFINITY ||
       !Number.isFinite(bounds[0][0])
-        ? { latitude: 0, longitude: 0, zoom: 1.5 }
-        : fitBounds({
-            width: 800,
-            height: 600,
-            bounds,
-            padding: 100,
-          });
+    ) {
+      longitude = 0;
+      latitude = 0;
+      zoom = 1.5;
+    } else if (usePolygonFit) {
+      const fitted = fitBounds({
+        width: 800,
+        height: 600,
+        bounds,
+        padding: 88,
+        maxZoom: 13,
+      });
+      longitude = fitted.longitude;
+      latitude = fitted.latitude;
+      zoom = Math.max(2, fitted.zoom - 0.9);
+    } else {
+      const fitted = fitBounds({
+        width: 800,
+        height: 600,
+        bounds,
+        padding: 100,
+      });
+      longitude = fitted.longitude;
+      latitude = fitted.latitude;
+      zoom = fitted.zoom;
+    }
     return {
       initialMapView: {
         longitude,
