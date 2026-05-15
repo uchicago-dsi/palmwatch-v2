@@ -1,0 +1,38 @@
+/**
+ * Shared page content shell. Import in any route page (or feature view) that
+ * needs horizontal gutter + centered max-width on the main column.
+ *
+ * Body content uses `--content-max-main` (narrower than header/footer chrome, which uses
+ * `--content-max-wide`).
+ *
+ * Usage:
+ *   <main className={styles.pageShell}>
+ *     <div className={styles.pageInner}>…</div>
+ *   </main>
+ *
+ * For full-bleed sections (hero, maps), break out of `.pageInner` and apply
+ * the gutter/max-width directly on the section's inner wrapper instead.
+ */
+
+/** Outer gutter only — carries horizontal padding matching the header/footer rhythm. */
+.pageShell {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 24px var(--page-gutter, 16px) 56px;
+}
+
+/** Centered content cap — inside `.pageShell`; narrower than header/footer (--content-max-wide). */
+.pageInner {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--content-max-main, 1120px);
+  margin: 0 auto;
+}
+
+/** Narrower cap for prose-heavy pages (about, contact). Use instead of `.pageInner`. */
+.pageInnerNarrow {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+}

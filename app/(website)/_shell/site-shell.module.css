@@ -1,0 +1,23 @@
+/**
+ * Site-wide horizontal rhythm. Wrapped around all pages in `app/(website)/layout.tsx`.
+ * Pages inherit these custom properties for padding and max-width alignment.
+ */
+.siteShell {
+  --page-gutter: clamp(14px, 2.2vw, 22px);
+  /* Header + footer inner alignment (chrome). */
+  --content-max-wide: 1320px;
+  /* Main page column — narrower than chrome so body sits inset from nav/footer bars. */
+  --content-max-main: 1120px;
+  /* Desktop: utility + mega row; mobile: black strip only (~42px). */
+  --site-header-height: 94px;
+  display: flex;
+  flex-direction: column;
+  /* At least full viewport; routes + siteMain flex so footer sits at bottom when content is short */
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.siteMain {
+  flex: 1 0 auto;
+  width: 100%;
+}

@@ -2,7 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Shared with site nav (active / open menu triggers) and landing hero CTA outline. */
+:root {
+  --site-nav-accent: #0f766e;
+}
+
 /* Page chrome uses DaisyUI theme tokens from html[data-theme] (layout: dark). */
+html {
+  min-height: 100%;
+}
+
 body {
-  @apply min-h-screen bg-base-200 text-base-content;
+  min-height: 100vh;
+  min-height: 100dvh;
+  @apply bg-base-200 text-base-content;
 }

@@ -6,7 +6,7 @@ import { Feedback } from "@/components/feedback";
 import { Footer } from "@/components/footer";
 import { NavBar } from "@/features/site-nav";
 import { getCanonicalSiteOrigin, getUmamiConfig } from "@/lib/server/site";
-import cmsClient from "@/sanity/lib/client";
+import shellStyles from "./_shell/site-shell.module.css";
 
 const siteOrigin = getCanonicalSiteOrigin();
 
@@ -58,7 +58,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const footerContent = await cmsClient.getFooterContent();
   const umami = getUmamiConfig();
   return (
     <html data-theme="dark" lang="en">
@@ -94,9 +93,11 @@ export default async function RootLayout({
             strategy="afterInteractive"
           />
         ) : null}
-        <NavBar />
-        {children}
-        <Footer footerContent={footerContent} />
+        <div className={shellStyles.siteShell}>
+          <NavBar />
+          <div className={shellStyles.siteMain}>{children}</div>
+          <Footer />
+        </div>
         <Feedback />
       </body>
     </html>
