@@ -10,15 +10,10 @@ import {
   countyInfoQuery,
   footerInfoQuery,
   groupInfoQuery,
-  homePageQuery,
   landingPageContentQuery,
   umlInfoQuery,
 } from "./groq";
-import type {
-  AboutPageContent,
-  ContactPageContent,
-  HomePageContent,
-} from "./types";
+import type { AboutPageContent, ContactPageContent } from "./types";
 
 class CmsClient {
   client: SanityClient;
@@ -79,9 +74,6 @@ class CmsClient {
   }
   async getFooterContent() {
     return await this.client.fetch(footerInfoQuery);
-  }
-  async getHomeContent() {
-    return await this.client.fetch<HomePageContent>(homePageQuery);
   }
 }
 

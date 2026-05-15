@@ -106,27 +106,6 @@ export const footerInfoQuery = groq`
 }
 `;
 
-export const homePageQuery = groq`
-*[_type == "home"][0] {
-  _id,
-  title,
-  heroTitle,
-  heroSubtitle,
-  introContent[] {
-    ...,
-    _type,
-  },
-  useCases[] {
-    ...,
-    _type,
-  },
-  mapDescription[] {
-    ...,
-    _type,
-  }
-}
-`;
-
 export const landingPageContentQuery = groq`
 *[_type == "landingPage" && page == $page][0] {
   _id,
