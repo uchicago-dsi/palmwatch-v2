@@ -1,0 +1,487 @@
+"use client";
+import { GeoJsonLayer, IconLayer } from "@deck.gl/layers/typed";
+import { MapboxOverlay, type MapboxOverlayProps } from "@deck.gl/mapbox/typed";
+import { fitBounds } from "@math.gl/web-mercator";
+import { useQuery } from "@tanstack/react-query";
+import bbox from "@turf/bbox";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import Map, {
+  AttributionControl,
+  type MapRef,
+  NavigationControl,
+  useControl,
+} from "react-map-gl";
+import { colorFunctions } from "@/lib/color-function";
+import GeocoderControl from "./geocoder-control";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { DataProvider } from "@/components/data-provider";
+import { fullYearRange, latestTreelossKmColumn } from "@/config/years";
+import { useActiveUmlStore } from "@/hooks/use-active-uml-store";
+import { Legend } from "./legend";
+import { MapTooltip } from "./map-tooltip";
+import { useTooltipStore } from "./stores/tooltip-store";
+
+const DEFAULT_MAP_STYLE = "mapbox://styles/dhalpern/cln0e32pu06ba01qxcgrp4gv9";
+const MAP_STYLE = process.env.NEXT_PUBLIC_MAPBOX_STYLE || DEFAULT_MAP_STYLE;
+const MAP_PROJECTION = { name: "mercator" } as const;
+
+/** Mill pins only at this zoom or closer (Mapbox zoom is roughly log2 of scale). */
+const PIN_MIN_ZOOM = 7;
+
+export type MapProps = {
+  geoDataUrl: string;
+  dataTable: Array<Record<string, unknown>> | object[];
+  geoIdColumn: string;
+  dataIdColumn: string;
+  choroplethColumn: string;
+  choroplethScheme: keyof typeof colorFunctions;
+  showLayerStepper?: boolean;
+  onMapMove?: (v: any) => void;
+  noFlyMap?: boolean;
+};
+
+export const PalmwatchMap: React.FC<MapProps> = ({
+  geoDataUrl,
+  dataTable,
+  geoIdColumn,
+  dataIdColumn,
+  choroplethColumn,
+  choroplethScheme,
+  showLayerStepper,
+  onMapMove,
+  noFlyMap,
+}) => {
+  const mapRef = React.useRef<MapRef | null>(null);
+  const [mapZoom, setMapZoom] = useState(0);
+  const lastRoundedZoomRef = useRef<number | null>(null);
+  const syncZoomFromView = useCallback((z: number) => {
+    const rounded = Math.round(z);
+    if (lastRoundedZoomRef.current === rounded) {
+      return;
+    }
+    lastRoundedZoomRef.current = rounded;
+    setMapZoom(rounded);
+  }, []);
+  const [currentChoroplethScheme, setCurrentChoroplethScheme] =
+    useState(choroplethScheme);
+  const [currentChoroplethColumn, setCurrentChoroplethColumn] =
+    useState(choroplethColumn);
+  const currentYear = currentChoroplethColumn.includes("score")
+    ? -1
+    : Number.parseInt(currentChoroplethColumn?.split("_")?.[2]);
+  const [showLayerPanel, setShowLayerPanel] = useState(false);
+  const { colorFunction, scale } = colorFunctions[currentChoroplethScheme];
+  const setData = useTooltipStore((state) => state.setData);
+  const setChoroplethColumnInTooltip = useTooltipStore(
+    (state) => state.setChoroplethColumn
+  );
+  const umlStore = useActiveUmlStore();
+  const setUml = umlStore.setUml;
+  const activeUml = umlStore.currentUml;
+
+  const getColor = (data: Record<string, any>) => {
+    const value = data?.[currentChoroplethColumn];
+    return colorFunction(value);
+  };
+  const { data, isLoading, isError } = useQuery<GeoJSON.FeatureCollection>(
+    ["geoData"],
+    async () => await fetch(geoDataUrl).then((res) => res.json())
+  );
+  const { initialMapView, dataDict } = useMemo(() => {
+    if (isLoading || isError) {
+      return {};
+    }
+    const dataDict: { [key: string]: unknown } = {};
+    for (const row of dataTable) {
+      // @ts-expect-error
+      dataDict[row[dataIdColumn] as string] = row;
+    }
+
+    /** Prefer mill lon/lat — catchment polygons can span the globe and break fitBounds zoom. */
+    const lngs: number[] = [];
+    const lats: number[] = [];
+    for (const row of dataTable) {
+      const r = row as Record<string, unknown>;
+      const lng = Number(r.Longitude);
+      const lat = Number(r.Latitude);
+      if (
+        Number.isFinite(lng) &&
+        Number.isFinite(lat) &&
+        Math.abs(lat) <= 90 &&
+        Math.abs(lng) <= 180
+      ) {
+        lngs.push(lng);
+        lats.push(lat);
+      }
+    }
+
+    let bounds: [[number, number], [number, number]];
+    if (lngs.length > 0) {
+      let minLng = Math.min(...lngs);
+      let maxLng = Math.max(...lngs);
+      let minLat = Math.min(...lats);
+      let maxLat = Math.max(...lats);
+      if (minLng === maxLng) {
+        minLng -= 0.02;
+        maxLng += 0.02;
+      }
+      if (minLat === maxLat) {
+        minLat -= 0.02;
+        maxLat += 0.02;
+      }
+      bounds = [
+        [minLng, minLat],
+        [maxLng, maxLat],
+      ];
+    } else {
+      const filteredData = {
+        type: "FeatureCollection",
+        features: data!.features.filter(
+          (feature) => feature.properties![geoIdColumn] in dataDict
+        ),
+      };
+      const mapBbox = bbox(filteredData);
+      bounds = [
+        [mapBbox[0], mapBbox[1]],
+        [mapBbox[2], mapBbox[3]],
+      ];
+    }
+
+    const { longitude, latitude, zoom } =
+      bounds[0][0] === Number.POSITIVE_INFINITY ||
+      !Number.isFinite(bounds[0][0])
+        ? { latitude: 0, longitude: 0, zoom: 1.5 }
+        : fitBounds({
+            width: 800,
+            height: 600,
+            bounds,
+            padding: 100,
+          });
+    return {
+      initialMapView: {
+        longitude,
+        latitude,
+        zoom,
+      },
+      dataDict,
+    };
+  }, [data, dataTable, dataIdColumn, geoIdColumn, isLoading, isError]);
+
+  const millPinFeatures = useMemo(() => {
+    if (!(data?.features && dataDict)) {
+      return [];
+    }
+    return data.features.filter((f) => {
+      const id = f.properties![geoIdColumn] as string;
+      if (!(id in dataDict)) {
+        return false;
+      }
+      const row = dataDict[id] as Record<string, unknown>;
+      const lng = Number(row.Longitude);
+      const lat = Number(row.Latitude);
+      return (
+        Number.isFinite(lat) &&
+        Number.isFinite(lng) &&
+        Math.abs(lat) <= 90 &&
+        Math.abs(lng) <= 180
+      );
+    });
+  }, [data, dataDict, geoIdColumn]);
+
+  useEffect(() => {
+    if (initialMapView?.zoom != null && Number.isFinite(initialMapView.zoom)) {
+      syncZoomFromView(initialMapView.zoom);
+    }
+  }, [
+    initialMapView?.zoom,
+    initialMapView?.latitude,
+    initialMapView?.longitude,
+    syncZoomFromView,
+  ]);
+
+  useEffect(() => {
+    setChoroplethColumnInTooltip(currentChoroplethColumn);
+  }, [currentChoroplethColumn, setChoroplethColumnInTooltip]);
+
+  useEffect(() => {
+    !noFlyMap &&
+      mapRef.current?.flyTo({
+        center: [initialMapView?.longitude ?? 0, initialMapView?.latitude ?? 0],
+        zoom: initialMapView?.zoom ?? 1,
+      });
+  }, [
+    initialMapView?.latitude,
+    initialMapView?.longitude,
+    initialMapView?.zoom,
+    noFlyMap,
+  ]);
+
+  const layers = [
+    new GeoJsonLayer({
+      id: "main-map-layer",
+      data: data!,
+      opacity: 0.4,
+      stroked: true,
+      filled: true,
+      extruded: false,
+      wireframe: false,
+      pickable: true,
+      // Pixels: a huge meter width (e.g. 1000m) made the selected polygon swallow the map for picking.
+      getLineWidth: (d) => (d?.properties?.[geoIdColumn] === activeUml ? 4 : 1),
+      lineWidthUnits: "pixels",
+      getLineColor: [0, 0, 0, 255],
+      lineWidthMinPixels: 0.5,
+      lineWidthMaxPixels: 6,
+      onHover: ({ x, y, object }) =>
+        object
+          ? setData(x, y, object.properties["UML ID"])
+          : setData(null, null, null),
+      onClick: (info) => {
+        const id = info.object.properties![geoIdColumn] as string;
+        setUml(id);
+      },
+      getFillColor: (d) => {
+        const id = d.properties![geoIdColumn] as string;
+        const data = dataDict?.[id] as any;
+        const color = getColor(data);
+        return color as [number, number, number, number];
+      },
+      updateTriggers: {
+        getFillColor: [
+          dataDict,
+          currentChoroplethColumn,
+          currentChoroplethScheme,
+        ],
+        getLineWidth: [activeUml],
+      },
+    }),
+
+    new IconLayer({
+      id: "mill-point",
+      data: millPinFeatures,
+      getPosition: (d) => {
+        const row = dataDict?.[d.properties![geoIdColumn] as string] as Record<
+          string,
+          unknown
+        >;
+        return [Number(row.Longitude), Number(row.Latitude)];
+      },
+      iconAtlas: "/icons/pin.png",
+      iconMapping: {
+        marker: { x: 0, y: 0, width: 128, height: 128, mask: true },
+      },
+      getSize: 28,
+      getIcon: () => "marker",
+      sizeUnits: "pixels",
+      sizeMinPixels: 12,
+      sizeMaxPixels: 40,
+      pickable: false,
+      visible: mapZoom >= PIN_MIN_ZOOM,
+      opacity: 0.9,
+      getColor: [0, 0, 0, 255],
+      updateTriggers: {
+        visible: [mapZoom],
+        getColor: [dataDict],
+        getPosition: [dataDict],
+      },
+    }),
+  ];
+  const incrementYear = () => {
+    const index = fullYearRange.indexOf(currentYear);
+    if (index < fullYearRange.length - 1) {
+      setCurrentChoroplethColumn(`treeloss_km_${fullYearRange[index + 1]}`);
+    }
+  };
+  const decrementYear = () => {
+    const index = fullYearRange.indexOf(currentYear);
+    if (index > 0) {
+      setCurrentChoroplethColumn(`treeloss_km_${fullYearRange[index - 1]}`);
+    }
+  };
+
+  const handleVariable = (variable: string) => {
+    variable.includes("score")
+      ? setCurrentChoroplethScheme("riskScore")
+      : setCurrentChoroplethScheme("forestLoss");
+    setCurrentChoroplethColumn(variable);
+  };
+
+  return (
+    <div className="flex h-full w-full flex-row">
+      <div
+        className={`${
+          showLayerPanel
+            ? "w-96 opacity-100 transition-all"
+            : "w-0 px-0 opacity-0"
+        } prose`}
+      >
+        <div className="px-2">
+          <h3>Map Data Layers</h3>
+          <ul className="menu w-full rounded-box p-0">
+            <li>
+              <button
+                className={`m-0 p-2 ${currentYear === -1 ? "" : "btn-active"}`}
+                onClick={() => handleVariable(latestTreelossKmColumn)}
+              >
+                Deforestation By Year
+              </button>
+            </li>
+            <li>
+              <button
+                className={`m-0 p-2 ${currentYear === -1 ? "btn-active" : ""}`}
+                onClick={() => handleVariable("risk_score_current")}
+              >
+                Deforestation Scores
+              </button>
+            </li>
+          </ul>
+          {currentYear === -1 ? (
+            <>
+              <h4>Deforestation Score</h4>
+              <div className="join join-vertical">
+                {[
+                  {
+                    value: "risk_score_past",
+                    label: "Past Deforestation Score",
+                  },
+                  {
+                    value: "risk_score_current",
+                    label: "Recent Deforestation Score",
+                  },
+                  {
+                    value: "risk_score_future",
+                    label: "Future Deforestation Risk Score",
+                  },
+                ].map((variable) => (
+                  <button
+                    className={`join-item btn ${
+                      currentChoroplethColumn === variable.value
+                        ? "btn-active"
+                        : ""
+                    }`}
+                    key={variable.value}
+                    onClick={() => handleVariable(variable.value)}
+                  >
+                    {variable.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <h4>Data Year</h4>
+              <div className="join w-full max-w-none">
+                <button className="join-item btn" onClick={decrementYear}>
+                  «
+                </button>
+                <button className="join-item btn">{currentYear}</button>
+                <button className="join-item btn" onClick={incrementYear}>
+                  »
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="relative h-full w-full">
+        <button
+          aria-label="Toggle Layer Panel"
+          className="btn absolute top-[50%] left-2 z-10 translate-y-[-50%] rounded-r-lg bg-base-100 py-0 shadow-xl"
+          onClick={() => setShowLayerPanel((p) => !p)}
+        >
+          <svg
+            className="dark:fill-white"
+            height="24px"
+            version="1.1"
+            viewBox="0 0 100 100"
+            width="24px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="m3.5 67.75c-0.011719 1.125 0.58594 2.1719 1.5625 2.7344l43.375 24c0.94141 0.52344 2.0898 0.52344 3.0312 0l43.422-24c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-43.328-24c-0.94141-0.52344-2.0898-0.52344-3.0312 0l-43.422 24c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99219 0.55078-1.6094 1.5977-1.6094 2.7344zm9.5781-37.5 36.922-20.422 36.922 20.422-11.922 6.6406-25 13.781-24.922-13.781zm10.484 31.703 25 13.781c0.94141 0.52344 2.0898 0.52344 3.0312 0l25-13.781 10.484 5.7969-37.078 20.422-36.922-20.422z" />
+          </svg>
+        </button>
+        <Map
+          bearing={0}
+          initialViewState={{
+            latitude: 0,
+            longitude: 0,
+            zoom: 1,
+            pitch: 0,
+            bearing: 0,
+            ...initialMapView,
+          }}
+          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+          mapStyle={MAP_STYLE}
+          onLoad={(e) => syncZoomFromView(e.target.getZoom())}
+          onMove={(e) => syncZoomFromView(e.viewState.zoom)}
+          onMoveEnd={(e) => {
+            syncZoomFromView(e.viewState.zoom);
+            onMapMove && onMapMove(e);
+          }}
+          pitch={0}
+          projection={MAP_PROJECTION}
+          ref={mapRef}
+          reuseMaps={true}
+        >
+          <GeocoderControl
+            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN!}
+            position="top-left"
+          />
+          <NavigationControl />
+          <AttributionControl
+            compact={true}
+            customAttribution={["© The University of Chicago"]}
+          />
+
+          <DeckGLOverlay interleaved={true} layers={layers} />
+        </Map>
+        <MapTooltip />
+        <Legend
+          colorStops={scale}
+          label={
+            currentYear === -1
+              ? "Risk score"
+              : `Deforestation ${currentYear} (km2)`
+          }
+        />
+      </div>
+    </div>
+  );
+};
+
+function DeckGLOverlay(
+  props: MapboxOverlayProps & {
+    interleaved?: boolean;
+  }
+) {
+  const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
+
+export const ServerMap: React.FC<{ dataUrl: string } & MapProps> = ({
+  dataUrl,
+  ...props
+}) => (
+  <DataProvider<{ umlInfo: MapProps["dataTable"] }> dataUrl={dataUrl}>
+    {(data) => <PalmwatchMap {...props} dataTable={data.umlInfo} />}
+  </DataProvider>
+);
+
+const MapLayerStepper: React.FC<{
+  setChoroplethColumn: (column: string) => void;
+  setChoroplethScheme: (scheme: keyof typeof colorFunctions) => void;
+  choroplethColumn: string;
+  choroplethScheme: keyof typeof colorFunctions;
+}> = ({
+  setChoroplethColumn,
+  setChoroplethScheme,
+  choroplethColumn,
+  choroplethScheme,
+}) => <div />;

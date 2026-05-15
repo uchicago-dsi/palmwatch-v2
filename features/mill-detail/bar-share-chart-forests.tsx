@@ -1,5 +1,5 @@
-import type { UmlData } from "@/utils/dataTypes";
-import { BarShareChart } from "./BarShareChart";
+import type { UmlData } from "@/domain";
+import { BarShareChart } from "./bar-share-chart";
 
 // s {
 //   data: Record<string, unknown>[];
