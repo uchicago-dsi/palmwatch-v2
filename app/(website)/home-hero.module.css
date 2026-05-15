@@ -1,0 +1,33 @@
+/**
+ * Home hero CTA — accent fill + white label (matches `--site-nav-accent`).
+ */
+.heroExploreMapCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 32px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  background: var(--site-nav-accent);
+  border: 2px solid var(--site-nav-accent);
+  border-radius: 6px;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.heroExploreMapCta:hover {
+  color: #fff;
+  background: color-mix(in srgb, var(--site-nav-accent) 88%, black);
+  border-color: color-mix(in srgb, var(--site-nav-accent) 88%, black);
+}
+
+.heroExploreMapCta:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}

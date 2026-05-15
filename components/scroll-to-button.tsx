@@ -13,7 +13,7 @@ export const ScrollToButton: React.FC<{
     }
   };
   return (
-    <button className={className} onClick={handleClick}>
+    <button className={className} onClick={handleClick} type="button">
       {children}
     </button>
   );

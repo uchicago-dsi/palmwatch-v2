@@ -1,0 +1,178 @@
+.introTitle {
+  margin: 0 0 0.875rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.65rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: oklch(var(--bc));
+}
+
+.intro {
+  /* Air between full-bleed hero and first paragraph */
+  padding-top: clamp(2rem, 6vw, 3.75rem);
+}
+
+.intro p {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: oklch(var(--bc));
+}
+
+.intro p:last-child {
+  margin-bottom: 0;
+}
+
+.intro a {
+  color: var(--site-nav-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.intro a:hover {
+  opacity: 0.85;
+}
+
+.featureSection {
+  width: 100%;
+}
+
+/* Horizontal gutter + vertical rhythm only — avoid nesting full pageShell (large bottom pad) */
+.featureShell {
+  box-sizing: border-box;
+  padding: 2.5rem var(--page-gutter, 16px) 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .featureShell {
+    padding-bottom: 1.75rem;
+  }
+}
+
+.featureGrid {
+  display: grid;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .featureGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+.featureCard {
+  text-align: center;
+}
+
+.featureIconWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: var(--site-nav-accent);
+}
+
+.featureIcon {
+  width: 48px;
+  height: 48px;
+}
+
+.featureCard h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: oklch(var(--bc));
+}
+
+.featureCard p {
+  margin: 0 0 1.1rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: oklch(var(--bc) / 0.85);
+}
+
+.featureCta {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--site-nav-accent);
+  text-decoration: none;
+}
+
+.featureCta:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Map heading + instructions — width follows pageInner */
+.mapSectionIntro {
+  box-sizing: border-box;
+  padding: 1rem 1rem 1.25rem;
+}
+
+.mapSectionTitle {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.65rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: oklch(var(--bc));
+}
+
+.mapLeadIn {
+  padding: 0;
+}
+
+.mapLeadIn p {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: oklch(var(--bc));
+}
+
+.mapLeadIn p:last-child {
+  margin-bottom: 0;
+}
+
+.mapLeadIn a {
+  font-weight: 600;
+  color: var(--site-nav-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.mapLeadIn a:hover {
+  opacity: 0.85;
+}
+
+/* Brief usage hints shown between the map and the detail panels */
+.mapTips {
+  padding: 0.75rem 1rem 0.25rem;
+}
+
+.mapTips p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: oklch(var(--bc) / 0.7);
+}
+
+.mapTips strong {
+  font-weight: 600;
+  color: oklch(var(--bc) / 0.85);
+}
+
+.mapDetailPanels {
+  padding-top: 1.25rem;
+}
+
+/* Hero "Explore the map": land at map section heading (below sticky header) */
+.mapScrollAnchor {
+  /* Mobile: utility bar only (mega row hidden) */
+  scroll-margin-top: 54px;
+}
+
+@media (min-width: 1024px) {
+  .mapScrollAnchor {
+    scroll-margin-top: calc(var(--site-header-height, 94px) + 12px);
+  }
+}
