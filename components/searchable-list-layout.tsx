@@ -2,29 +2,34 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useMemo } from "react";
-import { InnerTextComponent } from "./InnerTextComponent";
+import { InnerTextComponent } from "./inner-text-component";
+
+interface SearchOption {
+  href: string;
+  imgPath?: string;
+  label: string;
+}
 
 const paginateOptions = (
-  _options: any[],
+  _options: SearchOption[],
   columns: number,
   rows: number,
   filter?: string,
-  filterProp?: string
+  filterProp?: keyof SearchOption
 ) => {
   const filterFunc =
-    filter && filterProp && filterProp?.length > 2
-      ? (s: object) =>
-          // @ts-expect-error
-          s?.[filterProp]?.toLowerCase().includes(filter.toLowerCase())
-      : (s: any) => true;
+    filter && filterProp && filterProp === "label" && filter.length > 2
+      ? (s: SearchOption) =>
+          s.label.toLowerCase().includes(filter.toLowerCase())
+      : (_s: SearchOption) => true;
   const options = filter ? _options.filter(filterFunc) : _options;
   const pageLength = rows * columns;
   const hasPages = options.length > pageLength;
   const colLength = hasPages ? rows : Math.ceil(options.length / columns);
-  const items: any[][] = [];
+  const items: SearchOption[][][] = [];
   const numPages = Math.ceil(options.length / pageLength);
   for (let i = 0; i < numPages; i++) {
-    const page = [];
+    const page: SearchOption[][] = [];
     for (let j = 0; j < columns; j++) {
       const start = i * pageLength + j * colLength;
       const end = start + colLength;
@@ -51,11 +56,7 @@ const paginateOptions = (
 export const SearchableListLayout: React.FC<{
   label: string;
   description?: string;
-  options: Array<{
-    label: string;
-    href: string;
-    imgPath?: string;
-  }>;
+  options: SearchOption[];
   path?: string;
   rows?: number;
   manyRows?: number;
@@ -78,7 +79,7 @@ export const SearchableListLayout: React.FC<{
   const displayRows = options.length > 32 ? manyRows || 16 : rows || 8;
   const displayColumns = columns || 4;
   const alphabeticalOptions = useMemo(
-    () => options.sort((a, b) => a.label.localeCompare(b.label)),
+    () => [...options].sort((a, b) => a.label.localeCompare(b.label)),
     [options]
   );
   const { hasPages, items } = useMemo(
@@ -92,9 +93,11 @@ export const SearchableListLayout: React.FC<{
       ),
     [alphabeticalOptions, searchTerm, displayColumns, displayRows]
   );
+  // Reset pagination when list inputs change (effect body only calls setter).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional deps for pagination reset
   useEffect(() => {
     setCurrentPage(0);
-  }, [items]);
+  }, [alphabeticalOptions, searchTerm, displayColumns, displayRows]);
   const currentItems = items?.[currentPage];
   const pages = items?.length;
 
@@ -114,7 +117,7 @@ export const SearchableListLayout: React.FC<{
       }
     });
   };
-  const closeDropdown = () => setcurrentDropdown && setcurrentDropdown("");
+  const closeDropdown = () => setcurrentDropdown?.("");
   return (
     <div
       className={
@@ -137,15 +140,17 @@ export const SearchableListLayout: React.FC<{
             <button
               className="join-item btn"
               onClick={() => pageAction("prev")}
+              type="button"
             >
               «
             </button>
-            <button className="join-item btn">
+            <button className="join-item btn" type="button">
               Page {currentPage + 1} / {pages}
             </button>
             <button
               className="join-item btn"
               onClick={() => pageAction("next")}
+              type="button"
             >
               »
             </button>
@@ -155,8 +160,11 @@ export const SearchableListLayout: React.FC<{
       {hasNoOptions ? (
         <p>Loading, please wait...</p>
       ) : (
-        currentItems.map((column: any[], idx: number) => (
-          <div className="m-0 flex flex-1 flex-col space-y-1 p-0" key={idx}>
+        currentItems.map((column, idx) => (
+          <div
+            className="m-0 flex flex-1 flex-col space-y-1 p-0"
+            key={column.map((o) => o.label).join("|") || `col-${idx}`}
+          >
             {column.map((option) => (
               <div key={option.label}>
                 <Link
@@ -165,15 +173,15 @@ export const SearchableListLayout: React.FC<{
                   onClick={closeDropdown}
                 >
                   <div className="flex flex-col">
-                    {Boolean(option.imgPath) && (
+                    {option.imgPath ? (
                       <Image
                         alt={option.label}
                         className="h-20 w-20 object-contain"
                         height={80}
-                        src={option.imgPath!}
+                        src={option.imgPath}
                         width={80}
                       />
-                    )}
+                    ) : null}
                     {option.label.toLowerCase()}
                   </div>
                 </Link>

@@ -21,7 +21,6 @@ export const Feedback = () => {
     <>
       <button
         className="btn btn-sm fixed right-0 bottom-[50%] z-50 rounded-full rounded-r-none bg-accent normal-case shadow-xl dark:text-black"
-        // @ts-expect-error
         onClick={handleOpen}
       >
         Feedback

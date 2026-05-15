@@ -1,7 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { Preloader } from "./Preloader";
+import { Preloader } from "./preloader";
 
 interface DataProviderProps<T> {
   children: (data: T) => React.ReactElement | React.ReactNode;
@@ -11,9 +11,9 @@ export const DataProvider = <T,>({
   dataUrl,
   children,
 }: DataProviderProps<T>) => {
-  const { data, isLoading, error } = useQuery(
+  const { data } = useQuery<T>(
     ["data", dataUrl],
-    async () => await fetch(dataUrl).then((res) => res.json())
+    async (): Promise<T> => (await fetch(dataUrl)).json() as T
   );
   if (!data) {
     return <Preloader />;
