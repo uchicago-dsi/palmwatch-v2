@@ -62,6 +62,8 @@ export const SearchableListLayout: React.FC<{
   manyRows?: number;
   columns?: number;
   setcurrentDropdown?: (label: string) => void;
+  /** White desktop mega-menu (nav only): contrast text + outlined search */
+  navPanel?: boolean;
 }> = ({
   label,
   description,
@@ -71,6 +73,7 @@ export const SearchableListLayout: React.FC<{
   columns,
   manyRows,
   setcurrentDropdown,
+  navPanel,
 }) => {
   const hasNoOptions = options.length === 0;
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -134,7 +137,11 @@ export const SearchableListLayout: React.FC<{
             </Link>
           </div>
         )}
-        <InnerTextComponent label={label} onChange={setSearchTerm} />
+        <InnerTextComponent
+          label={label}
+          lightOnWhite={navPanel}
+          onChange={setSearchTerm}
+        />
         {hasPages && (
           <div>
             <button
