@@ -6,6 +6,18 @@
     "ultracite/biome/next"
   ],
   "files": {
-    "includes": ["!!**/public/data"]
-  }
+    "includes": ["!!**/public/data", "!**/lib/generated/data-by-mill.ts"]
+  },
+  "overrides": [
+    {
+      "includes": ["**/app/(website)/globals.css"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noUnknownAtRules": "off"
+          }
+        }
+      }
+    }
+  ]
 }
