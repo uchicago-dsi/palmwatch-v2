@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
-import { precomputedSlug } from "@/utils/precomputedSlug";
+import { precomputedSlug } from "@/lib/precomputed-slug";
+import { loadMillApiPayload } from "@/lib/server/mill-api-data";
 
 export async function GET(
   req: NextRequest,
@@ -22,10 +22,10 @@ export async function GET(
   }
 
   const slug = precomputedSlug(decoded);
-  const payload = await loadPrecomputedJson<{
-    brands: unknown[];
-    info: unknown[];
-  }>(`mill/${slug}.json`, req);
+  const payload = await loadMillApiPayload(slug, req);
+  if (!payload) {
+    return NextResponse.json({ error: "Mill not found" }, { status: 404 });
+  }
 
   const brands = millOnly ? [] : payload.brands;
   return NextResponse.json({ brands, info: payload.info });

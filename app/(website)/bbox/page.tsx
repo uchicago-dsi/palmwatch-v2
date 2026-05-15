@@ -3,12 +3,12 @@
 import { WebMercatorViewport } from "@deck.gl/core/typed";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { InfoTable } from "@/components/InfoTable";
-import { PalmwatchMap } from "@/components/Map";
-import { QueryProvider } from "@/components/QueryProvider";
-import { StatsBlock } from "@/components/StatsBlock";
+import { InfoTable } from "@/components/info-table";
+import { QueryProvider } from "@/components/query-provider";
+import { StatsBlock } from "@/components/stats-block";
 import { latestTreelossKmColumn } from "@/config/years";
-import { getStats } from "./pageConfig";
+import { buildRollupEntityStatTiles } from "@/domain/stat-tiles";
+import { PalmwatchMap } from "@/features/map";
 
 function getBounds(
   latitude: number,
@@ -75,7 +75,7 @@ function BboxInner() {
     }
   );
 
-  const stats = getStats(
+  const stats = buildRollupEntityStatTiles(
     data?.mills?.length,
     data?.uniqueCountries,
     data?.averageCurrentRisk,

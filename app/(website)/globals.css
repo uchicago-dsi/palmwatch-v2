@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-}
-
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { mergeFullShards } from "@/utils/bboxCompute";
-import { readMillDataText } from "@/utils/readMillDataText";
-import { cleanUnparse } from "@/utils/renameOutputColumns";
-import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
-import { timestamp } from "@/utils/timestamp";
+import { cleanUnparse } from "@/lib/rename-output-columns";
+import { mergeFullShards } from "@/lib/server/bbox-compute";
+import { readMillDataText } from "@/lib/server/read-mill-data-text";
+import { resolveMillDataBase } from "@/lib/server/resolve-mill-data-base";
+import { timestamp } from "@/lib/timestamp";
 
 export async function GET(req: Request) {
   const output = new URL(req.url).searchParams.get("output");
@@ -20,8 +20,8 @@ export async function GET(req: Request) {
       const features = [];
       for (const row of data as Record<string, unknown>[]) {
         const feature = geoData.features.find(
-          // @ts-expect-error
-          (f: any) => f.properties["UML ID"] === row["UML ID"]
+          (f: { properties: Record<string, unknown> }) =>
+            f.properties["UML ID"] === row["UML ID"]
         );
         if (feature) {
           features.push({
@@ -29,11 +29,8 @@ export async function GET(req: Request) {
             geometry: feature.geometry,
             properties: {
               ...row,
-              // @ts-expect-error
               "Current Deforestation Score": row.risk_score_current,
-              // @ts-expect-error
               "Past Deforestation Score": row.risk_score_past,
-              // @ts-expect-error
               "Future Risk Score": row.risk_score_future,
               risk_score_current: undefined,
               risk_score_past: undefined,

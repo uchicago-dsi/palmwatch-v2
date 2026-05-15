@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { unparse } from "papaparse";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
-import { precomputedSlug } from "@/utils/precomputedSlug";
-import { readMillDataText } from "@/utils/readMillDataText";
-import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
-import { timestamp } from "@/utils/timestamp";
+import { precomputedSlug } from "@/lib/precomputed-slug";
+import { loadOwnerApiDocument } from "@/lib/server/entity-api-data";
+import { readMillDataText } from "@/lib/server/read-mill-data-text";
+import { resolveMillDataBase } from "@/lib/server/resolve-mill-data-base";
+import { timestamp } from "@/lib/timestamp";
 
 export async function GET(
   req: NextRequest,
@@ -21,11 +21,10 @@ export async function GET(
   }
   const dataDir = await resolveMillDataBase(req);
   const slug = precomputedSlug(owner);
-  const data = await loadPrecomputedJson<{
-    umlInfo: unknown[];
-    timeseries: unknown[];
-    brands: unknown[];
-  }>(`owner/${slug}-api.json`, req);
+  const data = await loadOwnerApiDocument(slug, req);
+  if (!data) {
+    return NextResponse.json({ error: "Owner not found" }, { status: 404 });
+  }
 
   switch (output) {
     case "geo": {
@@ -35,10 +34,12 @@ export async function GET(
       );
       const geoData = JSON.parse(geoDataRaw);
       const features = [];
-      for (const row of data.umlInfo as Record<string, unknown>[]) {
+      for (const row of (data.umlInfo as
+        | Record<string, unknown>[]
+        | undefined) ?? []) {
         const feature = geoData.features.find(
-          // @ts-expect-error
-          (f: any) => f.properties["UML ID"] === row["UML ID"]
+          (f: { properties: Record<string, unknown> }) =>
+            f.properties["UML ID"] === row["UML ID"]
         );
         if (feature) {
           features.push({
@@ -60,26 +61,35 @@ export async function GET(
       );
     }
     case "loss":
-      return new NextResponse(unparse(data.timeseries), {
-        headers: {
-          "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="${owner}-Mills-${timestamp}.csv"`,
-        },
-      });
+      return new NextResponse(
+        unparse((data.timeseries as unknown[] | undefined) ?? []),
+        {
+          headers: {
+            "Content-Type": "text/csv",
+            "Content-Disposition": `attachment; filename="${owner}-Mills-${timestamp}.csv"`,
+          },
+        }
+      );
     case "mills":
-      return new NextResponse(unparse(data.umlInfo), {
-        headers: {
-          "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="${owner}-Mills-${timestamp}.csv"`,
-        },
-      });
+      return new NextResponse(
+        unparse((data.umlInfo as unknown[] | undefined) ?? []),
+        {
+          headers: {
+            "Content-Type": "text/csv",
+            "Content-Disposition": `attachment; filename="${owner}-Mills-${timestamp}.csv"`,
+          },
+        }
+      );
     case "brands":
-      return new NextResponse(unparse(data.brands), {
-        headers: {
-          "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="${owner}-Brands-${timestamp}.csv"`,
-        },
-      });
+      return new NextResponse(
+        unparse((data.brands as unknown[] | undefined) ?? []),
+        {
+          headers: {
+            "Content-Type": "text/csv",
+            "Content-Disposition": `attachment; filename="${owner}-Brands-${timestamp}.csv"`,
+          },
+        }
+      );
     default:
       return NextResponse.json({ ...data }, { status: 200 });
   }

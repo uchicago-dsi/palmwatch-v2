@@ -1,20 +1,28 @@
-import { InfoTable } from "@/components/InfoTable";
-import { SearchableListLayout } from "@/components/SearchableListLayout";
+import { InfoTable } from "@/components/info-table";
+import { emptySearchListPayload } from "@/domain";
+import { SearchableListLayout } from "@/features/searchable-list";
+import { loadCountriesSummary } from "@/lib/server/aggregates-data";
+import { loadSearchListPayload } from "@/lib/server/search-list-data";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import type { SearchListPayload } from "@/types/searchList";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 export const revalidate = 60;
 
 export default async function Page() {
-  const [searchList, countriesSummary, landingPageContent] = await Promise.all([
-    loadPrecomputedJson<SearchListPayload>("search-list.json"),
-    loadPrecomputedJson<{
-      countryStats: Record<string, unknown>[];
-    }>("aggregates/countries-summary.json"),
-    cmsClient.getLandingPageContent("countries"),
-  ]);
+  const [searchListRaw, countriesSummary, landingPageContent] =
+    await Promise.all([
+      loadSearchListPayload(),
+      loadCountriesSummary(),
+      cmsClient.getLandingPageContent("countries"),
+    ]);
+  const searchList = searchListRaw ?? emptySearchListPayload;
   const options = searchList.Countries;
+  if (!countriesSummary) {
+    return (
+      <main className="mx-auto p-4">
+        <p>Could not load countries summary. Please try again later.</p>
+      </main>
+    );
+  }
   const { countryStats } = countriesSummary;
 
   return (
@@ -42,7 +50,6 @@ export default async function Page() {
         <SearchableListLayout
           columns={2}
           label="Countries"
-          // @ts-expect-error
           options={options}
           rows={20}
         />

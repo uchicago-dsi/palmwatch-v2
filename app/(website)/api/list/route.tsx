@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import type { SearchListPayload } from "@/types/searchList";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
+import { emptySearchListPayload } from "@/domain";
+import { loadSearchListPayload } from "@/lib/server/search-list-data";
 
 export async function GET(req: Request) {
-  const searchList = await loadPrecomputedJson<SearchListPayload>(
-    "search-list.json",
-    req
-  );
+  const searchList =
+    (await loadSearchListPayload(req)) ?? emptySearchListPayload;
   return NextResponse.json(searchList);
 }

@@ -1,16 +1,16 @@
-import { SearchableListLayout } from "@/components/SearchableListLayout";
-
+import { emptySearchListPayload } from "@/domain";
+import { SearchableListLayout } from "@/features/searchable-list";
+import { loadSearchListPayload } from "@/lib/server/search-list-data";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import type { SearchListPayload } from "@/types/searchList";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 export const revalidate = 60;
 
 export default async function Page() {
-  const [searchList, landingPageContent] = await Promise.all([
-    loadPrecomputedJson<SearchListPayload>("search-list.json"),
+  const [searchListRaw, landingPageContent] = await Promise.all([
+    loadSearchListPayload(),
     cmsClient.getLandingPageContent("owners"),
   ]);
+  const searchList = searchListRaw ?? emptySearchListPayload;
   const options = searchList["Mill Owners"];
 
   return (
@@ -27,7 +27,6 @@ export default async function Page() {
         <SearchableListLayout
           columns={2}
           label="Mill Owners"
-          // @ts-expect-error
           options={options}
           rows={20}
         />

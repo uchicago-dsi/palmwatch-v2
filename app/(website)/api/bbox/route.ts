@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { computeBboxPayload } from "@/utils/bboxCompute";
+import { computeBboxPayload } from "@/lib/server/bbox-compute";
 
 export async function GET(req: Request, _res: unknown) {
   const reqUrl = new URL(req.url);

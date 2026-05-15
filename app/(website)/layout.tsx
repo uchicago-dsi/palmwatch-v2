@@ -2,10 +2,10 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Head from "next/head";
-import { Feedback } from "@/components/Feedback";
-import { Footer } from "@/components/Footer";
-import { NavBar } from "@/components/NavBar";
-import { getCanonicalSiteOrigin, getUmamiConfig } from "@/lib/public-site";
+import { Feedback } from "@/components/feedback";
+import { Footer } from "@/components/footer";
+import { NavBar } from "@/features/site-nav";
+import { getCanonicalSiteOrigin, getUmamiConfig } from "@/lib/server/site";
 import cmsClient from "@/sanity/lib/client";
 
 const siteOrigin = getCanonicalSiteOrigin();

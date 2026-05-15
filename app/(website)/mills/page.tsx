@@ -1,10 +1,11 @@
-import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
-import { SearchableListLayout } from "@/components/SearchableListLayout";
-import { StatsBlock } from "@/components/StatsBlock";
+import { IqrOverTime } from "@/components/iqr-over-time-line-chart";
+import { StatsBlock } from "@/components/stats-block";
+import { emptySearchListPayload } from "@/domain";
+import { SearchableListLayout } from "@/features/searchable-list";
+import { loadMillSummaryStats } from "@/lib/server/aggregates-data";
+import { loadSearchListPayload } from "@/lib/server/search-list-data";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import type { SearchListPayload } from "@/types/searchList";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 import {
   basicStatsConfig,
   forestStatsConfig,
@@ -14,15 +15,22 @@ import {
 export const revalidate = 60;
 
 export default async function Page() {
-  const [searchList, millStats, landingPageContent] = await Promise.all([
-    loadPrecomputedJson<SearchListPayload>("search-list.json"),
-    loadPrecomputedJson<Record<string, unknown>>(
-      "aggregates/mill-summary-stats.json"
-    ),
+  const [searchListRaw, millStats, landingPageContent] = await Promise.all([
+    loadSearchListPayload(),
+    loadMillSummaryStats(),
     cmsClient.getLandingPageContent("mills"),
   ]);
 
+  const searchList = searchListRaw ?? emptySearchListPayload;
+
   const options = searchList.Mills;
+  if (!millStats) {
+    return (
+      <main className="mx-auto p-4">
+        <p>Could not load aggregate statistics. Please try again later.</p>
+      </main>
+    );
+  }
   const {
     timeseries,
     totalForestArea,
@@ -35,19 +43,7 @@ export default async function Page() {
     millCount,
     rspoCertified,
     notRspoCertified,
-  } = millStats as {
-    timeseries: Record<string, unknown>[];
-    totalForestArea: number;
-    totalForestLoss: number;
-    totalArea: number;
-    brandCount: number | null;
-    companyCount: number | null;
-    countryCount: number | null;
-    groupCount: number | null;
-    millCount: number | null;
-    rspoCertified: number;
-    notRspoCertified: number;
-  };
+  } = millStats;
 
   const basicStats = basicStatsConfig(
     millCount,
@@ -85,7 +81,6 @@ export default async function Page() {
         <SearchableListLayout
           columns={2}
           label="Mills"
-          // @ts-expect-error
           options={options}
           rows={20}
         />

@@ -1,11 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 import removeAccents from "remove-accents";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
-import { precomputedSlug } from "@/utils/precomputedSlug";
-import { readMillDataText } from "@/utils/readMillDataText";
-import { cleanLossData, cleanUnparse } from "@/utils/renameOutputColumns";
-import { resolveMillDataBase } from "@/utils/resolveMillDataBase";
-import { timestamp } from "@/utils/timestamp";
+import { precomputedSlug } from "@/lib/precomputed-slug";
+import {
+  cleanLossData,
+  cleanUnparse,
+  type LossTimeseriesRow,
+} from "@/lib/rename-output-columns";
+import { loadBrandPrecomputedPayload } from "@/lib/server/brand-precomputed-data";
+import { readMillDataText } from "@/lib/server/read-mill-data-text";
+import { resolveMillDataBase } from "@/lib/server/resolve-mill-data-base";
+import { timestamp } from "@/lib/timestamp";
 
 export async function GET(
   req: NextRequest,
@@ -21,12 +25,13 @@ export async function GET(
   }
   const dataDir = await resolveMillDataBase(req);
   const slug = precomputedSlug(decodeURIComponent(brand));
-  const data = await loadPrecomputedJson<{
-    umlInfo: unknown[];
-    timeseries: unknown[];
-    owners: unknown[];
-    brandStats?: unknown;
-  }>(`brand/${slug}.json`, req);
+  const data = await loadBrandPrecomputedPayload(slug, req);
+  if (!data) {
+    return NextResponse.json(
+      { error: "Brand data not found" },
+      { status: 404 }
+    );
+  }
   const sanitizedBrand = removeAccents(brand);
   switch (output) {
     case "geo": {
@@ -36,10 +41,10 @@ export async function GET(
       );
       const geoData = JSON.parse(geoDataRaw);
       const features = [];
-      for (const row of data.umlInfo as Record<string, unknown>[]) {
+      for (const row of (data.umlInfo ?? []) as Record<string, unknown>[]) {
         const feature = geoData.features.find(
-          // @ts-expect-error
-          (f: any) => f.properties["UML ID"] === row["UML ID"]
+          (f: { properties: Record<string, unknown> }) =>
+            f.properties["UML ID"] === row["UML ID"]
         );
         if (feature) {
           features.push({
@@ -47,11 +52,8 @@ export async function GET(
             geometry: feature.geometry,
             properties: {
               ...row,
-              // @ts-expect-error
               "Current Deforestation Score": row.risk_score_current,
-              // @ts-expect-error
               "Past Deforestation Score": row.risk_score_past,
-              // @ts-expect-error
               "Future Risk Score": row.risk_score_future,
               risk_score_current: undefined,
               risk_score_past: undefined,
@@ -72,7 +74,7 @@ export async function GET(
       );
     }
     case "loss": {
-      const lossDataRaw = data.timeseries;
+      const lossDataRaw = (data.timeseries ?? []) as LossTimeseriesRow[];
       const cleanedLossData = cleanLossData(lossDataRaw);
       return new NextResponse(cleanUnparse(cleanedLossData), {
         headers: {
@@ -82,14 +84,14 @@ export async function GET(
       });
     }
     case "mills":
-      return new NextResponse(cleanUnparse(data.umlInfo), {
+      return new NextResponse(cleanUnparse(data.umlInfo ?? []), {
         headers: {
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="${sanitizedBrand}-Mills-${timestamp}.csv"`,
         },
       });
     case "owners":
-      return new NextResponse(cleanUnparse(data.owners), {
+      return new NextResponse(cleanUnparse(data.owners ?? []), {
         headers: {
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="${sanitizedBrand}-Mill-Owners-${timestamp}.csv"`,

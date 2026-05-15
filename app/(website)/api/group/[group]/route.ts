@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
-import { precomputedSlug } from "@/utils/precomputedSlug";
+import { precomputedSlug } from "@/lib/precomputed-slug";
+import { loadGroupApiDocument } from "@/lib/server/entity-api-data";
 
 export async function GET(
   req: NextRequest,
@@ -14,9 +14,9 @@ export async function GET(
     );
   }
   const slug = precomputedSlug(decodeURIComponent(group));
-  const data = await loadPrecomputedJson<Record<string, unknown>>(
-    `group/${slug}-api.json`,
-    req
-  );
+  const data = await loadGroupApiDocument(slug, req);
+  if (!data) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
   return NextResponse.json({ ...data }, { status: 200 });
 }

@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BrandInfoClient } from "@/components/BrandInfoClient";
-import { HomePageMap } from "@/components/HomePageMap";
-import { MillInfo } from "@/components/MillInfo";
-import { QueryProvider } from "@/components/QueryProvider";
-import { ScrollToButton } from "@/components/ScrollToButton";
+import { BrandInfoClient } from "@/components/brand-info-client";
+import { QueryProvider } from "@/components/query-provider";
+import { ScrollToButton } from "@/components/scroll-to-button";
+import { HomePageMap } from "@/features/map";
+import { MillInfo } from "@/features/mill-detail";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText, urlFor } from "@/sanity/lib/components";
 

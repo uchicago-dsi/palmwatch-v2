@@ -1,32 +1,36 @@
-import { InfoTable } from "@/components/InfoTable";
-import { SearchableListLayout } from "@/components/SearchableListLayout";
-import { StatsBlock } from "@/components/StatsBlock";
+import { InfoTable } from "@/components/info-table";
+import { StatsBlock } from "@/components/stats-block";
+import { emptySearchListPayload } from "@/domain";
+import { SearchableListLayout } from "@/features/searchable-list";
+import {
+  loadMillSummaryStats,
+  loadRankingBrands,
+} from "@/lib/server/aggregates-data";
+import { loadSearchListPayload } from "@/lib/server/search-list-data";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import type { SearchListPayload } from "@/types/searchList";
-import { loadPrecomputedJson } from "@/utils/loadPrecomputed";
 import { getStatConfig } from "./pageConfig";
 
 export const revalidate = 60;
 
 export default async function Page() {
-  const [searchList, millStats, rankingBrands, landingPageContent] =
+  const [searchListRaw, millStats, rankingBrands, landingPageContent] =
     await Promise.all([
-      loadPrecomputedJson<SearchListPayload>("search-list.json"),
-      loadPrecomputedJson<{
-        brandCount: number | null;
-        companyCount: number | null;
-        countryCount: number | null;
-        millCount: number | null;
-        groupCount: number | null;
-      }>("aggregates/mill-summary-stats.json"),
-      loadPrecomputedJson<Record<string, unknown>[]>(
-        "aggregates/ranking-brands.json"
-      ),
+      loadSearchListPayload(),
+      loadMillSummaryStats(),
+      loadRankingBrands(),
       cmsClient.getLandingPageContent("brands"),
     ]);
 
+  const searchList = searchListRaw ?? emptySearchListPayload;
   const options = searchList.Brands;
+  if (!millStats) {
+    return (
+      <main className="mx-auto p-4">
+        <p>Could not load aggregate statistics. Please try again later.</p>
+      </main>
+    );
+  }
   const { brandCount, companyCount, countryCount, millCount, groupCount } =
     millStats;
   const statConfig = getStatConfig(
@@ -35,7 +39,7 @@ export default async function Page() {
     millCount,
     companyCount
   );
-  const rankedTable = rankingBrands;
+  const rankedTable = rankingBrands ?? [];
 
   return (
     <main className="mx-auto">
