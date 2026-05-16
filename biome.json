@@ -5,6 +5,11 @@
     "ultracite/biome/react",
     "ultracite/biome/next"
   ],
+  "css": {
+    "parser": {
+      "cssModules": true
+    }
+  },
   "files": {
     "includes": ["!!**/public/data", "!**/lib/generated/data-by-mill.ts"]
   },
