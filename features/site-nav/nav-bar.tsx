@@ -4,9 +4,36 @@ import { usePathname } from "next/navigation";
 import React from "react";
 import styles from "@/app/(website)/_shell/site-chrome.module.css";
 import { MENU_ITEMS } from "@/components/nav-bar-menu";
+import { useTheme } from "@/components/theme-provider";
 import type { SearchListPayload } from "@/domain";
 import { useDropdownStore } from "@/hooks/super-dropdown-store";
 import { NavBarSuperDropdown } from "./nav-bar-super-dropdown";
+
+function IconSun(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg fill="none" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function IconMoon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg fill="none" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function IconEnvelope({ className }: { className?: string }) {
+  return (
+    <svg aria-hidden className={className} fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <rect height="16" rx="2" stroke="currentColor" strokeWidth="2" width="20" x="2" y="4" />
+      <path d="M2 8l10 7 10-7" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+    </svg>
+  );
+}
 
 interface NavbarProps {
   searchList?: SearchListPayload;
@@ -17,6 +44,7 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList }) => {
     React.useState<NavbarProps["searchList"]>();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const pathname = usePathname();
+  const { theme, toggle } = useTheme();
   const searchBarRef = React.useRef<HTMLDivElement>(null);
   const currentMegaMenu = useDropdownStore((s) => s.currentDropdown);
   const setMegaMenu = useDropdownStore((s) => s.setcurrentDropdown);
@@ -112,6 +140,18 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList }) => {
               >
                 <Link href="/about">About</Link>
                 <Link href="/contact">Contact</Link>
+                <button
+                  aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                  className={styles.themeToggle}
+                  onClick={toggle}
+                  type="button"
+                >
+                  {theme === "dark" ? (
+                    <IconMoon aria-hidden />
+                  ) : (
+                    <IconSun aria-hidden />
+                  )}
+                </button>
               </nav>
             </div>
           </div>
@@ -186,6 +226,23 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList }) => {
           <Link className={styles.mobileLink} href="/contact">
             Contact
           </Link>
+          <div className={styles.mobileThemeRow}>
+            <span className={styles.mobileThemeLabel}>
+              {theme === "dark" ? "Dark mode" : "Light mode"}
+            </span>
+            <button
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              className={styles.mobileThemeToggle}
+              onClick={toggle}
+              type="button"
+            >
+              {theme === "dark" ? (
+                <IconMoon aria-hidden />
+              ) : (
+                <IconSun aria-hidden />
+              )}
+            </button>
+          </div>
         </nav>
       </aside>
     </>

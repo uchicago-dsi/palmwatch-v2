@@ -229,6 +229,77 @@
   letter-spacing: 0.04em;
 }
 
+/* Theme toggle — white on black utility bar; sits in utility nav on desktop, mobile panel too */
+.themeToggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: #fff;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  opacity: 0.85;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease;
+}
+
+.themeToggle:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Envelope icon inside Contact links */
+.utilityNavIcon {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  margin-right: 4px;
+  vertical-align: middle;
+  opacity: 0.8;
+}
+
+/* Mobile panel theme toggle row */
+.mobileThemeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+}
+
+.mobileThemeLabel {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.mobileThemeToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin-left: auto;
+  color: #ccc;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.mobileThemeToggle:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
 /* Hamburger — white on black utility bar; hidden on desktop */
 
 .hamburger {

@@ -5,6 +5,7 @@ import Head from "next/head";
 import { Feedback } from "@/components/feedback";
 import { Footer } from "@/components/footer";
 import { NavBar } from "@/features/site-nav";
+import { ThemeProvider } from "@/components/theme-provider";
 import { getCanonicalSiteOrigin, getUmamiConfig } from "@/lib/server/site";
 import shellStyles from "./_shell/site-shell.module.css";
 
@@ -60,7 +61,7 @@ export default async function RootLayout({
 }) {
   const umami = getUmamiConfig();
   return (
-    <html data-theme="dark" lang="en">
+    <html data-theme="light" lang="en" suppressHydrationWarning>
       <Head>
         <link
           href="/apple-touch-icon.png"
@@ -85,6 +86,11 @@ export default async function RootLayout({
         <meta content="#1d232a" name="theme-color" />
       </Head>
       <body className={inter.variable}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');}catch(e){}`,
+          }}
+        />
         {umami ? (
           <Script
             data-website-id={umami.websiteId}
@@ -93,12 +99,14 @@ export default async function RootLayout({
             strategy="afterInteractive"
           />
         ) : null}
-        <div className={shellStyles.siteShell}>
-          <NavBar />
-          <div className={shellStyles.siteMain}>{children}</div>
-          <Footer />
-        </div>
-        <Feedback />
+        <ThemeProvider>
+          <div className={shellStyles.siteShell}>
+            <NavBar />
+            <div className={shellStyles.siteMain}>{children}</div>
+            <Footer />
+          </div>
+          <Feedback />
+        </ThemeProvider>
       </body>
     </html>
   );
