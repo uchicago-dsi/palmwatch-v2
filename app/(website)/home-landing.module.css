@@ -3,7 +3,7 @@
   font-size: clamp(1.35rem, 2.4vw, 1.65rem);
   font-weight: 700;
   line-height: 1.25;
-  color: oklch(var(--bc));
+  color: hsl(var(--bc));
 }
 
 .intro {
@@ -15,7 +15,7 @@
   margin: 0 0 1rem;
   font-size: 1.05rem;
   line-height: 1.65;
-  color: oklch(var(--bc));
+  color: hsl(var(--bc));
 }
 
 .intro p:last-child {
@@ -81,14 +81,14 @@
   margin: 0 0 0.65rem;
   font-size: 1.125rem;
   font-weight: 700;
-  color: oklch(var(--bc));
+  color: hsl(var(--bc));
 }
 
 .featureCard p {
   margin: 0 0 1.1rem;
   font-size: 0.9375rem;
   line-height: 1.55;
-  color: oklch(var(--bc) / 0.85);
+  color: hsl(var(--bc) / 0.85);
 }
 
 .featureCta {
@@ -115,7 +115,7 @@
   font-size: clamp(1.35rem, 2.4vw, 1.65rem);
   font-weight: 700;
   line-height: 1.25;
-  color: oklch(var(--bc));
+  color: hsl(var(--bc));
 }
 
 .mapLeadIn {
@@ -126,7 +126,7 @@
   margin: 0 0 1rem;
   font-size: 1.05rem;
   line-height: 1.65;
-  color: oklch(var(--bc));
+  color: hsl(var(--bc));
 }
 
 .mapLeadIn p:last-child {
@@ -153,12 +153,12 @@
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.55;
-  color: oklch(var(--bc) / 0.7);
+  color: hsl(var(--bc) / 0.7);
 }
 
 .mapTips strong {
   font-weight: 600;
-  color: oklch(var(--bc) / 0.85);
+  color: hsl(var(--bc) / 0.85);
 }
 
 .mapDetailPanels {
