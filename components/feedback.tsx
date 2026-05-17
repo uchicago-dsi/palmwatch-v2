@@ -1,6 +1,8 @@
 "use client";
 import { usePathname } from "next/navigation";
 import React from "react";
+import styles from "./feedback.module.css";
+
 export const Feedback = () => {
   const path = usePathname();
   const url = path === "/" ? "Homepage" : decodeURI(path);
@@ -19,10 +21,7 @@ export const Feedback = () => {
   };
   return (
     <>
-      <button
-        className="btn btn-sm fixed right-0 bottom-[50%] z-50 rounded-full rounded-r-none bg-accent normal-case shadow-xl dark:text-black"
-        onClick={handleOpen}
-      >
+      <button className={styles.trigger} onClick={handleOpen} type="button">
         Feedback
       </button>
       <dialog className={`modal ${modalOpen ? "modal-open" : ""} `}>
