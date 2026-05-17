@@ -1,0 +1,611 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-top: 1.5rem;
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────────────── */
+
+.hero {
+  max-width: 680px;
+}
+
+.heroTitle {
+  margin: 0 0 0.625rem;
+  font-size: clamp(1.4rem, 3vw, 1.875rem);
+  font-weight: 600;
+  line-height: 1.25;
+  color: hsl(var(--bc));
+}
+
+.heroBody {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: hsl(var(--bc) / 0.7);
+}
+
+/* ── Search ────────────────────────────────────────────────────────────────── */
+
+.searchWrap {
+  position: relative;
+}
+
+.searchBar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 16px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+  transition: border-color 150ms ease;
+}
+
+.searchBar:focus-within {
+  border-color: hsl(var(--bc) / 0.2);
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  color: hsl(var(--bc) / 0.3);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: hsl(var(--bc));
+  appearance: none;
+  outline: none;
+  background: transparent;
+  border: none;
+}
+
+.searchInput::placeholder {
+  color: hsl(var(--bc) / 0.35);
+}
+
+.searchResults {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+  overflow-y: auto;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.15);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.searchResultItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+  text-decoration: none;
+  transition: background 100ms ease;
+}
+
+.searchResultItem:not(:last-child) {
+  border-bottom: 1px solid hsl(var(--bc) / 0.06);
+}
+
+.searchResultItem:hover,
+.searchResultActive {
+  background: hsl(var(--b2) / 0.5);
+}
+
+.searchResultMeta {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.45);
+}
+
+.searchResultChevron {
+  flex-shrink: 0;
+  color: hsl(var(--bc) / 0.25);
+}
+
+.searchResultItem:hover .searchResultChevron,
+.searchResultActive .searchResultChevron {
+  color: hsl(var(--bc) / 0.5);
+}
+
+.searchNoMatch {
+  padding: 12px 16px;
+  font-size: 0.8125rem;
+  color: hsl(var(--bc) / 0.45);
+}
+
+/* ── Directory stat cards (4-up) ───────────────────────────────────────────── */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 580px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.6);
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: hsl(var(--bc));
+  letter-spacing: -0.02em;
+}
+
+/* ── Impact cards (2-up) ───────────────────────────────────────────────────── */
+
+.impactGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .impactGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.impactCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.impactLabel {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.55);
+}
+
+/* RSPO donut */
+
+.rspoDonutLayout {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.rspoDonutSvg {
+  flex-shrink: 0;
+  color: hsl(var(--bc));
+}
+
+.rspoDonutCounts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rspoDonutGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.rspoDonutValue {
+  font-size: 18px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.rspoDonutValuePrimary {
+  font-size: 18px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc));
+}
+
+.rspoDonutSub {
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.55);
+}
+
+/* Forest impact — mirrors RSPO bar layout */
+
+.forestHeadline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.forestKmValue {
+  font-size: 22px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: hsl(var(--bc));
+  letter-spacing: -0.02em;
+}
+
+.forestKmSub {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.55);
+}
+
+.forestBar {
+  height: 8px;
+  overflow: hidden;
+  background: hsl(var(--b3));
+  border-radius: 9999px;
+}
+
+.forestBarFill {
+  height: 100%;
+  background: #e24b4a;
+  border-radius: 9999px;
+  transition: width 0.35s ease;
+}
+
+:global([data-theme="dark"]) .forestBarFill {
+  background: #f09595;
+}
+
+.forestFooter {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.forestLostLabel {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.6);
+}
+
+.forestRemainLabel {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.65);
+  text-align: right;
+}
+
+/* ── Chart card ────────────────────────────────────────────────────────────── */
+
+.chartCard {
+  padding: 20px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.chartTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.chartLegend {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.chartLegendItem {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.chartLegendBar {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  background: rgba(226, 75, 74, 0.35);
+  border-radius: 2px;
+}
+
+:global([data-theme="dark"]) .chartLegendBar {
+  background: rgba(240, 149, 149, 0.35);
+}
+
+.chartLegendLine {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 2px;
+  background: #e24b4a;
+  border-radius: 9999px;
+}
+
+:global([data-theme="dark"]) .chartLegendLine {
+  background: #f09595;
+}
+
+.chartLegendLabel {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.5);
+}
+
+.chartBody {
+  height: 200px;
+}
+
+/* ── Shared section label ──────────────────────────────────────────────────── */
+
+.tableHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sectionTitle {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.tableCount {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.45);
+}
+
+/* ── Table ─────────────────────────────────────────────────────────────────── */
+
+.tableWrap {
+  overflow-x: auto;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.table {
+  width: 100%;
+  min-width: 440px;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: hsl(var(--b2));
+}
+
+.th {
+  padding: 9px 12px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: hsl(var(--bc) / 0.6);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid hsl(var(--bc) / 0.1);
+  transition: color 150ms ease;
+}
+
+.th:hover {
+  color: hsl(var(--bc) / 0.9);
+}
+
+.thActive {
+  color: hsl(var(--bc));
+}
+
+.thName {
+  composes: th;
+}
+
+.thCountry {
+  composes: th;
+  width: 120px;
+}
+
+.thRspo {
+  composes: th;
+  width: 80px;
+  text-align: center;
+}
+
+.thArrow {
+  composes: th;
+  width: 32px;
+  cursor: default;
+}
+
+.thInner {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.sortIconInactive {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.4;
+}
+
+.sortIconActive {
+  display: inline-flex;
+  align-items: center;
+  color: var(--site-nav-accent);
+}
+
+.tr {
+  cursor: pointer;
+  border-top: 1px solid hsl(var(--bc) / 0.1);
+  transition: background 100ms ease;
+}
+
+.tr:hover {
+  background: hsl(var(--b2) / 0.35);
+}
+
+.tdName {
+  padding: 10px 12px;
+}
+
+.millName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+  text-decoration: none;
+}
+
+.tdCountry {
+  width: 120px;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  color: hsl(var(--bc) / 0.6);
+  white-space: nowrap;
+}
+
+.tdRspo {
+  width: 80px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.rspoBadgeYes {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #085041;
+  background: #e1f5ee;
+  border-radius: 6px;
+}
+
+:global([data-theme="dark"]) .rspoBadgeYes {
+  color: #5dcaa5;
+  background: rgba(8, 80, 65, 0.3);
+}
+
+.rspoBadgeNo {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.4);
+}
+
+.tdArrow {
+  padding: 10px 8px;
+  color: hsl(var(--bc) / 0.3);
+  text-align: center;
+}
+
+.noResults {
+  padding: 1.5rem;
+  font-size: 0.875rem;
+  color: hsl(var(--bc) / 0.45);
+  text-align: center;
+}
+
+/* ── Pagination ────────────────────────────────────────────────────────────── */
+
+.tableFooter {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background: hsl(var(--b2));
+  border-top: 1px solid hsl(var(--bc) / 0.1);
+}
+
+.paginationBtn {
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: hsl(var(--bc) / 0.7);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  transition: color 100ms ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  color: hsl(var(--bc));
+}
+
+.paginationBtn:disabled {
+  color: hsl(var(--bc) / 0.25);
+  cursor: default;
+}
+
+.paginationInfo {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.55);
+}
+
+/* ── Mobile sticky name column ─────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  .tdName {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: hsl(var(--b1));
+  }
+
+  .thName {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: hsl(var(--b2));
+  }
+}
+
+/* ── Disclaimer ────────────────────────────────────────────────────────────── */
+
+.disclaimer {
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: hsl(var(--bc) / 0.5);
+}

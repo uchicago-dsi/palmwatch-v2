@@ -1,99 +1,57 @@
-import { IqrOverTime } from "@/components/iqr-over-time-line-chart";
 import pageStyles from "@/components/page-layout.module.css";
-import { StatsBlock } from "@/components/stats-block";
-import { emptySearchListPayload } from "@/domain";
-import { SearchableListLayout } from "@/features/searchable-list";
 import { loadMillSummaryStats } from "@/lib/server/aggregates-data";
-import { loadSearchListPayload } from "@/lib/server/search-list-data";
+import { loadMillDirectory } from "@/lib/server/mill-directory-data";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
-import {
-  basicStatsConfig,
-  forestStatsConfig,
-  rspoStatsConfig,
-} from "./pageConfig";
+import styles from "./mills.module.css";
+import { MillsClient } from "./mills-client";
 
 export const revalidate = 60;
 
 export default async function Page() {
-  const [searchListRaw, millStats, landingPageContent] = await Promise.all([
-    loadSearchListPayload(),
+  const [millStats, millDirectory, landingPageContent] = await Promise.all([
     loadMillSummaryStats(),
+    loadMillDirectory(),
     cmsClient.getLandingPageContent("mills"),
   ]);
 
-  const searchList = searchListRaw ?? emptySearchListPayload;
-
-  const options = searchList.Mills;
   if (!millStats) {
     return (
       <main className={pageStyles.pageShell}>
         <div className={pageStyles.pageInner}>
-          <p>Could not load aggregate statistics. Please try again later.</p>
+          <p>Could not load statistics. Please try again later.</p>
         </div>
       </main>
     );
   }
+
   const {
-    timeseries,
+    forestLossByYear,
     totalForestArea,
     totalForestLoss,
-    totalArea,
-    brandCount,
-    companyCount,
-    countryCount,
-    groupCount,
     millCount,
     rspoCertified,
-    notRspoCertified,
   } = millStats;
 
-  const basicStats = basicStatsConfig(
-    millCount,
-    brandCount,
-    countryCount,
-    companyCount
-  );
-  const forestStats = forestStatsConfig(
-    totalForestArea,
-    totalForestLoss,
-    totalArea
-  );
-  const rspoStats = rspoStatsConfig(rspoCertified, notRspoCertified);
+  const forestLossPct =
+    totalForestArea > 0 ? (totalForestLoss / totalForestArea) * 100 : 0;
 
   return (
     <main className={pageStyles.pageShell}>
       <div className={pageStyles.pageInner}>
-        <section className="prose flex max-w-none flex-col pb-4">
-          <h1 className="m-0 p-0">Mills</h1>
-          {!!landingPageContent?.content && (
-            <div className="prose max-w-none">
-              <PortableText value={landingPageContent.content} />
-            </div>
-          )}
-          <StatsBlock stats={basicStats} />
-          <hr className="my-0 py-0" />
-          <StatsBlock stats={rspoStats} />
-          <hr className="my-0 py-0" />
-          <StatsBlock stats={forestStats} />
-          <hr className="my-0 py-0" />
-          <div className="h-96">
-            <IqrOverTime data={timeseries} type="brand" />
-          </div>
-        </section>
-        <div>
-          <SearchableListLayout
-            columns={2}
-            label="Mills"
-            options={options}
-            rows={20}
-          />
-        </div>
-        <div className="prose my-4 max-w-none">
-          {!!landingPageContent?.disclaimer && (
+        <MillsClient
+          forestLossByYear={forestLossByYear ?? []}
+          forestLossKm2={totalForestLoss}
+          forestLossPct={forestLossPct}
+          millCount={millCount ?? 0}
+          mills={millDirectory ?? []}
+          rspoCertified={rspoCertified}
+        />
+        {!!landingPageContent?.disclaimer && (
+          <div className={styles.disclaimer}>
             <PortableText value={landingPageContent.disclaimer} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </main>
   );
