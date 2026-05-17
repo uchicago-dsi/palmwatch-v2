@@ -9,6 +9,12 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      { source: "/owners", destination: "/companies", permanent: true },
+      { source: "/groups", destination: "/companies", permanent: true },
+    ];
+  },
 };
 
 module.exports = nextConfig;
