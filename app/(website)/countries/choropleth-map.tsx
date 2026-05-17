@@ -180,9 +180,14 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
     map.on("load", async () => {
       applyBrightness(map, themeRef.current);
 
-      const topoJson = await fetch("/data/world-110m.json").then((r) =>
-        r.json()
-      );
+      const res = await fetch("/data/world-110m.json");
+      if (!res.ok) {
+        console.error(
+          `Failed to load world map topology: ${res.status} ${res.statusText}`
+        );
+        return;
+      }
+      const topoJson = await res.json();
       const geo = feature(
         topoJson as Parameters<typeof feature>[0],
         topoJson.objects.countries as Parameters<typeof feature>[1]
