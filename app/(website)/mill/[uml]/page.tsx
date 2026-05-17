@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
-import { QueryProvider } from "@/components/query-provider";
-import { latestTreelossKmColumn } from "@/config/years";
-import { PalmwatchMap } from "@/features/map";
+import pageStyles from "@/components/page-layout.module.css";
 import { MillPageView } from "@/features/mill-detail";
 import { loadMillPageModel } from "@/lib/server/mill-page-data";
+import { PortableText } from "@/sanity/lib/components";
 
 export const revalidate = 60;
 
@@ -18,17 +17,16 @@ export default async function Page({
   if (!model) {
     notFound();
   }
-  const deforestationMap = (
-    <QueryProvider>
-      <PalmwatchMap
-        choroplethColumn={latestTreelossKmColumn}
-        choroplethScheme="forestLoss"
-        dataIdColumn="UML ID"
-        dataTable={model.millPayload.info}
-        geoDataUrl="/data/mill-catchment.geojson"
-        geoIdColumn="UML ID"
-      />
-    </QueryProvider>
+
+  const cmsContent = model.millContent?.content ? (
+    <PortableText value={model.millContent.content} />
+  ) : undefined;
+
+  return (
+    <main className={pageStyles.pageShell}>
+      <div className={pageStyles.pageInner}>
+        <MillPageView cmsContent={cmsContent} model={model} />
+      </div>
+    </main>
   );
-  return <MillPageView deforestationMap={deforestationMap} model={model} />;
 }
