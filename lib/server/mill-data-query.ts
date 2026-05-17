@@ -203,6 +203,35 @@ class MillDataQuery {
     }
     return quantileResults;
   }
+
+  /** Per-year sum of `treeloss_km_*` across deduped mills, plus running cumulative. */
+  getForestLossByYear() {
+    const mills = this.uml!.dedupe("UML ID").objects() as UmlData[];
+    if (mills.length === 0) {
+      return [];
+    }
+
+    const years = Object.keys(mills[0])
+      .filter((key) => /^treeloss_km_\d{4}$/.test(key))
+      .map((key) => Number.parseInt(key.replace("treeloss_km_", ""), 10))
+      .sort((a, b) => a - b);
+
+    let cumulativeKm2 = 0;
+    return years.map((year) => {
+      const column = `treeloss_km_${year}` as keyof UmlData;
+      const annualKm2 = mills.reduce(
+        (sum, mill) => sum + (Number(mill[column]) || 0),
+        0
+      );
+      cumulativeKm2 += annualKm2;
+      return {
+        year,
+        annualKm2: Math.round(annualKm2 * 100) / 100,
+        cumulativeKm2: Math.round(cumulativeKm2 * 100) / 100,
+      };
+    });
+  }
+
   getOwnerInfo(
     owner: string,
     cols: string[],
@@ -462,6 +491,7 @@ class MillDataQuery {
       totalForestArea: number;
     };
     const timeseries = this.getQuantileTimeseries(this.uml!);
+    const forestLossByYear = this.getForestLossByYear();
     const uniqueCounts = this.getUniqueCounts();
 
     const notRspoCertified = this.uml!.filter(
@@ -479,6 +509,7 @@ class MillDataQuery {
       notRspoCertified: notRspoCertified.count,
       rspoCertified,
       timeseries,
+      forestLossByYear,
     };
   }
 

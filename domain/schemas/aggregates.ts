@@ -1,9 +1,18 @@
 import { z } from "zod";
 
+export const forestLossYearPointSchema = z.object({
+  year: z.number(),
+  annualKm2: z.number(),
+  cumulativeKm2: z.number(),
+});
+
+export type ForestLossYearPoint = z.infer<typeof forestLossYearPointSchema>;
+
 /** `aggregates/mill-summary-stats.json` (brands + mills list pages). */
 export const millSummaryStatsPayloadSchema = z
   .object({
     timeseries: z.array(z.record(z.unknown())),
+    forestLossByYear: z.array(forestLossYearPointSchema).optional(),
     totalForestArea: z.number(),
     totalForestLoss: z.number(),
     totalArea: z.number(),
