@@ -130,12 +130,6 @@
   gap: 10px;
 }
 
-@media (min-width: 580px) {
-  .statsGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
 .statCard {
   display: flex;
   flex-direction: column;
@@ -159,6 +153,40 @@
   line-height: 1.1;
   color: hsl(var(--bc));
   letter-spacing: -0.02em;
+}
+
+.statValueRow {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.scoreDot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-top: 2px;
+  border-radius: 50%;
+}
+
+.scoreDotRed {
+  background: #e24b4a;
+}
+.scoreDotAmber {
+  background: #ef9f27;
+}
+.scoreDotTeal {
+  background: #1d9e75;
+}
+
+:global([data-theme="dark"]) .scoreDotRed {
+  background: #f09595;
+}
+:global([data-theme="dark"]) .scoreDotAmber {
+  background: #fac775;
+}
+:global([data-theme="dark"]) .scoreDotTeal {
+  background: #5dcaa5;
 }
 
 /* ── Rankings table ────────────────────────────────────────────────────────── */
@@ -225,6 +253,12 @@
   text-align: right;
 }
 
+.thArrow {
+  composes: th;
+  width: 32px;
+  cursor: default;
+}
+
 .thInner {
   display: inline-flex;
   gap: 4px;
@@ -246,7 +280,9 @@
 /* Body rows */
 
 .tr {
+  cursor: pointer;
   border-top: 1px solid hsl(var(--bc) / 0.1);
+  transition: background 100ms ease;
 }
 
 .tr:hover {
@@ -335,6 +371,13 @@
   color: hsl(var(--bc) / 0.6);
   text-align: right;
   white-space: nowrap;
+}
+
+.tdArrow {
+  width: 32px;
+  padding: 12px 8px;
+  color: hsl(var(--bc) / 0.3);
+  text-align: center;
 }
 
 /* ── Score legend ──────────────────────────────────────────────────────────── */

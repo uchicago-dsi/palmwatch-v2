@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { ShowMoreButton } from "@/components/show-more-button";
+import { useShowMore } from "@/hooks/use-show-more";
 import styles from "./brands.module.css";
 
 type BrandRow = {
@@ -12,7 +14,11 @@ type BrandRow = {
   totalForestLoss: number;
 };
 
-type StatCard = { label: string; value: string };
+type StatCard = {
+  label: string;
+  value: string;
+  dotCategory?: "red" | "amber" | "teal";
+};
 type SortKey = "overallScore" | "consumer_brand" | "totalForestLoss";
 type SortDir = "asc" | "desc";
 
@@ -22,7 +28,7 @@ interface Props {
 }
 
 function computeOverall(b: BrandRow) {
-  return (b.averageCurrentRisk + b.averagePastRisk) / 2;
+  return b.averageCurrentRisk;
 }
 
 function scoreColorClass(score: number) {
@@ -43,27 +49,6 @@ function swatchClass(score: number) {
     return styles.swatchAmber;
   }
   return styles.swatchRed;
-}
-
-function IconSearch() {
-  return (
-    <svg
-      aria-hidden
-      className={styles.searchIcon}
-      fill="none"
-      height="18"
-      viewBox="0 0 24 24"
-      width="18"
-    >
-      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.75" />
-      <path
-        d="m21 21-4.35-4.35"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.75"
-      />
-    </svg>
-  );
 }
 
 function IconSortBoth() {
@@ -130,7 +115,6 @@ const LEGEND = [
 ];
 
 export function BrandsClient({ brands, stats }: Props) {
-  const [query, setQuery] = React.useState("");
   const [sortKey, setSortKey] = React.useState<SortKey>("overallScore");
   const [sortDir, setSortDir] = React.useState<SortDir>("desc");
 
@@ -169,55 +153,21 @@ export function BrandsClient({ brands, stats }: Props) {
     return rows.map((r, i) => ({ ...r, rank: i + 1 }));
   }, [enriched, sortKey, sortDir]);
 
+  const {
+    visibleItems: visibleRows,
+    hiddenCount,
+    expanded,
+    toggle: toggleShowMore,
+  } = useShowMore(sorted);
+
   const router = useRouter();
-  const q = query.trim().toLowerCase();
-  const searchResults =
-    q.length >= 2
-      ? enriched.filter((r) => r.consumer_brand.toLowerCase().includes(q))
-      : [];
-  const showResults = q.length >= 2;
-  const [activeIdx, setActiveIdx] = React.useState(-1);
-  const resultsRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    setActiveIdx(-1);
-  }, [q]);
-
-  function handleSearchKeyDown(e: React.KeyboardEvent) {
-    if (!showResults || searchResults.length === 0) {
-      return;
-    }
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIdx((i) => (i < searchResults.length - 1 ? i + 1 : 0));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIdx((i) => (i > 0 ? i - 1 : searchResults.length - 1));
-    } else if (e.key === "Enter" && activeIdx >= 0) {
-      e.preventDefault();
-      router.push(searchResults[activeIdx].href);
-    } else if (e.key === "Escape") {
-      setQuery("");
-    }
-  }
-
-  React.useEffect(() => {
-    if (activeIdx < 0 || !resultsRef.current) {
-      return;
-    }
-    const item = resultsRef.current.children[activeIdx] as
-      | HTMLElement
-      | undefined;
-    item?.scrollIntoView({ block: "nearest" });
-  }, [activeIdx]);
 
   return (
     <div className={styles.page}>
       {/* Hero */}
       <section className={styles.hero}>
         <h1 className={styles.heroTitle}>
-          How do major brands score on deforestation?
+          Consumer brands in the palm oil supply chain
         </h1>
         <p className={styles.heroBody}>
           PalmWatch tracks 15 major consumer brands and scores each on its links
@@ -228,78 +178,27 @@ export function BrandsClient({ brands, stats }: Props) {
         </p>
       </section>
 
-      {/* Search */}
-      <div className={styles.searchWrap}>
-        <div className={styles.searchBar}>
-          <IconSearch />
-          <input
-            aria-activedescendant={
-              activeIdx >= 0 ? `search-result-${activeIdx}` : undefined
-            }
-            aria-autocomplete="list"
-            aria-controls="brand-search-results"
-            aria-expanded={showResults && searchResults.length > 0}
-            aria-label="Search brands"
-            className={styles.searchInput}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            placeholder="Search brands…"
-            role="combobox"
-            type="search"
-            value={query}
-          />
-        </div>
-        {showResults && (
-          <div
-            className={styles.searchResults}
-            id="brand-search-results"
-            ref={resultsRef}
-            role="listbox"
-          >
-            {searchResults.length > 0 ? (
-              searchResults.map((brand, i) => (
-                <Link
-                  aria-selected={i === activeIdx}
-                  className={`${styles.searchResultItem} ${i === activeIdx ? styles.searchResultActive : ""}`}
-                  href={brand.href}
-                  id={`search-result-${i}`}
-                  key={brand.consumer_brand}
-                  role="option"
-                >
-                  {brand.consumer_brand}
-                  <svg
-                    aria-hidden
-                    className={styles.searchResultChevron}
-                    fill="none"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    width="14"
-                  >
-                    <path
-                      d="M9 18l6-6-6-6"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.75"
-                    />
-                  </svg>
-                </Link>
-              ))
-            ) : (
-              <span className={styles.searchNoMatch}>
-                No brands match &ldquo;{query}&rdquo;
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-
       {/* Stat cards */}
       <div className={styles.statsGrid}>
         {stats.map((s) => (
           <div className={styles.statCard} key={s.label}>
             <span className={styles.statLabel}>{s.label}</span>
-            <span className={styles.statValue}>{s.value}</span>
+            {s.dotCategory ? (
+              <div className={styles.statValueRow}>
+                <span
+                  className={`${styles.scoreDot} ${
+                    s.dotCategory === "red"
+                      ? styles.scoreDotRed
+                      : s.dotCategory === "amber"
+                        ? styles.scoreDotAmber
+                        : styles.scoreDotTeal
+                  }`}
+                />
+                <span className={styles.statValue}>{s.value}</span>
+              </div>
+            ) : (
+              <span className={styles.statValue}>{s.value}</span>
+            )}
           </div>
         ))}
       </div>
@@ -347,16 +246,25 @@ export function BrandsClient({ brands, stats }: Props) {
                     />
                   </span>
                 </th>
+                <th className={styles.thArrow} />
               </tr>
             </thead>
             <tbody>
-              {sorted.map((row) => (
-                <tr className={styles.tr} key={row.consumer_brand}>
+              {visibleRows.map((row) => (
+                <tr
+                  className={styles.tr}
+                  key={row.consumer_brand}
+                  onClick={() => router.push(row.href)}
+                >
                   <td className={styles.tdRank}>{row.rank}</td>
                   <td className={styles.tdBrand}>
-                    <span className={styles.brandName}>
+                    <Link
+                      className={styles.brandName}
+                      href={row.href}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {row.consumer_brand}
-                    </span>
+                    </Link>
                   </td>
                   <td className={styles.tdScore}>
                     <div className={styles.scoreWrap}>
@@ -376,11 +284,33 @@ export function BrandsClient({ brands, stats }: Props) {
                   <td className={styles.tdForest}>
                     {row.totalForestLoss.toLocaleString()}
                   </td>
+                  <td className={styles.tdArrow}>
+                    <svg
+                      aria-hidden
+                      fill="none"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      width="14"
+                    >
+                      <path
+                        d="M9 18l6-6-6-6"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.75"
+                      />
+                    </svg>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        <ShowMoreButton
+          expanded={expanded}
+          hiddenCount={hiddenCount}
+          onToggle={toggleShowMore}
+        />
 
         {/* Legend */}
         <div className={styles.legend}>
