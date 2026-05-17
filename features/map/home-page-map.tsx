@@ -1,10 +1,10 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { latestTreelossKmColumn } from "@/config/years";
-import { PalmwatchMap } from "./palmwatch-map";
+import { PalmwatchMap, SATELLITE_MAP_STYLE } from "./palmwatch-map";
 
 export const HomePageMap = () => {
-  const { data, isLoading, isError } = useQuery(["full-data"], async () => {
+  const { data, isLoading } = useQuery(["full-data"], async () => {
     const res = await fetch("/api/full");
     return res.json();
   });
@@ -20,6 +20,8 @@ export const HomePageMap = () => {
           dataTable={data!}
           geoDataUrl="/data/mill-catchment.geojson"
           geoIdColumn="UML ID"
+          mapStyle={SATELLITE_MAP_STYLE}
+          showClusters={true}
         />
       )}
     </div>

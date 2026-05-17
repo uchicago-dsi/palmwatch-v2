@@ -4,6 +4,7 @@ import { MapboxOverlay, type MapboxOverlayProps } from "@deck.gl/mapbox/typed";
 import { fitBounds } from "@math.gl/web-mercator";
 import { useQuery } from "@tanstack/react-query";
 import bbox from "@turf/bbox";
+import type { Map as MapboxGLMap } from "mapbox-gl";
 import React, {
   useCallback,
   useEffect,
@@ -13,10 +14,13 @@ import React, {
 } from "react";
 import Map, {
   AttributionControl,
+  Layer,
   type MapRef,
   NavigationControl,
+  Source,
   useControl,
 } from "react-map-gl";
+import { useTheme } from "@/components/theme-provider";
 import { colorFunctions } from "@/lib/color-function";
 import GeocoderControl from "./geocoder-control";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -27,12 +31,112 @@ import { Legend } from "./legend";
 import { MapTooltip } from "./map-tooltip";
 import { useTooltipStore } from "./stores/tooltip-store";
 
-const DEFAULT_MAP_STYLE = "mapbox://styles/dhalpern/cln0e32pu06ba01qxcgrp4gv9";
-const MAP_STYLE = process.env.NEXT_PUBLIC_MAPBOX_STYLE || DEFAULT_MAP_STYLE;
+export const SATELLITE_MAP_STYLE =
+  "mapbox://styles/mapbox/satellite-streets-v12";
+const MAP_STYLE = process.env.NEXT_PUBLIC_MAPBOX_STYLE || SATELLITE_MAP_STYLE;
 const MAP_PROJECTION = { name: "mercator" } as const;
 
-/** Mill pins only at this zoom or closer (Mapbox zoom is roughly log2 of scale). */
 const PIN_MIN_ZOOM = 7;
+
+// ── Brightness helpers ────────────────────────────────────────────────────────
+
+function applyThemeBrightness(map: MapboxGLMap, theme: "light" | "dark") {
+  if (!map.getLayer("satellite")) {
+    return;
+  }
+  if (theme === "light") {
+    map.setPaintProperty("satellite", "raster-brightness-min", 0.15);
+    map.setPaintProperty("satellite", "raster-brightness-max", 1.0);
+    map.setPaintProperty("satellite", "raster-saturation", -0.1);
+  } else {
+    map.setPaintProperty("satellite", "raster-brightness-min", 0.0);
+    map.setPaintProperty("satellite", "raster-brightness-max", 1.0);
+    map.setPaintProperty("satellite", "raster-saturation", -0.15);
+  }
+}
+
+// ── Icons ─────────────────────────────────────────────────────────────────────
+
+function IconLayersOn() {
+  return (
+    <svg fill="none" height="15" viewBox="0 0 24 24" width="15">
+      <polygon
+        points="12 2 2 7 12 12 22 7 12 2"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+      <polyline
+        points="2 17 12 22 22 17"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+      <polyline
+        points="2 12 12 17 22 12"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function IconClose() {
+  return (
+    <svg aria-hidden fill="none" height="18" viewBox="0 0 24 24" width="18">
+      <path
+        d="M18 6L6 18M6 6l12 12"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function IconLayersOff() {
+  return (
+    <svg fill="none" height="15" viewBox="0 0 24 24" width="15">
+      <polygon
+        points="12 2 2 7 12 12 22 7 12 2"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeOpacity="0.35"
+        strokeWidth="2"
+      />
+      <polyline
+        points="2 17 12 22 22 17"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeOpacity="0.35"
+        strokeWidth="2"
+      />
+      <polyline
+        points="2 12 12 17 22 12"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeOpacity="0.35"
+        strokeWidth="2"
+      />
+      <line
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="2"
+        x1="3"
+        x2="21"
+        y1="3"
+        y2="21"
+      />
+    </svg>
+  );
+}
 
 export type MapProps = {
   geoDataUrl: string;
@@ -44,6 +148,8 @@ export type MapProps = {
   showLayerStepper?: boolean;
   onMapMove?: (v: any) => void;
   noFlyMap?: boolean;
+  mapStyle?: string;
+  showClusters?: boolean;
 };
 
 export const PalmwatchMap: React.FC<MapProps> = ({
@@ -56,10 +162,15 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   showLayerStepper,
   onMapMove,
   noFlyMap,
+  mapStyle: mapStyleProp,
+  showClusters,
 }) => {
+  const { theme } = useTheme();
   const mapRef = React.useRef<MapRef | null>(null);
   const [mapZoom, setMapZoom] = useState(0);
   const lastRoundedZoomRef = useRef<number | null>(null);
+  const [fillVisible, setFillVisible] = useState(true);
+
   const syncZoomFromView = useCallback((z: number) => {
     const rounded = Math.round(z);
     if (lastRoundedZoomRef.current === rounded) {
@@ -85,6 +196,14 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   const setUml = umlStore.setUml;
   const activeUml = umlStore.currentUml;
 
+  // Apply brightness whenever theme changes (after initial load)
+  useEffect(() => {
+    const nativeMap = mapRef.current?.getMap() as MapboxGLMap | undefined;
+    if (nativeMap?.isStyleLoaded()) {
+      applyThemeBrightness(nativeMap, theme);
+    }
+  }, [theme]);
+
   const getColor = (data: Record<string, any>) => {
     const value = data?.[currentChoroplethColumn];
     return colorFunction(value);
@@ -109,13 +228,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         return id in dataDict;
       }) ?? [];
 
-    /**
-     * Mill detail passes one row. Framing from lon/lat uses ±0.02° — far tighter than the
-     * catchment. Prefer polygon bbox, extra padding, a max zoom cap, then ease out.
-     */
     const singleMillFocus = dataTable.length === 1;
 
-    /** With many mills, prefer point extents — merged polygons can span oddly. */
     const lngs: number[] = [];
     const lats: number[] = [];
     for (const row of dataTable) {
@@ -222,6 +336,18 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     };
   }, [data, dataTable, dataIdColumn, geoIdColumn, isLoading, isError]);
 
+  const filteredGeoData = useMemo(() => {
+    if (!(data?.features && dataDict)) {
+      return data ?? null;
+    }
+    return {
+      type: "FeatureCollection" as const,
+      features: data.features.filter(
+        (f) => (f.properties?.[geoIdColumn] as string) in dataDict
+      ),
+    };
+  }, [data, dataDict, geoIdColumn]);
+
   const millPinFeatures = useMemo(() => {
     if (!(data?.features && dataDict)) {
       return [];
@@ -242,6 +368,31 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       );
     });
   }, [data, dataDict, geoIdColumn]);
+
+  const millPointsGeoJSON = useMemo<GeoJSON.FeatureCollection | null>(() => {
+    if (!showClusters) {
+      return null;
+    }
+    const features: GeoJSON.Feature[] = [];
+    for (const row of dataTable) {
+      const r = row as Record<string, unknown>;
+      const lng = Number(r.Longitude);
+      const lat = Number(r.Latitude);
+      if (
+        Number.isFinite(lng) &&
+        Number.isFinite(lat) &&
+        Math.abs(lat) <= 90 &&
+        Math.abs(lng) <= 180
+      ) {
+        features.push({
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [lng, lat] },
+          properties: {},
+        });
+      }
+    }
+    return { type: "FeatureCollection", features };
+  }, [dataTable, showClusters]);
 
   useEffect(() => {
     if (initialMapView?.zoom != null && Number.isFinite(initialMapView.zoom)) {
@@ -271,20 +422,24 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     noFlyMap,
   ]);
 
+  const fillOpacity = theme === "light" ? 0.35 : 0.45;
+  const mapDetailZoom = !showClusters || mapZoom >= PIN_MIN_ZOOM;
+  const polygonFillVisible = fillVisible && mapDetailZoom;
+
   const layers = [
     new GeoJsonLayer({
       id: "main-map-layer",
-      data: data!,
-      opacity: 0.4,
+      data: (filteredGeoData ?? data)!,
+      opacity: fillOpacity,
       stroked: true,
       filled: true,
       extruded: false,
       wireframe: false,
       pickable: true,
-      // Pixels: a huge meter width (e.g. 1000m) made the selected polygon swallow the map for picking.
+      visible: polygonFillVisible,
       getLineWidth: (d) => (d?.properties?.[geoIdColumn] === activeUml ? 4 : 1),
       lineWidthUnits: "pixels",
-      getLineColor: [0, 0, 0, 255],
+      getLineColor: [255, 255, 255, 120],
       lineWidthMinPixels: 0.5,
       lineWidthMaxPixels: 6,
       onHover: ({ x, y, object }) =>
@@ -308,6 +463,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           currentChoroplethScheme,
         ],
         getLineWidth: [activeUml],
+        opacity: [fillOpacity],
+        visible: [polygonFillVisible, fillVisible, showClusters, mapZoom],
       },
     }),
 
@@ -361,101 +518,19 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     setCurrentChoroplethColumn(variable);
   };
 
+  const layerControlsVisible = mapDetailZoom;
+
+  useEffect(() => {
+    if (!layerControlsVisible && showLayerPanel) {
+      setShowLayerPanel(false);
+    }
+  }, [layerControlsVisible, showLayerPanel]);
+
   return (
-    <div className="flex h-full w-full flex-row">
-      <div
-        className={`${
-          showLayerPanel
-            ? "w-96 opacity-100 transition-all"
-            : "w-0 px-0 opacity-0"
-        } prose`}
-      >
-        <div className="px-2">
-          <h3>Map Data Layers</h3>
-          <ul className="menu w-full rounded-box p-0">
-            <li>
-              <button
-                className={`m-0 p-2 ${currentYear === -1 ? "" : "btn-active"}`}
-                onClick={() => handleVariable(latestTreelossKmColumn)}
-              >
-                Deforestation By Year
-              </button>
-            </li>
-            <li>
-              <button
-                className={`m-0 p-2 ${currentYear === -1 ? "btn-active" : ""}`}
-                onClick={() => handleVariable("risk_score_current")}
-              >
-                Deforestation Scores
-              </button>
-            </li>
-          </ul>
-          {currentYear === -1 ? (
-            <>
-              <h4>Deforestation Score</h4>
-              <div className="join join-vertical">
-                {[
-                  {
-                    value: "risk_score_past",
-                    label: "Past Deforestation Score",
-                  },
-                  {
-                    value: "risk_score_current",
-                    label: "Recent Deforestation Score",
-                  },
-                  {
-                    value: "risk_score_future",
-                    label: "Future Deforestation Risk Score",
-                  },
-                ].map((variable) => (
-                  <button
-                    className={`join-item btn ${
-                      currentChoroplethColumn === variable.value
-                        ? "btn-active"
-                        : ""
-                    }`}
-                    key={variable.value}
-                    onClick={() => handleVariable(variable.value)}
-                  >
-                    {variable.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : (
-            <>
-              <h4>Data Year</h4>
-              <div className="join w-full max-w-none">
-                <button className="join-item btn" onClick={decrementYear}>
-                  «
-                </button>
-                <button className="join-item btn">{currentYear}</button>
-                <button className="join-item btn" onClick={incrementYear}>
-                  »
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-      <div className="relative h-full w-full">
-        <button
-          aria-label="Toggle Layer Panel"
-          className="btn absolute top-[50%] left-2 z-10 translate-y-[-50%] rounded-r-lg bg-base-100 py-0 shadow-xl"
-          onClick={() => setShowLayerPanel((p) => !p)}
-        >
-          <svg
-            className="dark:fill-white"
-            height="24px"
-            version="1.1"
-            viewBox="0 0 100 100"
-            width="24px"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="m3.5 67.75c-0.011719 1.125 0.58594 2.1719 1.5625 2.7344l43.375 24c0.94141 0.52344 2.0898 0.52344 3.0312 0l43.422-24c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-43.328-24c-0.94141-0.52344-2.0898-0.52344-3.0312 0l-43.422 24c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99219 0.55078-1.6094 1.5977-1.6094 2.7344zm9.5781-37.5 36.922-20.422 36.922 20.422-11.922 6.6406-25 13.781-24.922-13.781zm10.484 31.703 25 13.781c0.94141 0.52344 2.0898 0.52344 3.0312 0l25-13.781 10.484 5.7969-37.078 20.422-36.922-20.422z" />
-          </svg>
-        </button>
+    <div className="flex h-full w-full">
+      <div className="relative h-full min-h-0 w-full">
         <Map
+          attributionControl={false}
           bearing={0}
           initialViewState={{
             latitude: 0,
@@ -466,8 +541,11 @@ export const PalmwatchMap: React.FC<MapProps> = ({
             ...initialMapView,
           }}
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-          mapStyle={MAP_STYLE}
-          onLoad={(e) => syncZoomFromView(e.target.getZoom())}
+          mapStyle={mapStyleProp ?? MAP_STYLE}
+          onLoad={(e) => {
+            syncZoomFromView(e.target.getZoom());
+            applyThemeBrightness(e.target as unknown as MapboxGLMap, theme);
+          }}
           onMove={(e) => syncZoomFromView(e.viewState.zoom)}
           onMoveEnd={(e) => {
             syncZoomFromView(e.viewState.zoom);
@@ -477,28 +555,235 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           projection={MAP_PROJECTION}
           ref={mapRef}
           reuseMaps={true}
+          style={{ width: "100%", height: "100%" }}
         >
           <GeocoderControl
             mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN!}
             position="top-left"
           />
-          <NavigationControl />
+          <NavigationControl showCompass={false} visualizePitch={false} />
           <AttributionControl
             compact={true}
             customAttribution={["© The University of Chicago"]}
           />
 
           <DeckGLOverlay interleaved={true} layers={layers} />
+          {showClusters && millPointsGeoJSON && (
+            <Source
+              cluster={true}
+              clusterMaxZoom={PIN_MIN_ZOOM - 1}
+              clusterRadius={45}
+              data={millPointsGeoJSON}
+              id="mill-clusters"
+              type="geojson"
+            >
+              <Layer
+                filter={["has", "point_count"]}
+                id="clusters"
+                maxzoom={PIN_MIN_ZOOM}
+                paint={{
+                  "circle-color": [
+                    "step",
+                    ["get", "point_count"],
+                    "#FCA5A5",
+                    10,
+                    "#EF4444",
+                    50,
+                    "#DC2626",
+                    200,
+                    "#991B1B",
+                  ],
+                  "circle-radius": [
+                    "step",
+                    ["get", "point_count"],
+                    14,
+                    10,
+                    18,
+                    50,
+                    22,
+                    200,
+                    28,
+                  ],
+                  "circle-opacity": 0.88,
+                  "circle-stroke-width": 2,
+                  "circle-stroke-color": "rgba(255,255,255,0.5)",
+                }}
+                type="circle"
+              />
+              <Layer
+                filter={["has", "point_count"]}
+                id="cluster-count"
+                layout={{
+                  "text-field": "{point_count_abbreviated}",
+                  "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+                  "text-size": 12,
+                }}
+                maxzoom={PIN_MIN_ZOOM}
+                paint={{ "text-color": "#ffffff" }}
+                type="symbol"
+              />
+              <Layer
+                filter={["!", ["has", "point_count"]]}
+                id="unclustered-point"
+                maxzoom={PIN_MIN_ZOOM}
+                paint={{
+                  "circle-color": "#F87171",
+                  "circle-radius": 5,
+                  "circle-opacity": 0.85,
+                  "circle-stroke-width": 1,
+                  "circle-stroke-color": "rgba(255,255,255,0.6)",
+                }}
+                type="circle"
+              />
+            </Source>
+          )}
         </Map>
+
+        {layerControlsVisible && showLayerPanel && (
+          <aside
+            aria-label="Map data layers"
+            className="absolute inset-y-0 left-0 z-40 flex w-96 max-w-[min(24rem,90vw)] flex-col overflow-hidden border-base-content/10 border-r bg-base-100 shadow-xl"
+            role="dialog"
+          >
+            <div className="flex shrink-0 items-center justify-between gap-2 border-base-content/10 border-b px-3 py-2">
+              <h3 className="m-0 font-semibold text-sm">Map Data Layers</h3>
+              <button
+                aria-label="Close layer panel"
+                className="btn btn-ghost btn-sm btn-square pointer-events-auto shrink-0"
+                onClick={() => setShowLayerPanel(false)}
+                type="button"
+              >
+                <IconClose />
+              </button>
+            </div>
+            <div className="prose min-h-0 flex-1 overflow-y-auto px-2 py-2">
+              <ul className="menu w-full rounded-box p-0">
+                <li>
+                  <button
+                    className={`m-0 p-2 ${currentYear === -1 ? "" : "btn-active"}`}
+                    onClick={() => handleVariable(latestTreelossKmColumn)}
+                  >
+                    Deforestation By Year
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`m-0 p-2 ${currentYear === -1 ? "btn-active" : ""}`}
+                    onClick={() => handleVariable("risk_score_current")}
+                  >
+                    Deforestation Scores
+                  </button>
+                </li>
+              </ul>
+              {currentYear === -1 ? (
+                <>
+                  <h4>Deforestation Score</h4>
+                  <div className="join join-vertical">
+                    {[
+                      {
+                        value: "risk_score_past",
+                        label: "Past Deforestation Score",
+                      },
+                      {
+                        value: "risk_score_current",
+                        label: "Recent Deforestation Score",
+                      },
+                      {
+                        value: "risk_score_future",
+                        label: "Future Deforestation Risk Score",
+                      },
+                    ].map((variable) => (
+                      <button
+                        className={`join-item btn ${
+                          currentChoroplethColumn === variable.value
+                            ? "btn-active"
+                            : ""
+                        }`}
+                        key={variable.value}
+                        onClick={() => handleVariable(variable.value)}
+                      >
+                        {variable.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h4>Data Year</h4>
+                  <div className="join w-full max-w-none">
+                    <button className="join-item btn" onClick={decrementYear}>
+                      «
+                    </button>
+                    <button className="join-item btn">{currentYear}</button>
+                    <button className="join-item btn" onClick={incrementYear}>
+                      »
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </aside>
+        )}
+
+        {layerControlsVisible && !showLayerPanel && (
+          <button
+            aria-label="Open layer panel"
+            className="btn pointer-events-auto absolute top-1/2 left-2 z-50 min-h-11 min-w-11 -translate-y-1/2 rounded-r-lg border border-base-content/10 bg-base-100 shadow-xl"
+            onClick={() => setShowLayerPanel(true)}
+            type="button"
+          >
+            <svg
+              aria-hidden
+              className="fill-current"
+              height="24px"
+              viewBox="0 0 100 100"
+              width="24px"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="m3.5 67.75c-0.011719 1.125 0.58594 2.1719 1.5625 2.7344l43.375 24c0.94141 0.52344 2.0898 0.52344 3.0312 0l43.422-24c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-43.328-24c-0.94141-0.52344-2.0898-0.52344-3.0312 0l-43.422 24c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99219 0.55078-1.6094 1.5977-1.6094 2.7344zm9.5781-37.5 36.922-20.422 36.922 20.422-11.922 6.6406-25 13.781-24.922-13.781zm10.484 31.703 25 13.781c0.94141 0.52344 2.0898 0.52344 3.0312 0l25-13.781 10.484 5.7969-37.078 20.422-36.922-20.422z" />
+            </svg>
+          </button>
+        )}
+
+        {layerControlsVisible && (
+          <button
+            aria-label={fillVisible ? "Hide overlay" : "Show overlay"}
+            onClick={() => setFillVisible((v) => !v)}
+            style={{
+              position: "absolute",
+              bottom: "40px",
+              right: "10px",
+              zIndex: 50,
+              background: "white",
+              border: "none",
+              borderRadius: "4px",
+              boxShadow: "0 0 0 2px rgba(0,0,0,0.1)",
+              width: "29px",
+              height: "29px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#333",
+              padding: 0,
+            }}
+            title={fillVisible ? "Hide overlay" : "Show overlay"}
+            type="button"
+          >
+            {fillVisible ? <IconLayersOn /> : <IconLayersOff />}
+          </button>
+        )}
         <MapTooltip />
-        <Legend
-          colorStops={scale}
-          label={
-            currentYear === -1
-              ? "Risk score"
-              : `Deforestation ${currentYear} (km2)`
-          }
-        />
+        {polygonFillVisible && (
+          <Legend
+            colorStops={scale}
+            label={
+              currentYear === -1
+                ? "Risk score"
+                : `Deforestation ${currentYear} (km2)`
+            }
+          />
+        )}
       </div>
     </div>
   );
