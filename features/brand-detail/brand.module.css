@@ -1,0 +1,776 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-top: 1.5rem;
+}
+
+/* ── Breadcrumb ────────────────────────────────────────────────────────────── */
+
+.breadcrumb {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 0.8125rem;
+  color: hsl(var(--bc) / 0.5);
+}
+
+.breadcrumbLink {
+  color: hsl(var(--bc) / 0.5);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.breadcrumbLink:hover {
+  color: hsl(var(--bc) / 0.8);
+}
+
+.breadcrumbSep {
+  color: hsl(var(--bc) / 0.3);
+}
+
+/* ── Scorecard header ──────────────────────────────────────────────────────── */
+
+.brandName {
+  margin: 0 0 1.25rem;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: hsl(var(--bc));
+}
+
+.altName {
+  margin-left: 6px;
+  font-size: 18px;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.5);
+}
+
+/* ── Ranking strip ─────────────────────────────────────────────────────────── */
+
+.rankingCard {
+  padding: 16px 20px 12px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.rankingTitle {
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.55);
+}
+
+.rankingWrap {
+  width: 100%;
+  padding: 2px 0;
+}
+
+.rankingLabelRow {
+  position: relative;
+  height: 22px;
+}
+
+.rankingScorePin {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.rankingScoreText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.rankingTrack {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  margin: 4px 0;
+  background: hsl(var(--b2));
+  border-radius: 9999px;
+}
+
+.rankingDot {
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: hsl(var(--bc) / 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.rankingDotCurrent {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.rankingEndLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.rankingEndLabel {
+  font-size: 0.6875rem;
+  color: hsl(var(--bc) / 0.4);
+}
+
+.rankingRankRow {
+  position: relative;
+  height: 18px;
+  margin-top: 2px;
+}
+
+.rankingRankPin {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.rankingRankText {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: hsl(var(--bc) / 0.6);
+  white-space: nowrap;
+}
+
+/* ── Stat cards ────────────────────────────────────────────────────────────── */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 639px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.6);
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: hsl(var(--bc));
+  letter-spacing: -0.02em;
+}
+
+/* ── Visual story (map + chart) ────────────────────────────────────────────── */
+
+.visualGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+@media (max-width: 767px) {
+  .visualGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mapCard {
+  overflow: hidden;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.mapFrame {
+  position: relative;
+  height: 480px;
+}
+
+.mapPlaceholder {
+  width: 100%;
+  height: 480px;
+  background: hsl(var(--b2));
+}
+
+.chartCard {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.chartTitle {
+  margin: 0 0 2px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.chartCaption {
+  margin: 0 0 16px;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.4);
+}
+
+.chartBody {
+  flex: 1;
+  min-height: 340px;
+}
+
+/* ── Section header ────────────────────────────────────────────────────────── */
+
+.sectionHeader {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.sectionSub {
+  margin: 0;
+  font-size: 0.875rem;
+  color: hsl(var(--bc) / 0.55);
+}
+
+/* ── Table header (above each table) ───────────────────────────────────────── */
+
+.tableHeaderRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.tableHeading {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.tableCount {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.45);
+}
+
+.tableFilter {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  align-items: center;
+  width: 280px;
+  padding: 7px 12px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 8px;
+  transition: border-color 150ms ease;
+}
+
+.tableFilter:focus-within {
+  border-color: hsl(var(--bc) / 0.2);
+}
+
+.filterIcon {
+  flex-shrink: 0;
+  color: hsl(var(--bc) / 0.3);
+}
+
+.filterInput {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: hsl(var(--bc));
+  appearance: none;
+  outline: none;
+  background: transparent;
+  border: none;
+}
+
+.filterInput::placeholder {
+  color: hsl(var(--bc) / 0.35);
+}
+
+/* ── Table ─────────────────────────────────────────────────────────────────── */
+
+.tableWrap {
+  overflow-x: auto;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: hsl(var(--b2));
+}
+
+.th {
+  padding: 9px 12px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: hsl(var(--bc) / 0.6);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid hsl(var(--bc) / 0.1);
+  transition: color 150ms ease;
+}
+
+.th:hover {
+  color: hsl(var(--bc) / 0.9);
+}
+
+.thActive {
+  color: hsl(var(--bc));
+}
+
+.thName {
+  composes: th;
+}
+
+.thCountry {
+  composes: th;
+  width: 110px;
+}
+
+.thMills {
+  composes: th;
+  width: 90px;
+  text-align: right;
+}
+
+.thScore {
+  composes: th;
+  width: 120px;
+}
+
+.thProvince {
+  composes: th;
+  width: 110px;
+}
+
+.thParent {
+  composes: th;
+  width: 140px;
+}
+
+.thArrow {
+  composes: th;
+  width: 32px;
+  cursor: default;
+}
+
+.thInner {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.sortIconInactive {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.4;
+}
+
+.sortIconActive {
+  display: inline-flex;
+  align-items: center;
+  color: var(--site-nav-accent);
+}
+
+.tr {
+  cursor: pointer;
+  border-top: 1px solid hsl(var(--bc) / 0.1);
+  transition: background 100ms ease;
+}
+
+.tr:hover {
+  background: hsl(var(--b2) / 0.35);
+}
+
+.tdName {
+  padding: 10px 12px;
+}
+
+.cellName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+  text-decoration: none;
+}
+
+.tdCountry {
+  width: 110px;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  color: hsl(var(--bc) / 0.6);
+  white-space: nowrap;
+}
+
+.tdMills {
+  width: 90px;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.6);
+  text-align: right;
+}
+
+.tdScore {
+  width: 120px;
+  padding: 10px 12px;
+}
+
+.tdProvince {
+  width: 110px;
+  max-width: 110px;
+  padding: 10px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  color: hsl(var(--bc) / 0.6);
+  white-space: nowrap;
+}
+
+.tdParent {
+  width: 140px;
+  max-width: 140px;
+  padding: 10px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8125rem;
+  color: hsl(var(--bc) / 0.6);
+  white-space: nowrap;
+}
+
+.tdParentLink {
+  color: hsl(var(--bc) / 0.6);
+  text-decoration: none;
+  transition: color 100ms ease;
+}
+
+.tdParentLink:hover {
+  color: hsl(var(--bc));
+}
+
+.tdArrow {
+  width: 32px;
+  padding: 10px 8px;
+  color: hsl(var(--bc) / 0.3);
+  text-align: center;
+}
+
+/* Score bar (mills table, narrow variant) */
+
+.barWrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.barTrack {
+  flex-shrink: 0;
+  width: 40px;
+  height: 6px;
+  overflow: hidden;
+  background: hsl(var(--b3));
+  border-radius: 9999px;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.barTeal {
+  background: #1d9e75;
+}
+
+:global([data-theme="dark"]) .barTeal {
+  background: #5dcaa5;
+}
+
+.barAmber {
+  background: #ef9f27;
+}
+
+:global([data-theme="dark"]) .barAmber {
+  background: #fac775;
+}
+
+.barRed {
+  background: #e24b4a;
+}
+
+:global([data-theme="dark"]) .barRed {
+  background: #f09595;
+}
+
+.barNum {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc));
+  white-space: nowrap;
+}
+
+.noResults {
+  padding: 1.5rem;
+  font-size: 0.875rem;
+  color: hsl(var(--bc) / 0.45);
+  text-align: center;
+}
+
+/* ── Pagination ────────────────────────────────────────────────────────────── */
+
+.tableFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background: hsl(var(--b2));
+  border-top: 1px solid hsl(var(--bc) / 0.1);
+}
+
+.paginationBtn {
+  padding: 3px 10px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: hsl(var(--bc) / 0.7);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  transition: color 100ms ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  color: hsl(var(--bc));
+}
+
+.paginationBtn:disabled {
+  color: hsl(var(--bc) / 0.25);
+  cursor: default;
+}
+
+.pageNum {
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: hsl(var(--bc) / 0.6);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  transition: color 100ms ease;
+}
+
+.pageNum:hover {
+  color: hsl(var(--bc));
+}
+
+.pageNumActive {
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: hsl(var(--bc));
+  cursor: default;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 6px;
+}
+
+.pageEllipsis {
+  padding: 3px 4px;
+  font-size: 0.8125rem;
+  color: hsl(var(--bc) / 0.3);
+  user-select: none;
+}
+
+/* ── About accordion ───────────────────────────────────────────────────────── */
+
+.accordion {
+  overflow: hidden;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.accordionTrigger {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 20px;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.accordionTriggerLabel {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.accordionChevron {
+  flex-shrink: 0;
+  color: hsl(var(--bc) / 0.4);
+  transition: transform 200ms ease;
+}
+
+.accordionChevronOpen {
+  transform: rotate(180deg);
+}
+
+.accordionBody {
+  padding: 16px 20px 20px;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: hsl(var(--bc) / 0.8);
+  border-top: 1px solid hsl(var(--bc) / 0.08);
+}
+
+.accordionBody a {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 0.875rem;
+  color: hsl(var(--bc));
+  text-decoration: none;
+  transition: color 100ms ease;
+}
+
+.accordionBody a:hover {
+  color: hsl(var(--bc) / 0.65);
+}
+
+.accordionBody a::after {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 11px;
+  height: 11px;
+  content: "";
+  background-color: currentColor;
+  opacity: 0.35;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cline x1='10' y1='14' x2='21' y2='3'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cline x1='10' y1='14' x2='21' y2='3'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* ── Links card ────────────────────────────────────────────────────────────── */
+
+.linksCard {
+  padding: 20px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.linksGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 639px) {
+  .linksGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+.linksCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.linksColTitle {
+  margin-bottom: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: hsl(var(--bc) / 0.55);
+}
+
+.linkItem {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.875rem;
+  color: hsl(var(--bc));
+  text-decoration: none;
+  transition: color 100ms ease;
+}
+
+.linkItem:hover {
+  color: hsl(var(--bc) / 0.7);
+}
+
+.linkIcon {
+  flex-shrink: 0;
+  color: hsl(var(--bc) / 0.3);
+}
+
+/* ── Methodology note ──────────────────────────────────────────────────────── */
+
+.methodology {
+  max-width: none;
+  font-size: 0.75rem;
+  font-style: italic;
+  line-height: 1.6;
+  color: hsl(var(--bc) / 0.4);
+}
