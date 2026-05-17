@@ -5,9 +5,7 @@ import React from "react";
 import styles from "@/app/(website)/_shell/site-chrome.module.css";
 import { MENU_ITEMS } from "@/components/nav-bar-menu";
 import { useTheme } from "@/components/theme-provider";
-import type { SearchListPayload } from "@/domain";
-import { useDropdownStore } from "@/hooks/super-dropdown-store";
-import { NavBarSuperDropdown } from "./nav-bar-super-dropdown";
+import { NavSearch } from "@/features/site-nav/nav-search";
 
 function IconSun(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -51,62 +49,28 @@ function IconMoon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function IconEnvelope({ className }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect
-        height="16"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="2"
-        width="20"
-        x="2"
-        y="4"
-      />
-      <path
-        d="M2 8l10 7 10-7"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="2"
-      />
-    </svg>
-  );
+function isNavItemActive(pathname: string, itemPath: string): boolean {
+  if (pathname === itemPath) {
+    return true;
+  }
+  switch (itemPath) {
+    case "/brands":
+      return pathname.startsWith("/brand/");
+    case "/mills":
+      return pathname.startsWith("/mill/");
+    case "/companies":
+      return pathname.startsWith("/owner/") || pathname.startsWith("/group/");
+    case "/countries":
+      return pathname.startsWith("/country/");
+    default:
+      return false;
+  }
 }
 
-interface NavbarProps {
-  searchList?: SearchListPayload;
-}
-
-export const NavBar: React.FC<NavbarProps> = ({ searchList }) => {
-  const [innerSearchList, setInnerSearchList] =
-    React.useState<NavbarProps["searchList"]>();
+export const NavBar: React.FC = () => {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
-  const searchBarRef = React.useRef<HTMLDivElement>(null);
-  const currentMegaMenu = useDropdownStore((s) => s.currentDropdown);
-  const setMegaMenu = useDropdownStore((s) => s.setcurrentDropdown);
-
-  React.useEffect(() => {
-    if (!currentMegaMenu) {
-      return;
-    }
-    function onPointerDown(ev: PointerEvent) {
-      const root = searchBarRef.current;
-      if (root && !root.contains(ev.target as Node)) {
-        setMegaMenu("");
-      }
-    }
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () =>
-      document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [currentMegaMenu, setMegaMenu]);
 
   React.useEffect(() => {
     setMenuOpen(false);
@@ -125,27 +89,6 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList }) => {
     return () =>
       document.removeEventListener("keydown", onKeyDown, { capture: true });
   }, [menuOpen]);
-
-  React.useEffect(() => {
-    if (innerSearchList !== undefined) {
-      return;
-    }
-    if (searchList) {
-      setInnerSearchList(searchList);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await fetch("/api/list");
-      const json = await res.json();
-      if (!cancelled) {
-        setInnerSearchList(json);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [searchList, innerSearchList]);
 
   return (
     <>
@@ -182,6 +125,7 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList }) => {
                 aria-label="Utility navigation"
                 className={styles.topbarUtilityNav}
               >
+                <NavSearch />
                 <Link href="/about">About</Link>
                 <Link href="/contact">Contact</Link>
                 <button
@@ -203,18 +147,23 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList }) => {
 
         <div className={styles.topbarMain}>
           <div className={styles.topbarMainInner}>
-            <div className={styles.searchBar} ref={searchBarRef}>
-              {MENU_ITEMS.map((item) => (
-                <NavBarSuperDropdown
-                  description={item.description}
-                  icon={item.icon}
-                  key={item.label}
-                  label={item.label}
-                  options={(innerSearchList?.[item.label] as []) || []}
-                  path={item.path}
-                />
-              ))}
-            </div>
+            <nav aria-label="Main navigation" className={styles.searchBar}>
+              {MENU_ITEMS.map((item) => {
+                const active = isNavItemActive(pathname, item.path);
+                return (
+                  <Link
+                    aria-current={active ? "page" : undefined}
+                    className={`${styles.navMenuTrigger} ${active ? styles.navMenuTriggerActive : ""}`}
+                    href={item.path}
+                    key={item.label}
+                  >
+                    <span className={styles.navMenuTriggerLabel}>
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
         </div>
       </header>
@@ -254,15 +203,19 @@ export const NavBar: React.FC<NavbarProps> = ({ searchList }) => {
         </button>
 
         <nav className={styles.mobilePanelNav}>
-          {MENU_ITEMS.map((item) => (
-            <Link
-              className={styles.mobileLink}
-              href={item.path}
-              key={item.label}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {MENU_ITEMS.map((item) => {
+            const active = isNavItemActive(pathname, item.path);
+            return (
+              <Link
+                aria-current={active ? "page" : undefined}
+                className={`${styles.mobileLink} ${active ? styles.mobileLinkActive : ""}`}
+                href={item.path}
+                key={item.label}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
           <div className={styles.mobileDivider} />
           <Link className={styles.mobileLink} href="/about">
             About
