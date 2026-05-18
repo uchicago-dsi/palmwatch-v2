@@ -1,14 +1,12 @@
 import Link from "next/link";
-import { BrandInfoClient } from "@/components/brand-info-client";
 import pageStyles from "@/components/page-layout.module.css";
 import { QueryProvider } from "@/components/query-provider";
 import { ScrollToButton } from "@/components/scroll-to-button";
 import { HomePageMap } from "@/features/map";
-import { MillInfo } from "@/features/mill-detail";
 import heroStyles from "./home-hero.module.css";
 import landingStyles from "./home-landing.module.css";
 
-export default function Home() {
+export default async function Home() {
   return (
     <main className="flex h-auto w-full flex-col">
       <section className="relative h-[100vh] w-full overflow-hidden bg-black">
@@ -160,9 +158,8 @@ export default function Home() {
             <div className={landingStyles.mapLeadIn}>
               <p>
                 This map shows palm oil mill catchment areas and the tree cover
-                loss within them. Colors indicate the amount of forest lost each
-                year. Click on any mill area to see which brands source from it,
-                its deforestation risk scores, and RSPO certification status.
+                loss within them. Colors indicate cumulative forest loss since
+                2017. Click on any mill area to open its detail page.
               </p>
               <p>
                 Use the layer control to switch between years of tree loss data
@@ -178,19 +175,9 @@ export default function Home() {
                 <strong>Search</strong> for a province, town, or address using
                 the search box. <strong>Zoom</strong> with scroll or the
                 navigation buttons. <strong>Hover</strong> (or tap) a mill area
-                for a summary, and <strong>click</strong> (or tap) to load
-                detailed mill and brand information below.
+                for a quick summary, and <strong>click</strong> (or tap) to open
+                the full mill detail page.
               </p>
-            </div>
-            <div
-              className={`flex w-full flex-col gap-4 p-0 lg:flex-row ${landingStyles.mapDetailPanels}`}
-            >
-              <div className="min-w-0 flex-1">
-                <MillInfo />
-              </div>
-              <div className="min-w-0 flex-1">
-                <BrandInfoClient />
-              </div>
             </div>
           </QueryProvider>
         </div>

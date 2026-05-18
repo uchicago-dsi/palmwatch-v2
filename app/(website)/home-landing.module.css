@@ -165,6 +165,10 @@
   padding-top: 1.25rem;
 }
 
+.chartSection {
+  padding-top: 1.5rem;
+}
+
 /* Hero "Explore the map": land at map section heading (below sticky header) */
 .mapScrollAnchor {
   /* Mobile: utility bar only (mega row hidden) */
