@@ -395,7 +395,8 @@
 
 .thForest {
   composes: th;
-  width: 160px;
+  width: 120px;
+  text-align: right;
 }
 
 .thScore {
@@ -458,8 +459,12 @@
 }
 
 .tdForest {
-  width: 160px;
+  width: 120px;
   padding: 10px 12px;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.75);
+  text-align: right;
 }
 
 .tdScore {
@@ -497,27 +502,27 @@
 }
 
 .barTeal {
-  background: #1d9e75;
+  background: #ca8a04;
 }
 
 :global([data-theme="dark"]) .barTeal {
-  background: #5dcaa5;
+  background: #fde047;
 }
 
 .barAmber {
-  background: #ef9f27;
+  background: #ea580c;
 }
 
 :global([data-theme="dark"]) .barAmber {
-  background: #fac775;
+  background: #fb923c;
 }
 
 .barRed {
-  background: #e24b4a;
+  background: #dc2626;
 }
 
 :global([data-theme="dark"]) .barRed {
-  background: #f09595;
+  background: #f87171;
 }
 
 .barNum {
@@ -558,27 +563,27 @@
 }
 
 .swatchTeal {
-  background: #1d9e75;
+  background: #ca8a04;
 }
 
 :global([data-theme="dark"]) .swatchTeal {
-  background: #5dcaa5;
+  background: #fde047;
 }
 
 .swatchAmber {
-  background: #ef9f27;
+  background: #ea580c;
 }
 
 :global([data-theme="dark"]) .swatchAmber {
-  background: #fac775;
+  background: #fb923c;
 }
 
 .swatchRed {
-  background: #e24b4a;
+  background: #dc2626;
 }
 
 :global([data-theme="dark"]) .swatchRed {
-  background: #f09595;
+  background: #f87171;
 }
 
 .scoreLegendLabel {

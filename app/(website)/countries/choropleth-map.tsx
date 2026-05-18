@@ -21,18 +21,18 @@ const MAP_LEGEND = [
 
 function getColor(count: number): string {
   if (count >= 500) {
-    return "#991B1B";
+    return "#BD0026";
   }
   if (count >= 100) {
-    return "#DC2626";
+    return "#F03B20";
   }
   if (count >= 20) {
-    return "#EF4444";
+    return "#FD8D3C";
   }
   if (count >= 5) {
-    return "#F87171";
+    return "#FECC5C";
   }
-  return "#FCA5A5";
+  return "#FFFFB2";
 }
 
 function applyBrightness(map: mapboxgl.Map, theme: "light" | "dark") {
@@ -180,6 +180,13 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
     map.on("load", async () => {
       applyBrightness(map, themeRef.current);
 
+      // Hide all text/symbol layers from the basemap
+      for (const layer of map.getStyle().layers) {
+        if (layer.type === "symbol") {
+          map.setLayoutProperty(layer.id, "visibility", "none");
+        }
+      }
+
       const res = await fetch("/data/world-110m.json");
       if (!res.ok) {
         console.error(
@@ -193,15 +200,13 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
         topoJson.objects.countries as Parameters<typeof feature>[1]
       ) as unknown as GeoJSON.FeatureCollection;
 
-      const baseOpacity = themeRef.current === "light" ? 0.45 : 0.55;
-
       for (const f of geo.features) {
         const iso = f.id == null ? "" : String(f.id);
         const row = isoMapRef.current[iso];
         const props = f.properties as Record<string, unknown>;
         props._iso = iso;
         props._fillColor = row ? getColor(row.count) : "transparent";
-        props._fillOpacity = row ? baseOpacity : 0;
+        props._hasData = row ? 1 : 0;
       }
 
       map.addSource("countries", {
@@ -216,11 +221,21 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
         source: "countries",
         paint: {
           "fill-color": ["get", "_fillColor"],
+          "fill-opacity": ["get", "_hasData"],
+        },
+      });
+
+      map.addLayer({
+        id: "country-fill-hover",
+        type: "fill",
+        source: "countries",
+        paint: {
+          "fill-color": "#000000",
           "fill-opacity": [
             "case",
             ["boolean", ["feature-state", "hover"], false],
-            0.85,
-            ["get", "_fillOpacity"],
+            0.18,
+            0,
           ],
         },
       });
@@ -320,22 +335,13 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
     };
   }, []);
 
-  // Update brightness and opacity when theme changes
+  // Update satellite brightness when theme changes
   React.useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map?.isStyleLoaded()) {
       return;
     }
     applyBrightness(map, theme);
-    if (map.getLayer("country-fill")) {
-      const opacity = theme === "light" ? 0.45 : 0.55;
-      map.setPaintProperty("country-fill", "fill-opacity", [
-        "case",
-        ["boolean", ["feature-state", "hover"], false],
-        0.85,
-        opacity,
-      ]);
-    }
   }, [theme]);
 
   // Toggle fill layer visibility

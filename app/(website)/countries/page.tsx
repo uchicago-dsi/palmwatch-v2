@@ -70,10 +70,7 @@ export default async function Page() {
 
     const count = (raw.count as number) ?? 0;
     const pctForestLoss = (raw.pctForestLoss as number) ?? 0;
-    const pastRisk = (raw.pastRisk as number) ?? 0;
-    const currentRisk = (raw.currentRisk as number) ?? 0;
-    const futureRisk = (raw.futureRisk as number) ?? 0;
-    const score = (pastRisk + currentRisk + futureRisk) / 3;
+    const score = (raw.currentRisk as number) ?? 0;
 
     totalMills += count;
 
@@ -96,7 +93,7 @@ export default async function Page() {
     { label: "Total mills", value: totalMills.toLocaleString() },
     { label: "Top country", value: topCountry?.name ?? "—", text: true },
     {
-      label: "Avg forest loss",
+      label: "Avg forest loss (2017–2025)",
       value: `${Math.round(avgForestLoss)}%`,
     },
   ];

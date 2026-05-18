@@ -24,34 +24,12 @@ export type CountryRow = {
 };
 
 type StatCard = { label: string; value: string; text?: boolean };
-type SortKey = "name" | "count" | "pctForestLoss" | "score";
+type SortKey = "name" | "count" | "pctForestLoss";
 type SortDir = "asc" | "desc";
 
 interface Props {
   rows: CountryRow[];
   stats: StatCard[];
-}
-
-// ── Bar color helpers ───────────────────────────────────────────────────────
-
-function forestBarClass(pct: number) {
-  if (pct > 50) {
-    return styles.barRed;
-  }
-  if (pct >= 25) {
-    return styles.barAmber;
-  }
-  return styles.barTeal;
-}
-
-function scoreBarClass(score: number) {
-  if (score > 3.05) {
-    return styles.barRed;
-  }
-  if (score >= 2.85) {
-    return styles.barAmber;
-  }
-  return styles.barTeal;
 }
 
 function IconSortBoth() {
@@ -230,20 +208,11 @@ export function CountriesClient({ rows, stats }: Props) {
                   onClick={() => handleSort("pctForestLoss")}
                 >
                   <span className={styles.thInner}>
-                    Forest loss
+                    Forest loss (2017–2025)
                     <SortIcon
                       active={sortKey === "pctForestLoss"}
                       dir={sortDir}
                     />
-                  </span>
-                </th>
-                <th
-                  className={`${styles.thScore} ${sortKey === "score" ? styles.thActive : ""}`}
-                  onClick={() => handleSort("score")}
-                >
-                  <span className={styles.thInner}>
-                    Deforestation score
-                    <SortIcon active={sortKey === "score"} dir={sortDir} />
                   </span>
                 </th>
                 <th className={styles.thArrow} />
@@ -270,34 +239,7 @@ export function CountriesClient({ rows, stats }: Props) {
                         {row.count.toLocaleString()}
                       </td>
                       <td className={styles.tdForest}>
-                        <div className={styles.barWrap}>
-                          <div className={styles.barTrack}>
-                            <div
-                              className={`${styles.barFill} ${forestBarClass(row.pctForestLoss)}`}
-                              style={{
-                                width: `${Math.min(100, row.pctForestLoss)}%`,
-                              }}
-                            />
-                          </div>
-                          <span className={styles.barNum}>
-                            {row.pctForestLoss.toFixed(1)}%
-                          </span>
-                        </div>
-                      </td>
-                      <td className={styles.tdScore}>
-                        <div className={styles.barWrap}>
-                          <div className={styles.barTrack}>
-                            <div
-                              className={`${styles.barFill} ${scoreBarClass(row.score)}`}
-                              style={{
-                                width: `${Math.max(0, (row.score / 5) * 100)}%`,
-                              }}
-                            />
-                          </div>
-                          <span className={styles.barNum}>
-                            {row.score.toFixed(2)}
-                          </span>
-                        </div>
+                        {row.pctForestLoss.toFixed(1)}%
                       </td>
                       <td className={styles.tdArrow}>
                         <svg
@@ -327,20 +269,6 @@ export function CountriesClient({ rows, stats }: Props) {
           hiddenCount={hiddenCount}
           onToggle={toggleShowMore}
         />
-
-        {/* Score legend */}
-        <div className={styles.scoreLegend}>
-          {[
-            { label: "Lower risk", cls: styles.swatchTeal },
-            { label: "Moderate", cls: styles.swatchAmber },
-            { label: "Higher risk", cls: styles.swatchRed },
-          ].map(({ label, cls }) => (
-            <div className={styles.scoreLegendItem} key={label}>
-              <span className={`${styles.scoreLegendSwatch} ${cls}`} />
-              <span className={styles.scoreLegendLabel}>{label}</span>
-            </div>
-          ))}
-        </div>
       </section>
     </div>
   );
