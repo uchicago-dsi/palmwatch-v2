@@ -4,16 +4,16 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import React from "react";
 import {
-  Area,
-  ComposedChart,
-  Line,
+  Bar,
+  BarChart,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
-import { maxYear, minYear } from "@/config/years";
+import { maxYear } from "@/config/years";
 import type { BrandPrecomputedPayload } from "@/domain/schemas/brand-precomputed";
 import styles from "./brand.module.css";
 
@@ -26,9 +26,9 @@ export type RankingEntry = {
   averageCurrentRisk: number;
 };
 
-export type CumulativePoint = {
+export type AnnualLossPoint = {
   year: number;
-  cumulativeKm2: number;
+  annualKm2: number;
 };
 
 type Disclosure = { year: string; filename: string };
@@ -43,7 +43,7 @@ export type BrandPageViewProps = {
   brandStats: BrandStats;
   aboutContent: React.ReactNode;
   ranking: RankingEntry[];
-  forestLossTimeseries: CumulativePoint[];
+  forestLossTimeseries: AnnualLossPoint[];
   totalForestLoss: number;
   downloads: Download[];
 };
@@ -357,40 +357,43 @@ function RankingStrip({
   );
 }
 
-// ── Cumulative forest loss chart ──────────────────────────────────────────────
+// ── Annual forest loss chart ──────────────────────────────────────────────────
 
-function CumulativeChart({
-  data,
-  brand,
+function AnnualLossTooltip({
+  active,
+  payload,
 }: {
-  data: CumulativePoint[];
-  brand: string;
+  active?: boolean;
+  payload?: { value: number }[];
 }) {
+  if (!active || !payload?.length) return null;
+  const value = payload[0].value;
+  return (
+    <div className={styles.chartTooltip}>
+      <span className={styles.chartTooltipVal}>{value.toLocaleString()} km²</span>
+    </div>
+  );
+}
+
+function AnnualLossChart({ data }: { data: AnnualLossPoint[] }) {
   const { theme } = useTheme();
-  const lineColor = theme === "dark" ? "#F09595" : "#E24B4A";
-  const gradientId = "brandCumulativeGrad";
+  const barColor = theme === "dark" ? "#F09595" : "#E24B4A";
 
   if (data.length === 0) {
     return <div className={styles.chartBody} />;
   }
 
-  const maxVal = data[data.length - 1].cumulativeKm2;
+  const maxVal = Math.max(...data.map((d) => d.annualKm2));
   const firstYear = data[0].year;
   const lastYear = data[data.length - 1].year;
   const midYear = Math.round((firstYear + lastYear) / 2);
 
   return (
     <ResponsiveContainer height="100%" width="100%">
-      <ComposedChart
+      <BarChart
         data={data}
-        margin={{ top: 8, right: 56, left: 4, bottom: 0 }}
+        margin={{ top: 8, right: 16, left: 4, bottom: 0 }}
       >
-        <defs>
-          <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor={lineColor} stopOpacity={0.15} />
-            <stop offset="100%" stopColor={lineColor} stopOpacity={0.02} />
-          </linearGradient>
-        </defs>
         <XAxis
           axisLine={{ stroke: "hsl(var(--bc) / 0.1)" }}
           dataKey="year"
@@ -401,55 +404,24 @@ function CumulativeChart({
         <YAxis
           axisLine={false}
           domain={[0, maxVal]}
-          orientation="left"
           tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
           tickFormatter={formatKm2}
           tickLine={false}
           ticks={[0, Math.round(maxVal / 2), maxVal]}
           width={40}
         />
-        <Area
-          dataKey="cumulativeKm2"
-          fill={`url(#${gradientId})`}
-          isAnimationActive={false}
-          stroke="none"
-          type="monotone"
+        <Tooltip
+          content={<AnnualLossTooltip />}
+          cursor={{ fill: "hsl(var(--bc) / 0.06)" }}
         />
-        <Line
-          dataKey="cumulativeKm2"
-          dot={false}
+        <Bar
+          dataKey="annualKm2"
+          fill={barColor}
           isAnimationActive={false}
-          label={({ x, y, index }: { x: number; y: number; index: number }) => {
-            if (index !== data.length - 1) {
-              return <g key={index} />;
-            }
-            return (
-              <g key={index}>
-                <circle
-                  cx={x}
-                  cy={y}
-                  fill={lineColor}
-                  r={4}
-                  stroke="hsl(var(--b1))"
-                  strokeWidth={2}
-                />
-                <text
-                  fill={lineColor}
-                  fontSize={13}
-                  fontWeight={500}
-                  x={x + 8}
-                  y={y - 8}
-                >
-                  {formatKm2(maxVal)} km²
-                </text>
-              </g>
-            );
-          }}
-          stroke={lineColor}
-          strokeWidth={2}
-          type="monotone"
+          opacity={0.85}
+          radius={[2, 2, 0, 0]}
         />
-      </ComposedChart>
+      </BarChart>
     </ResponsiveContainer>
   );
 }
@@ -477,7 +449,11 @@ function MillOwnersTable({ owners }: { owners: OwnerRow[] }) {
   const filtered = React.useMemo(() => {
     const lower = q.trim().toLowerCase();
     return lower
-      ? owners.filter((r) => r["Parent Company"].toLowerCase().includes(lower))
+      ? owners.filter(
+          (r) =>
+            r["Parent Company"].toLowerCase().includes(lower) ||
+            r.Country.toLowerCase().includes(lower)
+        )
       : owners;
   }, [owners, q]);
 
@@ -677,8 +653,8 @@ const MILL_PAGE_SIZE = 20;
 
 function MillsTable({ mills }: { mills: MillRow[] }) {
   const [q, setQ] = React.useState("");
-  const [sortKey, setSortKey] = React.useState<MillSortKey>("score");
-  const [sortDir, setSortDir] = React.useState<"asc" | "desc">("desc");
+  const [sortKey, setSortKey] = React.useState<MillSortKey>("name");
+  const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
   const [page, setPage] = React.useState(1);
 
   const filtered = React.useMemo(() => {
@@ -687,6 +663,8 @@ function MillsTable({ mills }: { mills: MillRow[] }) {
       ? mills.filter(
           (r) =>
             r["Mill Name"].toLowerCase().includes(lower) ||
+            r.Province.toLowerCase().includes(lower) ||
+            r["Parent Company"].toLowerCase().includes(lower) ||
             r.Country.toLowerCase().includes(lower)
         )
       : mills;
@@ -773,7 +751,7 @@ function MillsTable({ mills }: { mills: MillRow[] }) {
                 onClick={() => handleSort("score")}
               >
                 <span className={styles.thInner}>
-                  Score <SortIcon active={sortKey === "score"} dir={sortDir} />
+                  Recent Deforestation Score <SortIcon active={sortKey === "score"} dir={sortDir} />
                 </span>
               </th>
               <th
@@ -827,19 +805,7 @@ function MillsTable({ mills }: { mills: MillRow[] }) {
                       </Link>
                     </td>
                     <td className={styles.tdScore}>
-                      <div className={styles.barWrap}>
-                        <div className={styles.barTrack}>
-                          <div
-                            className={`${styles.barFill} ${scoreBarClass(row.risk_score_current)}`}
-                            style={{
-                              width: `${Math.max(0, (row.risk_score_current / 5) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                        <span className={styles.barNum}>
-                          {row.risk_score_current.toFixed(2)}
-                        </span>
-                      </div>
+                      {row.risk_score_current.toFixed(2)}
                     </td>
                     <td className={styles.tdCountry}>{row.Country}</td>
                     <td className={styles.tdProvince}>{row.Province}</td>
@@ -979,7 +945,7 @@ function BrandPageViewInner({
     { label: "Countries", value: brandStats.uniqueCountries.toLocaleString() },
     { label: "Mill owners", value: brandStats.uniqueOwners.toLocaleString() },
     {
-      label: `Cumulative loss (${minYear}–${maxYear})`,
+      label: `Cumulative loss (2001–${maxYear})`,
       value: forestLossDisplay,
     },
   ];
@@ -1028,13 +994,12 @@ function BrandPageViewInner({
         </div>
 
         <div className={styles.chartCard}>
-          <p className={styles.chartTitle}>Cumulative forest loss</p>
+          <p className={styles.chartTitle}>Annual forest loss</p>
           <p className={styles.chartCaption}>
-            Total km² lost in {brand}&apos;s mill catchment areas, {minYear}–
-            {maxYear}
+            km² lost per year in {brand}&apos;s mill catchment areas, 2001–{maxYear}
           </p>
           <div className={styles.chartBody}>
-            <CumulativeChart brand={brand} data={forestLossTimeseries} />
+            <AnnualLossChart data={forestLossTimeseries} />
           </div>
         </div>
       </div>

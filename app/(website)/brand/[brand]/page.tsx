@@ -1,7 +1,7 @@
 import pageStyles from "@/components/page-layout.module.css";
 import { getBrandDataDownloadLinks } from "@/config/brand-data-download-links";
-import { fullYearRange } from "@/config/years";
-import type { CumulativePoint, RankingEntry } from "@/features/brand-detail";
+import { maxYear } from "@/config/years";
+import type { AnnualLossPoint, RankingEntry } from "@/features/brand-detail";
 import { BrandPageView } from "@/features/brand-detail";
 import { loadBrandPageModel } from "@/lib/server/brand-page-data";
 import { loadPrecomputedJson } from "@/lib/server/load-precomputed";
@@ -9,17 +9,19 @@ import { PortableText } from "@/sanity/lib/components";
 
 export const revalidate = 60;
 
+const CHART_START_YEAR = 2001;
+
 function computeForestTimeseries(
   umlInfo: Array<Record<string, unknown>>
-): CumulativePoint[] {
-  let cumulative = 0;
-  return fullYearRange.map((year) => {
+): AnnualLossPoint[] {
+  const years: number[] = [];
+  for (let y = CHART_START_YEAR; y <= maxYear; y++) years.push(y);
+  return years.map((year) => {
     const annual = umlInfo.reduce(
       (sum, mill) => sum + (Number(mill[`treeloss_km_${year}`]) || 0),
       0
     );
-    cumulative += annual;
-    return { year, cumulativeKm2: Math.round(cumulative) };
+    return { year, annualKm2: Math.round(annual) };
   });
 }
 
@@ -60,16 +62,16 @@ export default async function Page({
     averageCurrentRisk: r.averageCurrentRisk,
   }));
 
-  const rankingEntry = rankingRaw.find((r) => r.consumer_brand === brand);
-  const totalForestLoss =
-    (rankingEntry as { totalForestLoss?: number } | undefined)
-      ?.totalForestLoss ?? 0;
-
   const forestLossTimeseries = brandPre.umlInfo
     ? computeForestTimeseries(
         brandPre.umlInfo as Array<Record<string, unknown>>
       )
     : [];
+
+  const totalForestLoss = forestLossTimeseries.reduce(
+    (sum, p) => sum + p.annualKm2,
+    0
+  );
 
   const aboutContent = (
     <>

@@ -246,6 +246,21 @@
   min-height: 340px;
 }
 
+.chartTooltip {
+  padding: 6px 10px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.12);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px hsl(var(--bc) / 0.08);
+}
+
+.chartTooltipVal {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc));
+}
+
 /* ── Section header ────────────────────────────────────────────────────────── */
 
 .sectionHeader {
@@ -461,6 +476,9 @@
 .tdScore {
   width: 120px;
   padding: 10px 12px;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.6);
 }
 
 .tdProvince {
