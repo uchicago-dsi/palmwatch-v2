@@ -170,23 +170,23 @@
 }
 
 .scoreDotRed {
-  background: #e24b4a;
+  background: #dc2626;
 }
 .scoreDotAmber {
-  background: #ef9f27;
+  background: #ea580c;
 }
 .scoreDotTeal {
-  background: #1d9e75;
+  background: #ca8a04;
 }
 
 :global([data-theme="dark"]) .scoreDotRed {
-  background: #f09595;
+  background: #f87171;
 }
 :global([data-theme="dark"]) .scoreDotAmber {
-  background: #fac775;
+  background: #fb923c;
 }
 :global([data-theme="dark"]) .scoreDotTeal {
-  background: #5dcaa5;
+  background: #fde047;
 }
 
 /* ── Rankings table ────────────────────────────────────────────────────────── */
@@ -247,9 +247,9 @@
   width: 160px;
 }
 
-.thForest {
+.thMills {
   composes: th;
-  width: 120px;
+  width: 80px;
   text-align: right;
 }
 
@@ -335,23 +335,23 @@
 }
 
 .barTeal {
-  background: #1d9e75;
+  background: #ca8a04;
 }
 .barAmber {
-  background: #ef9f27;
+  background: #ea580c;
 }
 .barRed {
-  background: #e24b4a;
+  background: #dc2626;
 }
 
 :global([data-theme="dark"]) .barTeal {
-  background: #5dcaa5;
+  background: #fde047;
 }
 :global([data-theme="dark"]) .barAmber {
-  background: #fac775;
+  background: #fb923c;
 }
 :global([data-theme="dark"]) .barRed {
-  background: #f09595;
+  background: #f87171;
 }
 
 .scoreNum {
@@ -362,15 +362,13 @@
   color: hsl(var(--bc));
 }
 
-.tdForest {
-  width: 120px;
+.tdMills {
+  width: 80px;
   padding: 12px 16px;
   font-size: 0.875rem;
-  font-weight: 400;
   font-variant-numeric: tabular-nums;
   color: hsl(var(--bc) / 0.6);
   text-align: right;
-  white-space: nowrap;
 }
 
 .tdArrow {
@@ -404,23 +402,23 @@
 }
 
 .swatchTeal {
-  background: #1d9e75;
+  background: #ca8a04;
 }
 .swatchAmber {
-  background: #ef9f27;
+  background: #ea580c;
 }
 .swatchRed {
-  background: #e24b4a;
+  background: #dc2626;
 }
 
 :global([data-theme="dark"]) .swatchTeal {
-  background: #5dcaa5;
+  background: #fde047;
 }
 :global([data-theme="dark"]) .swatchAmber {
-  background: #fac775;
+  background: #fb923c;
 }
 :global([data-theme="dark"]) .swatchRed {
-  background: #f09595;
+  background: #f87171;
 }
 
 .legendLabel {

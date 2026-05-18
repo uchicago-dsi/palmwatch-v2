@@ -11,7 +11,7 @@ type BrandRow = {
   averageCurrentRisk: number;
   averageFutureRisk: number;
   averagePastRisk: number;
-  totalForestLoss: number;
+  millCount: number;
 };
 
 type StatCard = {
@@ -19,7 +19,7 @@ type StatCard = {
   value: string;
   dotCategory?: "red" | "amber" | "teal";
 };
-type SortKey = "overallScore" | "consumer_brand" | "totalForestLoss";
+type SortKey = "overallScore" | "consumer_brand" | "millCount";
 type SortDir = "asc" | "desc";
 
 interface Props {
@@ -235,15 +235,12 @@ export function BrandsClient({ brands, stats }: Props) {
                   </span>
                 </th>
                 <th
-                  className={`${styles.thForest} ${sortKey === "totalForestLoss" ? styles.thActive : ""}`}
-                  onClick={() => handleSort("totalForestLoss")}
+                  className={`${styles.thMills} ${sortKey === "millCount" ? styles.thActive : ""}`}
+                  onClick={() => handleSort("millCount")}
                 >
                   <span className={styles.thInner}>
-                    Forest Loss (km²)
-                    <SortIcon
-                      active={sortKey === "totalForestLoss"}
-                      dir={sortDir}
-                    />
+                    Mills
+                    <SortIcon active={sortKey === "millCount"} dir={sortDir} />
                   </span>
                 </th>
                 <th className={styles.thArrow} />
@@ -281,8 +278,8 @@ export function BrandsClient({ brands, stats }: Props) {
                       </span>
                     </div>
                   </td>
-                  <td className={styles.tdForest}>
-                    {row.totalForestLoss.toLocaleString()}
+                  <td className={styles.tdMills}>
+                    {row.millCount.toLocaleString()}
                   </td>
                   <td className={styles.tdArrow}>
                     <svg
