@@ -16,10 +16,24 @@ const fullYearRange = yearRange.length
 
 const fullYearRangeColumns = fullYearRange.map((y) => `treeloss_km_${y}`);
 
-/** Default choropleth / “latest year” column for maps and stats. */
+/** Default choropleth / "latest year" column for maps and stats. */
 const latestTreelossKmColumn = `treeloss_km_${maxYear}`;
 
+/** Start year for cumulative deforestation layer. */
+const CUMULATIVE_LOSS_START_YEAR = 2017;
+
+/** Year range used to compute the cumulative deforestation column. */
+const cumulativeYearRange = yearRange.filter(
+  (y) => y >= CUMULATIVE_LOSS_START_YEAR
+);
+
+/** Synthetic column key added to each row at runtime (not in raw data). */
+const cumulativeLossColumn = "treeloss_km_cumulative";
+
 export {
+  CUMULATIVE_LOSS_START_YEAR,
+  cumulativeLossColumn,
+  cumulativeYearRange,
   fullYearRange,
   fullYearRangeColumns,
   latestTreelossKmColumn,
