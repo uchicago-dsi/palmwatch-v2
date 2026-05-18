@@ -1,89 +1,155 @@
+"use client";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { latestTreelossKmColumn } from "@/config/years";
+import { useTheme } from "@/components/theme-provider";
+import {
+  cumulativeLossColumn,
+  cumulativeYearRange,
+  latestTreelossKmColumn,
+} from "@/config/years";
 import type { UmlData } from "@/domain";
+import { getScoreThreshold } from "@/lib/score-threshold";
 import { useTooltipStore } from "./stores/tooltip-store";
 
-const BASE_ROWS: Array<{ label: string; column: keyof UmlData }> = [
-  { label: "Mill Name", column: "Mill Name" },
-  { label: "UML ID", column: "UML ID" },
-  { label: "Country", column: "Country" },
-];
+function formatKm2(val: number): string {
+  if (val >= 100) {
+    return `${Math.round(val)} km²`;
+  }
+  return `${val.toFixed(1)} km²`;
+}
 
-const RISK_ROWS: Array<{ label: string; column: keyof UmlData }> = [
-  { label: "Recent Deforestation Score", column: "risk_score_current" },
-  { label: "Past Deforestation Score", column: "risk_score_past" },
-  { label: "Future Deforestation Risk Score", column: "risk_score_future" },
-];
+function getForestLossValue(
+  info: UmlData,
+  choroplethColumn: string
+): number | null {
+  if (choroplethColumn === cumulativeLossColumn) {
+    return cumulativeYearRange.reduce((sum, yr) => {
+      const val = (info as Record<string, unknown>)[`treeloss_km_${yr}`];
+      return sum + (typeof val === "number" ? val : 0);
+    }, 0);
+  }
+  if (choroplethColumn.startsWith("treeloss_km_")) {
+    const val = (info as Record<string, unknown>)[choroplethColumn];
+    return typeof val === "number" ? val : null;
+  }
+  const val = (info as Record<string, unknown>)[latestTreelossKmColumn];
+  return typeof val === "number" ? val : null;
+}
 
-function forestLossRow(choroplethColumn: string): {
-  label: string;
-  column: keyof UmlData;
-} {
-  const kmCol = choroplethColumn.startsWith("treeloss_km_")
-    ? choroplethColumn
-    : latestTreelossKmColumn;
-  const yearStr = kmCol.replace(/^treeloss_km_/, "");
-  const year = /^\d+$/.test(yearStr) ? yearStr : "?";
-  return {
-    label: `Forest Loss ${year} (km2)`,
-    column: kmCol as keyof UmlData,
-  };
+function ArrowUpRight() {
+  return (
+    <svg aria-hidden fill="none" height="12" viewBox="0 0 12 12" width="12">
+      <path
+        d="M2 10L10 2M10 2H4M10 2V8"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
 }
 
 export const MapTooltip = () => {
-  const tooltipStore = useTooltipStore();
-  const { x, y, id, choroplethColumn } = tooltipStore;
+  const { x, y, id, choroplethColumn } = useTooltipStore();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
-  const rows = useMemo(
-    () => [...BASE_ROWS, forestLossRow(choroplethColumn), ...RISK_ROWS],
-    [choroplethColumn]
-  );
-
-  const { data, isLoading, error } = useQuery<{ info: Array<UmlData> }>(
+  const { data, isLoading } = useQuery<{ info: Array<UmlData> }>(
     [`millonly-${id}`],
     async () =>
-      fetch(`/api/mill/${encodeURIComponent(id!)}?millOnly=true`).then((res) =>
-        res.json()
+      fetch(`/api/mill/${encodeURIComponent(id!)}?millOnly=true`).then((r) =>
+        r.json()
       ),
     { enabled: !!id }
   );
 
-  const _info = data?.info?.[0];
-  if (!id || x === null || y === null || !(_info || isLoading)) {
+  if (!id || x === null || y === null) {
     return null;
   }
-  const info = _info!;
+
+  const style: React.CSSProperties = {
+    left: x + 14,
+    top: y + 14,
+    maxWidth: 240,
+  };
+
+  if (!data && isLoading) {
+    return (
+      <div
+        className="pointer-events-none absolute z-40 flex items-center justify-center rounded-lg border border-base-content/10 bg-base-100 px-3 py-2.5 shadow-lg"
+        style={{ ...style, minWidth: 80 }}
+      >
+        <progress className="progress w-8" />
+      </div>
+    );
+  }
+
+  const info = data?.info?.[0];
+  if (!info) {
+    return null;
+  }
+
+  const score = Number(info.risk_score_current);
+  const validScore = Number.isFinite(score) && score > 0;
+  const threshold = validScore ? getScoreThreshold(score) : null;
+  const barColor = threshold
+    ? isDark
+      ? threshold.darkColor
+      : threshold.lightColor
+    : "currentColor";
+  const barPct = validScore ? Math.min(100, Math.round((score / 5) * 100)) : 0;
+
+  const lossVal = getForestLossValue(info, choroplethColumn);
+
+  const province = info.Province || info.District;
+  const location = [info.Country, province]
+    .filter((p): p is string => typeof p === "string" && p.trim().length > 0)
+    .join(" · ");
 
   return (
     <div
-      className="prose pointer-events-none absolute z-40 max-w-96 rounded-xl bg-base-100 px-4 shadow-xl"
-      style={{ left: x + 10, top: y + 10 }}
+      className="pointer-events-none absolute z-40 cursor-pointer rounded-lg border border-base-content/10 bg-base-100 px-3 py-2.5 shadow-lg"
+      style={style}
     >
-      {isLoading ? (
-        <div className="flex justify-center py-4 align-center">
-          <progress className="progress w-10" />
+      {/* Name + link arrow */}
+      <div className="flex items-start justify-between gap-2">
+        <span className="font-medium text-sm leading-snug">
+          {info["Mill Name"]}
+        </span>
+        <span className="mt-0.5 shrink-0 opacity-35">
+          <ArrowUpRight />
+        </span>
+      </div>
+
+      {/* Location */}
+      {location && <div className="mt-0.5 text-xs opacity-60">{location}</div>}
+
+      {/* Divider */}
+      <div className="my-2 border-base-content/10 border-t" />
+
+      {/* Score row */}
+      {validScore && threshold && (
+        <div className="mb-1 flex items-center gap-2">
+          <span className="w-8 shrink-0 text-[11px] opacity-40">Score</span>
+          <div className="h-[5px] w-10 shrink-0 overflow-hidden rounded-full bg-base-content/10">
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${barPct}%`, background: barColor }}
+            />
+          </div>
+          <span className="font-medium text-xs">{score.toFixed(1)}</span>
+          <span className="text-[11px]" style={{ color: barColor }}>
+            {threshold.label}
+          </span>
         </div>
-      ) : (
-        <>
-          <table className="table-xs m-0 table">
-            <thead>
-              <tr>
-                <th />
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(({ label, column }) => (
-                <tr key={label}>
-                  <td>{label}</td>
-                  <td>{info[column]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="p-0 pb-1 text-xs">Click area on map to learn more</p>
-        </>
+      )}
+
+      {/* Loss row */}
+      {lossVal !== null && lossVal > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="w-8 shrink-0 text-[11px] opacity-40">Loss</span>
+          <span className="font-medium text-xs">{formatKm2(lossVal)}</span>
+        </div>
       )}
     </div>
   );

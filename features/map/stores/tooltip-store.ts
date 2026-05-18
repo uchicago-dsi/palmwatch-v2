@@ -1,6 +1,6 @@
 "use client";
 import { create } from "zustand";
-import { latestTreelossKmColumn } from "@/config/years";
+import { cumulativeLossColumn } from "@/config/years";
 
 export type TooltipStore = {
   x: number | null;
@@ -16,7 +16,7 @@ export const useTooltipStore = create<TooltipStore>((set) => ({
   x: null,
   y: null,
   id: null,
-  choroplethColumn: latestTreelossKmColumn,
+  choroplethColumn: cumulativeLossColumn,
   setData: (x: number | null, y: number | null, id: string | null) =>
     set({ x, y, id }),
   setChoroplethColumn: (column: string) => set({ choroplethColumn: column }),

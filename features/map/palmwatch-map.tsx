@@ -25,7 +25,12 @@ import { colorFunctions } from "@/lib/color-function";
 import GeocoderControl from "./geocoder-control";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { DataProvider } from "@/components/data-provider";
-import { fullYearRange, latestTreelossKmColumn } from "@/config/years";
+import {
+  CUMULATIVE_LOSS_START_YEAR,
+  cumulativeLossColumn,
+  cumulativeYearRange,
+  fullYearRange,
+} from "@/config/years";
 import { useActiveUmlStore } from "@/hooks/use-active-uml-store";
 import { Legend } from "./legend";
 import { MapTooltip } from "./map-tooltip";
@@ -138,6 +143,8 @@ function IconLayersOff() {
   );
 }
 
+export type MapViewport = { longitude: number; latitude: number; zoom: number };
+
 export type MapProps = {
   geoDataUrl: string;
   dataTable: Array<Record<string, unknown>> | object[];
@@ -150,6 +157,8 @@ export type MapProps = {
   noFlyMap?: boolean;
   mapStyle?: string;
   showClusters?: boolean;
+  onFeatureClick?: (umlId: string) => void;
+  initialView?: MapViewport;
 };
 
 export const PalmwatchMap: React.FC<MapProps> = ({
@@ -164,6 +173,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   noFlyMap,
   mapStyle: mapStyleProp,
   showClusters,
+  onFeatureClick,
+  initialView,
 }) => {
   const { theme } = useTheme();
   const mapRef = React.useRef<MapRef | null>(null);
@@ -179,13 +190,23 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     lastRoundedZoomRef.current = rounded;
     setMapZoom(rounded);
   }, []);
+
+  const hasFlewRef = useRef(!!initialView);
+  const pendingFlyRef = useRef<{
+    longitude: number;
+    latitude: number;
+    zoom: number;
+  } | null>(null);
   const [currentChoroplethScheme, setCurrentChoroplethScheme] =
     useState(choroplethScheme);
   const [currentChoroplethColumn, setCurrentChoroplethColumn] =
     useState(choroplethColumn);
+  const isCumulative = currentChoroplethColumn === cumulativeLossColumn;
   const currentYear = currentChoroplethColumn.includes("score")
     ? -1
-    : Number.parseInt(currentChoroplethColumn?.split("_")?.[2]);
+    : isCumulative
+      ? -2
+      : Number.parseInt(currentChoroplethColumn?.split("_")?.[2]);
   const [showLayerPanel, setShowLayerPanel] = useState(false);
   const { colorFunction, scale } = colorFunctions[currentChoroplethScheme];
   const setData = useTooltipStore((state) => state.setData);
@@ -195,6 +216,9 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   const umlStore = useActiveUmlStore();
   const setUml = umlStore.setUml;
   const activeUml = umlStore.currentUml;
+
+  // Clear tooltip when the map unmounts (e.g. navigating away and back)
+  useEffect(() => () => setData(null, null, null), [setData]);
 
   // Apply brightness whenever theme changes (after initial load)
   useEffect(() => {
@@ -218,8 +242,15 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     }
     const dataDict: { [key: string]: unknown } = {};
     for (const row of dataTable) {
-      // @ts-expect-error
-      dataDict[row[dataIdColumn] as string] = row;
+      const r = row as Record<string, unknown>;
+      const cumLoss = cumulativeYearRange.reduce(
+        (sum, yr) => sum + (Number(r[`treeloss_km_${yr}`]) || 0),
+        0
+      );
+      dataDict[r[dataIdColumn] as string] = {
+        ...r,
+        [cumulativeLossColumn]: cumLoss,
+      };
     }
 
     const filteredGeoFeatures =
@@ -250,7 +281,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     let bounds: [[number, number], [number, number]];
     let usePolygonFit = false;
 
-    if (singleMillFocus && filteredGeoFeatures.length > 0) {
+    if (filteredGeoFeatures.length > 0) {
+      // Always prefer polygon bboxes — more accurate than mill pin coordinates
       const mapBbox = bbox({
         type: "FeatureCollection",
         features: filteredGeoFeatures,
@@ -277,16 +309,6 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         [minLng, minLat],
         [maxLng, maxLat],
       ];
-    } else if (filteredGeoFeatures.length > 0) {
-      const filteredData = {
-        type: "FeatureCollection" as const,
-        features: filteredGeoFeatures,
-      };
-      const mapBbox = bbox(filteredData);
-      bounds = [
-        [mapBbox[0], mapBbox[1]],
-        [mapBbox[2], mapBbox[3]],
-      ];
     } else {
       bounds = [
         [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY],
@@ -310,11 +332,11 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         height: 600,
         bounds,
         padding: 88,
-        maxZoom: 13,
+        ...(singleMillFocus ? { maxZoom: 13 } : {}),
       });
       longitude = fitted.longitude;
       latitude = fitted.latitude;
-      zoom = Math.max(2, fitted.zoom - 0.9);
+      zoom = singleMillFocus ? Math.max(2, fitted.zoom - 0.9) : fitted.zoom;
     } else {
       const fitted = fitBounds({
         width: 800,
@@ -410,11 +432,38 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   }, [currentChoroplethColumn, setChoroplethColumnInTooltip]);
 
   useEffect(() => {
-    !noFlyMap &&
-      mapRef.current?.flyTo({
-        center: [initialMapView?.longitude ?? 0, initialMapView?.latitude ?? 0],
-        zoom: initialMapView?.zoom ?? 1,
+    if (noFlyMap) {
+      return;
+    }
+    if (
+      !(
+        initialMapView &&
+        Number.isFinite(initialMapView.latitude) &&
+        Number.isFinite(initialMapView.longitude) &&
+        Number.isFinite(initialMapView.zoom)
+      )
+    ) {
+      return;
+    }
+    if (hasFlewRef.current) {
+      return;
+    }
+
+    if (mapRef.current) {
+      hasFlewRef.current = true;
+      pendingFlyRef.current = null;
+      mapRef.current.flyTo({
+        center: [initialMapView.longitude, initialMapView.latitude],
+        zoom: initialMapView.zoom,
       });
+    } else {
+      // Map not mounted yet — store the target and let onLoad execute it
+      pendingFlyRef.current = {
+        longitude: initialMapView.longitude,
+        latitude: initialMapView.latitude,
+        zoom: initialMapView.zoom,
+      };
+    }
   }, [
     initialMapView?.latitude,
     initialMapView?.longitude,
@@ -448,7 +497,11 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           : setData(null, null, null),
       onClick: (info) => {
         const id = info.object.properties![geoIdColumn] as string;
-        setUml(id);
+        if (onFeatureClick) {
+          onFeatureClick(id);
+        } else {
+          setUml(id);
+        }
       },
       getFillColor: (d) => {
         const id = d.properties![geoIdColumn] as string;
@@ -512,9 +565,13 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   };
 
   const handleVariable = (variable: string) => {
-    variable.includes("score")
-      ? setCurrentChoroplethScheme("riskScore")
-      : setCurrentChoroplethScheme("forestLoss");
+    if (variable.includes("score")) {
+      setCurrentChoroplethScheme("riskScore");
+    } else if (variable === cumulativeLossColumn) {
+      setCurrentChoroplethScheme("cumulativeLoss");
+    } else {
+      setCurrentChoroplethScheme("forestLoss");
+    }
     setCurrentChoroplethColumn(variable);
   };
 
@@ -539,12 +596,19 @@ export const PalmwatchMap: React.FC<MapProps> = ({
             pitch: 0,
             bearing: 0,
             ...initialMapView,
+            ...(initialView ?? {}),
           }}
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
           mapStyle={mapStyleProp ?? MAP_STYLE}
           onLoad={(e) => {
             syncZoomFromView(e.target.getZoom());
             applyThemeBrightness(e.target as unknown as MapboxGLMap, theme);
+            if (!(noFlyMap || hasFlewRef.current) && pendingFlyRef.current) {
+              const { longitude, latitude, zoom } = pendingFlyRef.current;
+              hasFlewRef.current = true;
+              pendingFlyRef.current = null;
+              mapRef.current?.flyTo({ center: [longitude, latitude], zoom });
+            }
           }}
           onMove={(e) => syncZoomFromView(e.viewState.zoom)}
           onMoveEnd={(e) => {
@@ -660,8 +724,21 @@ export const PalmwatchMap: React.FC<MapProps> = ({
               <ul className="menu w-full rounded-box p-0">
                 <li>
                   <button
-                    className={`m-0 p-2 ${currentYear === -1 ? "" : "btn-active"}`}
-                    onClick={() => handleVariable(latestTreelossKmColumn)}
+                    className={`m-0 p-2 ${isCumulative ? "btn-active" : ""}`}
+                    onClick={() => handleVariable(cumulativeLossColumn)}
+                  >
+                    Total Deforestation
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`m-0 p-2 ${!isCumulative && currentYear !== -1 ? "btn-active" : ""}`}
+                    onClick={() => {
+                      const idx = fullYearRange.indexOf(
+                        fullYearRange[fullYearRange.length - 1]
+                      );
+                      handleVariable(`treeloss_km_${fullYearRange[idx]}`);
+                    }}
                   >
                     Deforestation By Year
                   </button>
@@ -675,7 +752,12 @@ export const PalmwatchMap: React.FC<MapProps> = ({
                   </button>
                 </li>
               </ul>
-              {currentYear === -1 ? (
+              {isCumulative ? (
+                <p className="px-1 text-sm opacity-70">
+                  Cumulative tree cover loss from {CUMULATIVE_LOSS_START_YEAR}{" "}
+                  to present within mill catchment areas (km²).
+                </p>
+              ) : currentYear === -1 ? (
                 <>
                   <h4>Deforestation Score</h4>
                   <div className="join join-vertical">
@@ -780,7 +862,9 @@ export const PalmwatchMap: React.FC<MapProps> = ({
             label={
               currentYear === -1
                 ? "Risk score"
-                : `Deforestation ${currentYear} (km2)`
+                : isCumulative
+                  ? `Total deforestation since ${CUMULATIVE_LOSS_START_YEAR} (km²)`
+                  : `Deforestation ${currentYear} (km²)`
             }
           />
         )}
