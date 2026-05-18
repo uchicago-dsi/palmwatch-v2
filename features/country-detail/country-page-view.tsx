@@ -65,6 +65,14 @@ function scoreColor(score: number, theme: "dark" | "light"): string {
   return theme === "dark" ? "#FDE047" : "#CA8A04";
 }
 
+function millTreelossSinceMinYear(mill: UmlData): number {
+  return fullYearRange.reduce(
+    (s, year) =>
+      s + (Number(mill[`treeloss_km_${year}` as keyof UmlData]) || 0),
+    0
+  );
+}
+
 function computeForestTimeseries(mills: UmlData[]): CumulativePoint[] {
   let cumulative = 0;
   return fullYearRange.map((year) => {
@@ -287,10 +295,7 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
       if (!prov) {
         continue;
       }
-      map.set(
-        prov,
-        (map.get(prov) ?? 0) + (Number(mill.sum_of_treeloss_km) || 0)
-      );
+      map.set(prov, (map.get(prov) ?? 0) + millTreelossSinceMinYear(mill));
     }
     return [...map.entries()]
       .map(([name, loss]) => ({ name, loss }))
@@ -308,7 +313,9 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
     <div className={styles.provinceCard}>
       <div className={styles.provinceTitleRow}>
         <p className={styles.provinceTitle}>Forest loss by province</p>
-        <span className={styles.provinceSub}>km² lost (top {rows.length})</span>
+        <span className={styles.provinceSub}>
+          km² lost since {minYear} (top {rows.length})
+        </span>
       </div>
       <div className={styles.provinceList}>
         {rows.map((row) => (
@@ -589,16 +596,7 @@ export function CountryPageView({
 
   const forestLossSinceMinYear = useMemo(
     () =>
-      millsTyped.reduce(
-        (sum, mill) =>
-          sum +
-          fullYearRange.reduce(
-            (s, year) =>
-              s + (Number(mill[`treeloss_km_${year}` as keyof UmlData]) || 0),
-            0
-          ),
-        0
-      ),
+      millsTyped.reduce((sum, mill) => sum + millTreelossSinceMinYear(mill), 0),
     [millsTyped]
   );
 
@@ -703,7 +701,7 @@ export function CountryPageView({
         </div>
         <div className={styles.chartCard}>
           <p className={styles.chartTitle}>Cumulative forest loss</p>
-          <p className={styles.chartCaption}>km² lost since 2001</p>
+          <p className={styles.chartCaption}>km² lost since {minYear}</p>
           <div className={styles.chartBody}>
             <CumulativeChart data={forestTimeseries} />
           </div>
