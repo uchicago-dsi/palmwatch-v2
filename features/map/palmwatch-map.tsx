@@ -42,6 +42,7 @@ const MAP_STYLE = process.env.NEXT_PUBLIC_MAPBOX_STYLE || SATELLITE_MAP_STYLE;
 const MAP_PROJECTION = { name: "mercator" } as const;
 
 const PIN_MIN_ZOOM = 7;
+const CLUSTER_MAX_ZOOM = 4;
 
 // ── Brightness helpers ────────────────────────────────────────────────────────
 
@@ -213,6 +214,12 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   const setChoroplethColumnInTooltip = useTooltipStore(
     (state) => state.setChoroplethColumn
   );
+  const freeze = useTooltipStore((state) => state.freeze);
+  const unfreeze = useTooltipStore((state) => state.unfreeze);
+  const frozen = useTooltipStore((state) => state.frozen);
+  const frozenRef = useRef(frozen);
+  frozenRef.current = frozen;
+  const justFrozeRef = useRef(false);
   const umlStore = useActiveUmlStore();
   const setUml = umlStore.setUml;
   const activeUml = umlStore.currentUml;
@@ -472,8 +479,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   ]);
 
   const fillOpacity = theme === "light" ? 0.35 : 0.45;
-  const mapDetailZoom = !showClusters || mapZoom >= PIN_MIN_ZOOM;
-  const polygonFillVisible = fillVisible && mapDetailZoom;
+  const polygonFillVisible = fillVisible && (!showClusters || mapZoom >= CLUSTER_MAX_ZOOM);
 
   const layers = [
     new GeoJsonLayer({
@@ -491,17 +497,17 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       getLineColor: [255, 255, 255, 120],
       lineWidthMinPixels: 0.5,
       lineWidthMaxPixels: 6,
-      onHover: ({ x, y, object }) =>
+      onHover: ({ x, y, object }) => {
+        if (frozenRef.current) return;
         object
           ? setData(x, y, object.properties["UML ID"])
-          : setData(null, null, null),
+          : setData(null, null, null);
+      },
       onClick: (info) => {
         const id = info.object.properties![geoIdColumn] as string;
-        if (onFeatureClick) {
-          onFeatureClick(id);
-        } else {
-          setUml(id);
-        }
+        justFrozeRef.current = true;
+        setData(info.x, info.y, id);
+        freeze();
       },
       getFillColor: (d) => {
         const id = d.properties![geoIdColumn] as string;
@@ -575,7 +581,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     setCurrentChoroplethColumn(variable);
   };
 
-  const layerControlsVisible = mapDetailZoom;
+  const layerControlsVisible = !showClusters || mapZoom >= CLUSTER_MAX_ZOOM;
 
   useEffect(() => {
     if (!layerControlsVisible && showLayerPanel) {
@@ -610,6 +616,13 @@ export const PalmwatchMap: React.FC<MapProps> = ({
               mapRef.current?.flyTo({ center: [longitude, latitude], zoom });
             }
           }}
+          onClick={() => {
+            if (justFrozeRef.current) {
+              justFrozeRef.current = false;
+            } else {
+              unfreeze();
+            }
+          }}
           onMove={(e) => syncZoomFromView(e.viewState.zoom)}
           onMoveEnd={(e) => {
             syncZoomFromView(e.viewState.zoom);
@@ -635,7 +648,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           {showClusters && millPointsGeoJSON && (
             <Source
               cluster={true}
-              clusterMaxZoom={PIN_MIN_ZOOM - 1}
+              clusterMaxZoom={CLUSTER_MAX_ZOOM - 1}
               clusterRadius={45}
               data={millPointsGeoJSON}
               id="mill-clusters"
@@ -644,7 +657,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
               <Layer
                 filter={["has", "point_count"]}
                 id="clusters"
-                maxzoom={PIN_MIN_ZOOM}
+                maxzoom={CLUSTER_MAX_ZOOM}
                 paint={{
                   "circle-color": [
                     "step",
@@ -682,14 +695,14 @@ export const PalmwatchMap: React.FC<MapProps> = ({
                   "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
                   "text-size": 12,
                 }}
-                maxzoom={PIN_MIN_ZOOM}
+                maxzoom={CLUSTER_MAX_ZOOM}
                 paint={{ "text-color": "#ffffff" }}
                 type="symbol"
               />
               <Layer
                 filter={["!", ["has", "point_count"]]}
                 id="unclustered-point"
-                maxzoom={PIN_MIN_ZOOM}
+                maxzoom={CLUSTER_MAX_ZOOM}
                 paint={{
                   "circle-color": "#F87171",
                   "circle-radius": 5,

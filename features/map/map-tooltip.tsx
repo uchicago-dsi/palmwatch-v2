@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/components/theme-provider";
 import {
@@ -50,7 +51,7 @@ function ArrowUpRight() {
 }
 
 export const MapTooltip = () => {
-  const { x, y, id, choroplethColumn } = useTooltipStore();
+  const { x, y, id, frozen, choroplethColumn, unfreeze } = useTooltipStore();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -106,11 +107,10 @@ export const MapTooltip = () => {
     .filter((p): p is string => typeof p === "string" && p.trim().length > 0)
     .join(" · ");
 
-  return (
-    <div
-      className="pointer-events-none absolute z-40 cursor-pointer rounded-lg border border-base-content/10 bg-base-100 px-3 py-2.5 shadow-lg"
-      style={style}
-    >
+  const millHref = `/mill/${encodeURIComponent(id!)}`;
+
+  const inner = (
+    <>
       {/* Name + link arrow */}
       <div className="flex items-start justify-between gap-2">
         <span className="font-medium text-sm leading-snug">
@@ -151,6 +151,36 @@ export const MapTooltip = () => {
           <span className="font-medium text-xs">{formatKm2(lossVal)}</span>
         </div>
       )}
+    </>
+  );
+
+  if (frozen) {
+    return (
+      <div className="absolute z-40" style={style}>
+        <Link
+          className="block rounded-lg border border-base-content/10 bg-base-100 px-3 py-2.5 shadow-lg no-underline transition-opacity hover:opacity-90"
+          href={millHref}
+        >
+          {inner}
+        </Link>
+        <button
+          aria-label="Dismiss"
+          className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full border border-base-content/10 bg-base-100 shadow-sm text-[10px] opacity-70 hover:opacity-100"
+          onClick={(e) => { e.stopPropagation(); unfreeze(); }}
+          type="button"
+        >
+          ×
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="pointer-events-none absolute z-40 rounded-lg border border-base-content/10 bg-base-100 px-3 py-2.5 shadow-lg"
+      style={style}
+    >
+      {inner}
     </div>
   );
 };
