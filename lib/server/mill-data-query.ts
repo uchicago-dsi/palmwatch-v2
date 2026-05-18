@@ -1,7 +1,7 @@
 import path from "node:path";
 import { all, desc, escape, loadArrow, op } from "arquero";
 import type ColumnTable from "arquero/dist/types/table/column-table";
-import { fullYearRangeColumns } from "@/config/years";
+import { fullYearRangeColumns, minYear } from "@/config/years";
 import type { CompanyData, UmlData } from "@/domain";
 import { buildTreelossRollups } from "./treeloss-rollups.generated";
 
@@ -460,6 +460,14 @@ class MillDataQuery {
   getRankingOfBrandsByCurrentImpactScore() {
     const brandImpacts = this.companies!.join(this.uml!, ["UML ID", "UML ID"]);
     const grouped = brandImpacts
+      .derive({
+        _treelossMinToMax: escape((d: any) =>
+          fullYearRangeColumns.reduce(
+            (s: number, col: string) => s + (Number(d[col]) || 0),
+            0
+          )
+        ),
+      })
       .dedupe("consumer_brand", "UML ID")
       .groupby("consumer_brand")
       .rollup({
@@ -469,8 +477,8 @@ class MillDataQuery {
           op.round(op.mean(d.risk_score_future) * 100) / 100,
         averagePastRisk: (d: UmlData) =>
           op.round(op.mean(d.risk_score_past) * 100) / 100,
-        totalForestLoss: (d: UmlData) =>
-          op.round(op.sum(d.sum_of_treeloss_km as any)),
+        totalForestLoss: (d: any) => op.round(op.sum(d._treelossMinToMax)),
+        millCount: () => op.count(),
       })
       .orderby(desc("averageCurrentRisk"));
     return grouped.objects();
@@ -515,23 +523,42 @@ class MillDataQuery {
 
   @cache("countrySummaryStats")
   getCountriesSummary() {
-    const countryStats = this.uml!.groupby("Country")
+    const preMinYearColumns = Array.from(
+      { length: minYear - 2001 },
+      (_, i) => `treeloss_km_${2001 + i}`
+    );
+
+    const countryStats = this.uml!.derive({
+      _treelossMinToMax: escape((d: any) =>
+        fullYearRangeColumns.reduce(
+          (s: number, col: string) => s + (Number(d[col]) || 0),
+          0
+        )
+      ),
+      _forestAreaAtMinYear: escape((d: any) => {
+        const preLoss = preMinYearColumns.reduce(
+          (s: number, col: string) => s + (Number(d[col]) || 0),
+          0
+        );
+        return Math.max(0, (Number(d.km_forest_area_00) || 0) - preLoss);
+      }),
+    })
+      .groupby("Country")
       .rollup({
         count: () => op.count(),
-        totalForestLoss: (d: UmlData) =>
-          op.round(op.sum(d.sum_of_treeloss_km as any) * 100) / 100,
+        totalForestLoss: (d: any) =>
+          op.round(op.sum(d._treelossMinToMax) * 100) / 100,
         totalArea: (d: UmlData) =>
           op.round(op.sum(d.km_area as any) * 100) / 100,
-        totalForestArea: (d: UmlData) =>
-          op.round(op.sum(d.km_forest_area_00 as any) * 100) / 100,
-        pctForestLoss: (d: UmlData) =>
+        totalForestArea: (d: any) =>
+          op.round(op.sum(d._forestAreaAtMinYear) * 100) / 100,
+        pctForestLoss: (d: any) =>
           op.round(
-            (op.sum(d.sum_of_treeloss_km as any) /
-              op.sum(d.km_forest_area_00 as any)) *
+            (op.sum(d._treelossMinToMax) / op.sum(d._forestAreaAtMinYear)) *
               1000
           ) / 10,
-        pctForestLossString: (d: UmlData) =>
-          `${op.round((op.sum(d.sum_of_treeloss_km as any) / op.sum(d.km_forest_area_00 as any)) * 1000) / 10} %`,
+        pctForestLossString: (d: any) =>
+          `${op.round((op.sum(d._treelossMinToMax) / op.sum(d._forestAreaAtMinYear)) * 1000) / 10} %`,
         currentRisk: (d: UmlData) =>
           op.round(op.mean(d.risk_score_current) * 100) / 100,
         futureRisk: (d: UmlData) =>

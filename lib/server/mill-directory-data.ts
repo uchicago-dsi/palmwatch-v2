@@ -6,6 +6,7 @@ export type MillDirEntry = {
   href: string;
   country: string;
   rspo: boolean;
+  riskScore: number | null;
 };
 
 export function loadMillDirectory(): MillDirEntry[] | null {
@@ -37,6 +38,7 @@ export function loadMillDirectory(): MillDirEntry[] | null {
 
       for (const row of rows) {
         const id = row["UML ID"] as string;
+        const rawScore = row["risk_score_current"];
         entries.push({
           label: (row["Mill Name"] as string) || id,
           href: `/mill/${id}`,
@@ -44,6 +46,7 @@ export function loadMillDirectory(): MillDirEntry[] | null {
           rspo:
             typeof row["RSPO Status"] === "string" &&
             row["RSPO Status"] !== "Not RSPO Certified",
+          riskScore: typeof rawScore === "number" ? rawScore : null,
         });
       }
     }

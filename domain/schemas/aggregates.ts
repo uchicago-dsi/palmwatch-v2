@@ -40,7 +40,16 @@ export type CountriesSummaryPayload = z.infer<
 >;
 
 /** `aggregates/ranking-brands.json`. */
-export const rankingBrandsPayloadSchema = z.array(z.record(z.unknown()));
+export const rankingBrandsPayloadSchema = z.array(
+  z.object({
+    consumer_brand: z.string(),
+    averageCurrentRisk: z.number(),
+    averageFutureRisk: z.number(),
+    averagePastRisk: z.number(),
+    totalForestLoss: z.number(),
+    millCount: z.number(),
+  })
+);
 
 /** `aggregates/median-mill.json` — array of one row of medians per year keys. */
 export const medianMillPayloadSchema = z.array(
