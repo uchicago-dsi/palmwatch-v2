@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
+import { maxYear, minYear } from "@/config/years";
 import type { BrandPrecomputedPayload } from "@/domain/schemas/brand-precomputed";
 import styles from "./brand.module.css";
 
@@ -65,12 +66,12 @@ function formatKm2(v: number): string {
 
 function scoreColor(score: number, theme: "dark" | "light"): string {
   if (score > 3.05) {
-    return theme === "dark" ? "#F09595" : "#E24B4A";
+    return theme === "dark" ? "#F87171" : "#DC2626";
   }
   if (score >= 2.85) {
-    return theme === "dark" ? "#FAC775" : "#EF9F27";
+    return theme === "dark" ? "#FB923C" : "#EA580C";
   }
-  return theme === "dark" ? "#5DCAA5" : "#1D9E75";
+  return theme === "dark" ? "#FDE047" : "#CA8A04";
 }
 
 function scoreBarClass(score: number): string {
@@ -977,7 +978,10 @@ function BrandPageViewInner({
     { label: "Mills linked", value: brandStats.uniqueMills.toLocaleString() },
     { label: "Countries", value: brandStats.uniqueCountries.toLocaleString() },
     { label: "Mill owners", value: brandStats.uniqueOwners.toLocaleString() },
-    { label: "Forest loss", value: forestLossDisplay },
+    {
+      label: `Cumulative loss (${minYear}–${maxYear})`,
+      value: forestLossDisplay,
+    },
   ];
 
   return (
@@ -1026,7 +1030,8 @@ function BrandPageViewInner({
         <div className={styles.chartCard}>
           <p className={styles.chartTitle}>Cumulative forest loss</p>
           <p className={styles.chartCaption}>
-            Total km² lost in {brand}&apos;s mill catchment areas, 2001–2025
+            Total km² lost in {brand}&apos;s mill catchment areas, {minYear}–
+            {maxYear}
           </p>
           <div className={styles.chartBody}>
             <CumulativeChart brand={brand} data={forestLossTimeseries} />

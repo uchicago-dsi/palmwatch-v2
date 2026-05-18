@@ -509,23 +509,23 @@
 }
 
 .barRed {
-  background: #e24b4a;
+  background: #dc2626;
 }
 .barAmber {
-  background: #ef9f27;
+  background: #ea580c;
 }
 .barTeal {
-  background: #1d9e75;
+  background: #ca8a04;
 }
 
 :global([data-theme="dark"]) .barRed {
-  background: #f09595;
+  background: #f87171;
 }
 :global([data-theme="dark"]) .barAmber {
-  background: #fac775;
+  background: #fb923c;
 }
 :global([data-theme="dark"]) .barTeal {
-  background: #5dcaa5;
+  background: #fde047;
 }
 
 .barNum {

@@ -431,7 +431,8 @@
 }
 .thScore {
   composes: th;
-  width: 130px;
+  width: 56px;
+  text-align: center;
 }
 .thProv {
   composes: th;
@@ -440,10 +441,6 @@
 .thDist {
   composes: th;
   width: 120px;
-}
-.thParent {
-  composes: th;
-  width: 160px;
 }
 .thArrow {
   composes: th;
@@ -476,6 +473,15 @@
 }
 .tdScore {
   composes: td;
+  text-align: center;
+}
+
+.riskDotCell {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  vertical-align: middle;
+  border-radius: 9999px;
 }
 .tdProv {
   composes: td;
@@ -484,9 +490,6 @@
 .tdDist {
   composes: td;
   color: hsl(var(--bc) / 0.7);
-}
-.tdParent {
-  composes: td;
 }
 .tdArrow {
   composes: td;
@@ -501,62 +504,6 @@
 }
 .cellName:hover {
   color: hsl(var(--bc) / 0.65);
-}
-
-.parentLink {
-  color: hsl(var(--bc) / 0.7);
-  text-decoration: none;
-  transition: color 100ms ease;
-}
-.parentLink:hover {
-  color: hsl(var(--bc));
-}
-
-/* Score bar */
-
-.barWrap {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.barTrack {
-  flex-shrink: 0;
-  width: 40px;
-  height: 6px;
-  overflow: hidden;
-  background: hsl(var(--b3));
-  border-radius: 999px;
-}
-
-.barFill {
-  height: 100%;
-  border-radius: 999px;
-}
-.barRed {
-  background: #e24b4a;
-}
-.barAmber {
-  background: #ef9f27;
-}
-.barTeal {
-  background: #1d9e75;
-}
-
-:global([data-theme="dark"]) .barRed {
-  background: #f09595;
-}
-:global([data-theme="dark"]) .barAmber {
-  background: #fac775;
-}
-:global([data-theme="dark"]) .barTeal {
-  background: #5dcaa5;
-}
-
-.barNum {
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  color: hsl(var(--bc) / 0.8);
 }
 
 .noResults {

@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
-import { latestTreelossKmColumn, yearRange } from "@/config/years";
+import { cumulativeLossColumn, yearRange } from "@/config/years";
 import type { UmlData } from "@/domain";
 import type { MillPageModel } from "@/lib/server/mill-page-data";
 import styles from "./mill.module.css";
@@ -70,12 +70,12 @@ function formatKm2(v: number): string {
 
 function scoreColor(score: number, theme: "dark" | "light"): string {
   if (score > 3.05) {
-    return theme === "dark" ? "#F09595" : "#E24B4A";
+    return theme === "dark" ? "#F87171" : "#DC2626";
   }
   if (score >= 2.85) {
-    return theme === "dark" ? "#FAC775" : "#EF9F27";
+    return theme === "dark" ? "#FB923C" : "#EA580C";
   }
-  return theme === "dark" ? "#5DCAA5" : "#1D9E75";
+  return theme === "dark" ? "#FDE047" : "#CA8A04";
 }
 
 // ── Annual chart ──────────────────────────────────────────────────────────────
@@ -292,8 +292,8 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
           <div className={styles.mapFrame}>
             <QueryProvider>
               <PalmwatchMapDynamic
-                choroplethColumn={latestTreelossKmColumn}
-                choroplethScheme="forestLoss"
+                choroplethColumn={cumulativeLossColumn}
+                choroplethScheme="cumulativeLoss"
                 dataIdColumn="UML ID"
                 dataTable={millPayload.info}
                 geoDataUrl="/data/mill-catchment.geojson"

@@ -13,8 +13,10 @@ import {
 import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
 import {
+  cumulativeLossColumn,
   fullYearRange,
-  latestTreelossKmColumn,
+  maxYear,
+  minYear,
   yearRange,
 } from "@/config/years";
 import type { UmlData } from "@/domain";
@@ -55,22 +57,12 @@ function formatKm2(v: number): string {
 
 function scoreColor(score: number, theme: "dark" | "light"): string {
   if (score > 3.05) {
-    return theme === "dark" ? "#F09595" : "#E24B4A";
+    return theme === "dark" ? "#F87171" : "#DC2626";
   }
   if (score >= 2.85) {
-    return theme === "dark" ? "#FAC775" : "#EF9F27";
+    return theme === "dark" ? "#FB923C" : "#EA580C";
   }
-  return theme === "dark" ? "#5DCAA5" : "#1D9E75";
-}
-
-function scoreBarClass(score: number): string {
-  if (score > 3.05) {
-    return styles.barRed;
-  }
-  if (score >= 2.85) {
-    return styles.barAmber;
-  }
-  return styles.barTeal;
+  return theme === "dark" ? "#FDE047" : "#CA8A04";
 }
 
 function computeForestTimeseries(mills: UmlData[]): CumulativePoint[] {
@@ -341,9 +333,10 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
 // ── Mills table ───────────────────────────────────────────────────────────────
 
 const MILLS_PAGE_SIZE = 20;
-type MillSortKey = "name" | "score" | "province" | "district" | "parent";
+type MillSortKey = "name" | "score" | "province" | "district";
 
 function MillsTable({ mills }: { mills: UmlData[] }) {
+  const { theme } = useTheme();
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState<MillSortKey>("score");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -356,7 +349,12 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
       return mills;
     }
     const lq = q.trim().toLowerCase();
-    return mills.filter((m) => m["Mill Name"].toLowerCase().includes(lq));
+    return mills.filter(
+      (m) =>
+        m["Mill Name"].toLowerCase().includes(lq) ||
+        (m.Province ?? "").toLowerCase().includes(lq) ||
+        (m.District ?? "").toLowerCase().includes(lq)
+    );
   }, [mills, q]);
 
   const sorted = useMemo(
@@ -372,7 +370,6 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
           score: "risk_score_current",
           province: "Province",
           district: "District",
-          parent: "Parent Company",
         };
         const av = String(a[fieldMap[sortKey]] ?? "");
         const bv = String(b[fieldMap[sortKey]] ?? "");
@@ -418,7 +415,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
               aria-label="Filter mills"
               className={styles.filterInput}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Filter mills…"
+              placeholder="Filter by name, province, district…"
               type="search"
               value={q}
             />
@@ -443,7 +440,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                 onClick={() => handleSort("score")}
               >
                 <span className={styles.thInner}>
-                  Score <SortIcon active={sortKey === "score"} dir={sortDir} />
+                  Risk <SortIcon active={sortKey === "score"} dir={sortDir} />
                 </span>
               </th>
               <th
@@ -464,15 +461,6 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                   <SortIcon active={sortKey === "district"} dir={sortDir} />
                 </span>
               </th>
-              <th
-                className={`${styles.thParent} ${sortKey === "parent" ? styles.thActive : ""}`}
-                onClick={() => handleSort("parent")}
-              >
-                <span className={styles.thInner}>
-                  Parent company{" "}
-                  <SortIcon active={sortKey === "parent"} dir={sortDir} />
-                </span>
-              </th>
               <th className={styles.thArrow} />
             </tr>
           </thead>
@@ -481,8 +469,11 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
               pageRows.map((mill) => {
                 const umlId = mill["UML ID"];
                 const href = `/mill/${encodeURIComponent(umlId)}`;
-                const score = Number(mill.risk_score_current) || 0;
-                const parentCompany = mill["Parent Company"];
+                const rawScore = mill.risk_score_current;
+                const score =
+                  rawScore !== null && rawScore !== undefined
+                    ? Number(rawScore)
+                    : null;
                 return (
                   <tr
                     className={styles.tr}
@@ -499,33 +490,15 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                       </Link>
                     </td>
                     <td className={styles.tdScore}>
-                      <div className={styles.barWrap}>
-                        <div className={styles.barTrack}>
-                          <div
-                            className={`${styles.barFill} ${scoreBarClass(score)}`}
-                            style={{
-                              width: `${Math.max(0, (score / 5) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                        <span className={styles.barNum}>
-                          {score.toFixed(2)}
-                        </span>
-                      </div>
+                      {score !== null && (
+                        <span
+                          className={styles.riskDotCell}
+                          style={{ background: scoreColor(score, theme) }}
+                        />
+                      )}
                     </td>
                     <td className={styles.tdProv}>{mill.Province}</td>
                     <td className={styles.tdDist}>{mill.District}</td>
-                    <td className={styles.tdParent}>
-                      {parentCompany ? (
-                        <Link
-                          className={styles.parentLink}
-                          href={`/owner/${encodeURIComponent(parentCompany)}`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {toTitleCase(parentCompany)}
-                        </Link>
-                      ) : null}
-                    </td>
                     <td className={styles.tdArrow}>
                       <svg
                         aria-hidden
@@ -548,7 +521,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
               })
             ) : (
               <tr>
-                <td className={styles.noResults} colSpan={6}>
+                <td className={styles.noResults} colSpan={5}>
                   No mills match &ldquo;{q}&rdquo;
                 </td>
               </tr>
@@ -614,16 +587,40 @@ export function CountryPageView({
     [millsTyped]
   );
 
+  const forestLossSinceMinYear = useMemo(
+    () =>
+      millsTyped.reduce(
+        (sum, mill) =>
+          sum +
+          fullYearRange.reduce(
+            (s, year) =>
+              s + (Number(mill[`treeloss_km_${year}` as keyof UmlData]) || 0),
+            0
+          ),
+        0
+      ),
+    [millsTyped]
+  );
+
   const forestLossPct = useMemo(() => {
-    const totalForestArea = millsTyped.reduce(
-      (sum, mill) => sum + (Number(mill.km_forest_area_00) || 0),
-      0
+    const preMinYearRange = Array.from(
+      { length: minYear - 2001 },
+      (_, i) => 2001 + i
     );
-    if (totalForestArea === 0) {
+    const forestAreaAtMinYear = millsTyped.reduce((sum, mill) => {
+      const base = Number(mill.km_forest_area_00) || 0;
+      const preLoss = preMinYearRange.reduce(
+        (s, year) =>
+          s + (Number(mill[`treeloss_km_${year}` as keyof UmlData]) || 0),
+        0
+      );
+      return sum + Math.max(0, base - preLoss);
+    }, 0);
+    if (forestAreaAtMinYear === 0) {
       return null;
     }
-    return (totalForestLoss / totalForestArea) * 100;
-  }, [millsTyped, totalForestLoss]);
+    return (forestLossSinceMinYear / forestAreaAtMinYear) * 100;
+  }, [millsTyped, forestLossSinceMinYear]);
 
   const normalizedBrandUsage = useMemo(
     () => brandUsage.map((b) => ({ ...b, years: b.years.map(Number) })),
@@ -667,15 +664,19 @@ export function CountryPageView({
           </div>
         </div>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Forest loss</span>
+          <span className={styles.statLabel}>
+            Cumulative loss ({minYear}–{maxYear})
+          </span>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>
-              {formatKm2(totalForestLoss)} km²
+              {formatKm2(forestLossSinceMinYear)} km²
             </span>
           </div>
         </div>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Forest area lost</span>
+          <span className={styles.statLabel}>
+            Forest area lost (since {minYear})
+          </span>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>
               {forestLossPct === null ? "—" : `${forestLossPct.toFixed(1)}%`}
@@ -690,8 +691,8 @@ export function CountryPageView({
           <div className={styles.mapFrame}>
             <QueryProvider>
               <PalmwatchMapDynamic
-                choroplethColumn={latestTreelossKmColumn}
-                choroplethScheme="forestLoss"
+                choroplethColumn={cumulativeLossColumn}
+                choroplethScheme="cumulativeLoss"
                 dataIdColumn="UML ID"
                 dataTable={millsTyped}
                 geoDataUrl="/data/mill-catchment.geojson"

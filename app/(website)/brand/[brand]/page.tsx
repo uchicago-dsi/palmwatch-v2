@@ -1,5 +1,6 @@
 import pageStyles from "@/components/page-layout.module.css";
 import { getBrandDataDownloadLinks } from "@/config/brand-data-download-links";
+import { fullYearRange } from "@/config/years";
 import type { CumulativePoint, RankingEntry } from "@/features/brand-detail";
 import { BrandPageView } from "@/features/brand-detail";
 import { loadBrandPageModel } from "@/lib/server/brand-page-data";
@@ -8,13 +9,11 @@ import { PortableText } from "@/sanity/lib/components";
 
 export const revalidate = 60;
 
-const YEARS = Array.from({ length: 25 }, (_, i) => 2001 + i);
-
 function computeForestTimeseries(
   umlInfo: Array<Record<string, unknown>>
 ): CumulativePoint[] {
   let cumulative = 0;
-  return YEARS.map((year) => {
+  return fullYearRange.map((year) => {
     const annual = umlInfo.reduce(
       (sum, mill) => sum + (Number(mill[`treeloss_km_${year}`]) || 0),
       0

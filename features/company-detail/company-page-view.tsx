@@ -13,8 +13,10 @@ import {
 import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
 import {
+  cumulativeLossColumn,
   fullYearRange,
-  latestTreelossKmColumn,
+  maxYear,
+  minYear,
   yearRange,
 } from "@/config/years";
 import type { UmlData } from "@/domain";
@@ -66,12 +68,12 @@ function formatKm2(v: number): string {
 
 function scoreColor(score: number, theme: "dark" | "light"): string {
   if (score > 3.05) {
-    return theme === "dark" ? "#F09595" : "#E24B4A";
+    return theme === "dark" ? "#F87171" : "#DC2626";
   }
   if (score >= 2.85) {
-    return theme === "dark" ? "#FAC775" : "#EF9F27";
+    return theme === "dark" ? "#FB923C" : "#EA580C";
   }
-  return theme === "dark" ? "#5DCAA5" : "#1D9E75";
+  return theme === "dark" ? "#FDE047" : "#CA8A04";
 }
 
 function scoreBarClass(score: number): string {
@@ -662,6 +664,20 @@ export function CompanyPageView({
     () => computeForestTimeseries(millsTyped),
     [millsTyped]
   );
+  const forestLossSinceMinYear = useMemo(
+    () =>
+      millsTyped.reduce(
+        (sum, mill) =>
+          sum +
+          fullYearRange.reduce(
+            (s, year) =>
+              s + (Number(mill[`treeloss_km_${year}` as keyof UmlData]) || 0),
+            0
+          ),
+        0
+      ),
+    [millsTyped]
+  );
   const dotColor = scoreColor(averageCurrentRisk, theme);
 
   const normalizedBrandUsage = useMemo(
@@ -750,10 +766,12 @@ export function CompanyPageView({
           </div>
         </div>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Forest loss</span>
+          <span className={styles.statLabel}>
+            Cumulative loss ({minYear}–{maxYear})
+          </span>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>
-              {formatKm2(totalForestLoss)} km²
+              {formatKm2(forestLossSinceMinYear)} km²
             </span>
           </div>
         </div>
@@ -765,8 +783,8 @@ export function CompanyPageView({
           <div className={styles.mapFrame}>
             <QueryProvider>
               <PalmwatchMapDynamic
-                choroplethColumn={latestTreelossKmColumn}
-                choroplethScheme="forestLoss"
+                choroplethColumn={cumulativeLossColumn}
+                choroplethScheme="cumulativeLoss"
                 dataIdColumn="UML ID"
                 dataTable={millsTyped}
                 geoDataUrl="/data/mill-catchment.geojson"
@@ -777,7 +795,7 @@ export function CompanyPageView({
         </div>
         <div className={styles.chartCard}>
           <p className={styles.chartTitle}>Cumulative forest loss</p>
-          <p className={styles.chartCaption}>km² lost since 2001</p>
+          <p className={styles.chartCaption}>km² lost since {minYear}</p>
           <div className={styles.chartBody}>
             <CumulativeChart data={forestTimeseries} />
           </div>
