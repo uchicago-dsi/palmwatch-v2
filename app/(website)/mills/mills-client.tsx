@@ -2,31 +2,39 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import {
-  Area,
-  Bar,
-  ComposedChart,
-  Line,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { useTheme } from "@/components/theme-provider";
-import type { ForestLossYearPoint } from "@/domain/schemas/aggregates";
 import type { MillDirEntry } from "@/lib/server/mill-directory-data";
 import styles from "./mills.module.css";
 
-type SortKey = "label" | "country" | "rspo";
+type SortKey = "label" | "country" | "rspo" | "riskScore";
 type SortDir = "asc" | "desc";
+
+function scoreColor(score: number | null, theme: string): string {
+  if (score === null) {
+    return "hsl(var(--bc) / 0.4)";
+  }
+  if (score < 2.85) {
+    return theme === "dark" ? "#FDE047" : "#CA8A04";
+  }
+  if (score <= 3.05) {
+    return theme === "dark" ? "#FB923C" : "#EA580C";
+  }
+  return theme === "dark" ? "#F87171" : "#DC2626";
+}
 
 const PAGE_SIZE = 20;
 
+interface RiskDistribution {
+  higher: number;
+  lower: number;
+  moderate: number;
+  total: number;
+}
+
 interface Props {
-  forestLossByYear: ForestLossYearPoint[];
-  forestLossKm2: number;
-  forestLossPct: number;
   millCount: number;
   mills: MillDirEntry[];
+  riskDistribution: RiskDistribution;
   rspoCertified: number;
 }
 
@@ -171,124 +179,75 @@ function RspoDonut({ certified, total }: { certified: number; total: number }) {
           <span className={styles.rspoDonutSub}>Not certified</span>
         </div>
       </div>
+      <p className={styles.rspoExplainer}>
+        The Roundtable on Sustainable Palm Oil (RSPO) certifies mills that meet
+        environmental and social standards for sustainable production.
+      </p>
     </div>
   );
 }
 
-function formatKm2(v: number) {
-  return v >= 1000 ? `${Math.round(v / 1000)}k` : String(Math.round(v));
-}
+const RISK_TIERS = [
+  {
+    key: "lower" as const,
+    label: "Lower risk",
+    lightColor: "#CA8A04",
+    darkColor: "#FDE047",
+  },
+  {
+    key: "moderate" as const,
+    label: "Moderate",
+    lightColor: "#EA580C",
+    darkColor: "#FB923C",
+  },
+  {
+    key: "higher" as const,
+    label: "Higher risk",
+    lightColor: "#DC2626",
+    darkColor: "#F87171",
+  },
+];
 
-function ForestLossTimeseriesChart({ data }: { data: ForestLossYearPoint[] }) {
+function RiskDistributionCard({
+  distribution,
+}: {
+  distribution: {
+    lower: number;
+    moderate: number;
+    higher: number;
+    total: number;
+  };
+}) {
   const { theme } = useTheme();
-  const lineColor = theme === "dark" ? "#F09595" : "#E24B4A";
-  const barFill =
-    theme === "dark" ? "rgba(240, 149, 149, 0.35)" : "rgba(226, 75, 74, 0.35)";
-
-  if (data.length === 0) {
-    return null;
-  }
-
-  const maxAnnual = Math.max(...data.map((d) => d.annualKm2));
-  const maxCumulative = data[data.length - 1].cumulativeKm2;
-  const firstYear = data[0].year;
-  const lastYear = data[data.length - 1].year;
-  const midYear = Math.round((firstYear + lastYear) / 2);
-  const gradientId = "cumulativeGradient";
+  const { lower, moderate, higher, total } = distribution;
+  const counts = { lower, moderate, higher };
 
   return (
-    <ResponsiveContainer height="100%" width="100%">
-      <ComposedChart
-        data={data}
-        margin={{ top: 8, right: 48, left: 4, bottom: 0 }}
-      >
-        <defs>
-          <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor={lineColor} stopOpacity={0.15} />
-            <stop offset="100%" stopColor={lineColor} stopOpacity={0.02} />
-          </linearGradient>
-        </defs>
-        <XAxis
-          axisLine={{ stroke: "hsl(var(--bc) / 0.1)" }}
-          dataKey="year"
-          tick={{ fontSize: 11, fill: "hsl(var(--bc) / 0.45)" }}
-          tickLine={false}
-          ticks={[firstYear, midYear, lastYear]}
-        />
-        <YAxis
-          axisLine={false}
-          domain={[0, maxAnnual]}
-          orientation="left"
-          tick={{ fontSize: 11, fill: "hsl(var(--bc) / 0.45)" }}
-          tickFormatter={formatKm2}
-          tickLine={false}
-          ticks={[0, Math.round(maxAnnual / 2), Math.round(maxAnnual)]}
-          width={36}
-          yAxisId="annual"
-        />
-        <YAxis
-          axisLine={false}
-          domain={[0, maxCumulative]}
-          orientation="right"
-          tick={{ fontSize: 11, fill: "hsl(var(--bc) / 0.45)" }}
-          tickFormatter={formatKm2}
-          tickLine={false}
-          ticks={[0, Math.round(maxCumulative / 2), Math.round(maxCumulative)]}
-          width={40}
-          yAxisId="cumulative"
-        />
-        <Bar
-          dataKey="annualKm2"
-          fill={barFill}
-          isAnimationActive={false}
-          radius={[2, 2, 0, 0]}
-          yAxisId="annual"
-        />
-        <Area
-          dataKey="cumulativeKm2"
-          fill={`url(#${gradientId})`}
-          isAnimationActive={false}
-          stroke="none"
-          type="monotone"
-          yAxisId="cumulative"
-        />
-        <Line
-          dataKey="cumulativeKm2"
-          dot={false}
-          isAnimationActive={false}
-          label={({ x, y, index }: { x: number; y: number; index: number }) => {
-            if (index !== data.length - 1) {
-              return <g key={index} />;
-            }
-            return (
-              <g key={index}>
-                <circle
-                  cx={x}
-                  cy={y}
-                  fill={lineColor}
-                  r={4}
-                  stroke="hsl(var(--b1))"
-                  strokeWidth={2}
+    <div className={styles.impactCard}>
+      <span className={styles.impactLabel}>Risk distribution</span>
+      <div className={styles.riskRows}>
+        {RISK_TIERS.map(({ key, label, lightColor, darkColor }) => {
+          const count = counts[key];
+          const color = theme === "dark" ? darkColor : lightColor;
+          const pct = total > 0 ? (count / total) * 100 : 0;
+          return (
+            <div className={styles.riskRow} key={key}>
+              <span className={styles.riskDot} style={{ background: color }} />
+              <span className={styles.riskLabel}>{label}</span>
+              <div className={styles.riskBarTrack}>
+                <div
+                  className={styles.riskBarFill}
+                  style={{ width: `${pct.toFixed(1)}%`, background: color }}
                 />
-                <text
-                  fill={lineColor}
-                  fontSize={13}
-                  fontWeight={500}
-                  x={x + 8}
-                  y={y - 8}
-                >
-                  {formatKm2(maxCumulative)} km²
-                </text>
-              </g>
-            );
-          }}
-          stroke={lineColor}
-          strokeWidth={2}
-          type="monotone"
-          yAxisId="cumulative"
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
+              </div>
+              <span className={styles.riskCount}>
+                {count.toLocaleString()} ({Math.round(pct)}%)
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -296,11 +255,10 @@ export function MillsClient({
   mills,
   rspoCertified,
   millCount,
-  forestLossKm2,
-  forestLossPct,
-  forestLossByYear,
+  riskDistribution,
 }: Props) {
   const router = useRouter();
+  const { theme } = useTheme();
 
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(-1);
@@ -364,6 +322,15 @@ export function MillsClient({
           const bv = b.rspo ? 1 : 0;
           return sortDir === "asc" ? av - bv : bv - av;
         }
+        if (sortKey === "riskScore") {
+          const nullFallback =
+            sortDir === "asc"
+              ? Number.POSITIVE_INFINITY
+              : Number.NEGATIVE_INFINITY;
+          const av = a.riskScore ?? nullFallback;
+          const bv = b.riskScore ?? nullFallback;
+          return sortDir === "asc" ? av - bv : bv - av;
+        }
         const av = (a[sortKey] as string) ?? "";
         const bv = (b[sortKey] as string) ?? "";
         return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
@@ -382,13 +349,6 @@ export function MillsClient({
       setSortDir("asc");
     }
   }
-
-  const forestBarPct = Math.min(100, Math.max(0, forestLossPct));
-  const forestRemainPct = Math.max(0, 100 - forestBarPct);
-  const forestLossKmLabel =
-    forestLossKm2 >= 1000
-      ? `${Math.round(forestLossKm2 / 1000).toLocaleString()}k`
-      : forestLossKm2.toLocaleString();
 
   return (
     <div className={styles.page}>
@@ -479,49 +439,7 @@ export function MillsClient({
           <RspoDonut certified={rspoCertified} total={millCount} />
         </div>
 
-        <div className={styles.impactCard}>
-          <span className={styles.impactLabel}>Forest impact</span>
-          <div className={styles.forestHeadline}>
-            <span className={styles.forestKmValue}>
-              {forestLossKmLabel} km²
-            </span>
-            <span className={styles.forestKmSub}>total forest loss</span>
-          </div>
-          <div className={styles.forestBar}>
-            <div
-              className={styles.forestBarFill}
-              style={{ width: `${forestBarPct.toFixed(1)}%` }}
-            />
-          </div>
-          <div className={styles.forestFooter}>
-            <span className={styles.forestLostLabel}>
-              {Math.round(forestLossPct)}% of forest area lost
-            </span>
-            <span className={styles.forestRemainLabel}>
-              {Math.round(forestRemainPct)}% remaining
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Chart */}
-      <div className={styles.chartCard}>
-        <div className={styles.chartHeader}>
-          <span className={styles.chartTitle}>Forest loss over time</span>
-          <div className={styles.chartLegend}>
-            <div className={styles.chartLegendItem}>
-              <span className={styles.chartLegendBar} />
-              <span className={styles.chartLegendLabel}>Annual (km²)</span>
-            </div>
-            <div className={styles.chartLegendItem}>
-              <span className={styles.chartLegendLine} />
-              <span className={styles.chartLegendLabel}>Cumulative (km²)</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.chartBody}>
-          <ForestLossTimeseriesChart data={forestLossByYear} />
-        </div>
+        <RiskDistributionCard distribution={riskDistribution} />
       </div>
 
       {/* Mill directory table */}
@@ -555,6 +473,15 @@ export function MillsClient({
                   </span>
                 </th>
                 <th
+                  className={`${styles.thScore} ${sortKey === "riskScore" ? styles.thActive : ""}`}
+                  onClick={() => handleSort("riskScore")}
+                >
+                  <span className={styles.thInner}>
+                    Risk
+                    <SortIcon active={sortKey === "riskScore"} dir={sortDir} />
+                  </span>
+                </th>
+                <th
                   className={`${styles.thRspo} ${sortKey === "rspo" ? styles.thActive : ""}`}
                   onClick={() => handleSort("rspo")}
                 >
@@ -584,6 +511,16 @@ export function MillsClient({
                       </Link>
                     </td>
                     <td className={styles.tdCountry}>{mill.country}</td>
+                    <td className={styles.tdScore}>
+                      {mill.riskScore !== null && (
+                        <span
+                          className={styles.riskDotCell}
+                          style={{
+                            background: scoreColor(mill.riskScore, theme),
+                          }}
+                        />
+                      )}
+                    </td>
                     <td className={styles.tdRspo}>
                       {mill.rspo ? (
                         <span className={styles.rspoBadgeYes}>Yes</span>
@@ -612,7 +549,7 @@ export function MillsClient({
                 ))
               ) : (
                 <tr>
-                  <td className={styles.noResults} colSpan={4}>
+                  <td className={styles.noResults} colSpan={5}>
                     No mills found.
                   </td>
                 </tr>

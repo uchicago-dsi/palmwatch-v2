@@ -25,26 +25,33 @@ export default async function Page() {
     );
   }
 
-  const {
-    forestLossByYear,
-    totalForestArea,
-    totalForestLoss,
-    millCount,
-    rspoCertified,
-  } = millStats;
+  const { millCount, rspoCertified } = millStats;
 
-  const forestLossPct =
-    totalForestArea > 0 ? (totalForestLoss / totalForestArea) * 100 : 0;
+  const mills = millDirectory ?? [];
+  let lower = 0;
+  let moderate = 0;
+  let higher = 0;
+  for (const mill of mills) {
+    const s = mill.riskScore;
+    if (s === null) {
+      continue;
+    }
+    if (s < 2.85) {
+      lower++;
+    } else if (s <= 3.05) {
+      moderate++;
+    } else {
+      higher++;
+    }
+  }
 
   return (
     <main className={pageStyles.pageShell}>
       <div className={pageStyles.pageInner}>
         <MillsClient
-          forestLossByYear={forestLossByYear ?? []}
-          forestLossKm2={totalForestLoss}
-          forestLossPct={forestLossPct}
           millCount={millCount ?? 0}
-          mills={millDirectory ?? []}
+          mills={mills}
+          riskDistribution={{ lower, moderate, higher, total: mills.length }}
           rspoCertified={rspoCertified}
         />
         {!!landingPageContent?.disclaimer && (

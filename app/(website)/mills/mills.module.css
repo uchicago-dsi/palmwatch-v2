@@ -201,7 +201,7 @@
 
 .rspoDonutLayout {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   align-items: center;
 }
 
@@ -212,6 +212,7 @@
 
 .rspoDonutCounts {
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
   gap: 8px;
 }
@@ -240,66 +241,66 @@
   color: hsl(var(--bc) / 0.55);
 }
 
-/* Forest impact — mirrors RSPO bar layout */
+.rspoExplainer {
+  flex: 1;
+  min-width: 0;
+  padding-left: 16px;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: hsl(var(--bc) / 0.5);
+  border-left: 1px solid hsl(var(--bc) / 0.1);
+}
 
-.forestHeadline {
+/* Risk distribution card */
+
+.riskRows {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 12px;
 }
 
-.forestKmValue {
-  font-size: 22px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+.riskRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.riskDot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+}
+
+.riskLabel {
+  flex-shrink: 0;
+  width: 90px;
+  font-size: 0.875rem;
   color: hsl(var(--bc));
-  letter-spacing: -0.02em;
 }
 
-.forestKmSub {
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: hsl(var(--bc) / 0.55);
-}
-
-.forestBar {
-  height: 8px;
+.riskBarTrack {
+  flex: 1;
+  min-width: 0;
+  height: 6px;
   overflow: hidden;
   background: hsl(var(--b3));
   border-radius: 9999px;
 }
 
-.forestBarFill {
+.riskBarFill {
   height: 100%;
-  background: #e24b4a;
   border-radius: 9999px;
   transition: width 0.35s ease;
 }
 
-:global([data-theme="dark"]) .forestBarFill {
-  background: #f09595;
-}
-
-.forestFooter {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.forestLostLabel {
-  font-size: 0.8125rem;
-  font-weight: 400;
+.riskCount {
+  flex-shrink: 0;
+  min-width: 80px;
+  font-size: 0.875rem;
   font-variant-numeric: tabular-nums;
   color: hsl(var(--bc) / 0.6);
-}
-
-.forestRemainLabel {
-  font-size: 0.8125rem;
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-  color: hsl(var(--bc) / 0.65);
   text-align: right;
 }
 
@@ -443,6 +444,12 @@
   width: 120px;
 }
 
+.thScore {
+  composes: th;
+  width: 56px;
+  text-align: center;
+}
+
 .thRspo {
   composes: th;
   width: 80px;
@@ -500,6 +507,20 @@
   font-size: 0.875rem;
   color: hsl(var(--bc) / 0.6);
   white-space: nowrap;
+}
+
+.tdScore {
+  width: 56px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.riskDotCell {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  vertical-align: middle;
+  border-radius: 9999px;
 }
 
 .tdRspo {
