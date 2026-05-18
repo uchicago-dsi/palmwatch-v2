@@ -1,5 +1,4 @@
-import { existsSync, readFileSync } from "fs";
-import path from "path";
+import { loadPrecomputedJson } from "@/lib/server/load-precomputed";
 
 export type MillDirEntry = {
   label: string;
@@ -9,45 +8,39 @@ export type MillDirEntry = {
   riskScore: number | null;
 };
 
-export function loadMillDirectory(): MillDirEntry[] | null {
+function rowToEntry(row: Record<string, unknown>): MillDirEntry {
+  const id = row["UML ID"] as string;
+  const rawScore = row.risk_score_current;
+  return {
+    label: (row["Mill Name"] as string) || id,
+    href: `/mill/${id}`,
+    country: (row.Country as string) ?? "",
+    rspo:
+      typeof row["RSPO Status"] === "string" &&
+      row["RSPO Status"] !== "Not RSPO Certified",
+    riskScore: typeof rawScore === "number" ? rawScore : null,
+  };
+}
+
+export async function loadMillDirectory(
+  req?: Request
+): Promise<MillDirEntry[] | null> {
   try {
-    const manifestPath = path.join(
-      process.cwd(),
-      "public/data/precomputed/full-manifest.json"
-    );
-    const { shardCount } = JSON.parse(readFileSync(manifestPath, "utf-8")) as {
+    const manifest = await loadPrecomputedJson<{
       shardCount: number;
-    };
+    }>("full-manifest.json", req);
+
+    const shards = await Promise.all(
+      Array.from({ length: manifest.shardCount }, (_, i) => {
+        const name = `full/shard-${String(i).padStart(5, "0")}.json`;
+        return loadPrecomputedJson<Array<Record<string, unknown>>>(name, req);
+      })
+    );
 
     const entries: MillDirEntry[] = [];
-
-    for (let i = 0; i < shardCount; i++) {
-      const name = `shard-${String(i).padStart(5, "0")}.json`;
-      const shardPath = path.join(
-        process.cwd(),
-        "public/data/precomputed/full",
-        name
-      );
-      if (!existsSync(shardPath)) {
-        continue;
-      }
-
-      const rows = JSON.parse(readFileSync(shardPath, "utf-8")) as Array<
-        Record<string, unknown>
-      >;
-
+    for (const rows of shards) {
       for (const row of rows) {
-        const id = row["UML ID"] as string;
-        const rawScore = row["risk_score_current"];
-        entries.push({
-          label: (row["Mill Name"] as string) || id,
-          href: `/mill/${id}`,
-          country: (row["Country"] as string) ?? "",
-          rspo:
-            typeof row["RSPO Status"] === "string" &&
-            row["RSPO Status"] !== "Not RSPO Certified",
-          riskScore: typeof rawScore === "number" ? rawScore : null,
-        });
+        entries.push(rowToEntry(row));
       }
     }
 
