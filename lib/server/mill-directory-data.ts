@@ -4,6 +4,7 @@ export type MillDirEntry = {
   label: string;
   href: string;
   country: string;
+  province: string;
   rspo: boolean;
   riskScore: number | null;
 };
@@ -15,6 +16,7 @@ function rowToEntry(row: Record<string, unknown>): MillDirEntry {
     label: (row["Mill Name"] as string) || id,
     href: `/mill/${id}`,
     country: (row.Country as string) ?? "",
+    province: (row.Province as string) ?? (row.District as string) ?? "",
     rspo:
       typeof row["RSPO Status"] === "string" &&
       row["RSPO Status"] !== "Not RSPO Certified",

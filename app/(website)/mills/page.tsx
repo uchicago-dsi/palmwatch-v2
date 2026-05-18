@@ -25,25 +25,9 @@ export default async function Page() {
     );
   }
 
-  const { millCount, rspoCertified } = millStats;
+  const { millCount, rspoCertified, totalArea, totalForestArea, totalForestLoss } = millStats;
 
   const mills = millDirectory ?? [];
-  let lower = 0;
-  let moderate = 0;
-  let higher = 0;
-  for (const mill of mills) {
-    const s = mill.riskScore;
-    if (s === null) {
-      continue;
-    }
-    if (s < 2.85) {
-      lower++;
-    } else if (s <= 3.05) {
-      moderate++;
-    } else {
-      higher++;
-    }
-  }
 
   return (
     <main className={pageStyles.pageShell}>
@@ -51,8 +35,10 @@ export default async function Page() {
         <MillsClient
           millCount={millCount ?? 0}
           mills={mills}
-          riskDistribution={{ lower, moderate, higher, total: mills.length }}
           rspoCertified={rspoCertified}
+          totalArea={totalArea}
+          totalForestArea={totalForestArea}
+          totalForestLoss={totalForestLoss}
         />
         {!!landingPageContent?.disclaimer && (
           <div className={styles.disclaimer}>

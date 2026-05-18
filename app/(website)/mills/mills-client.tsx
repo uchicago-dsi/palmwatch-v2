@@ -6,36 +6,18 @@ import { useTheme } from "@/components/theme-provider";
 import type { MillDirEntry } from "@/lib/server/mill-directory-data";
 import styles from "./mills.module.css";
 
-type SortKey = "label" | "country" | "rspo" | "riskScore";
+type SortKey = "label" | "country" | "province" | "rspo";
 type SortDir = "asc" | "desc";
 
-function scoreColor(score: number | null, theme: string): string {
-  if (score === null) {
-    return "hsl(var(--bc) / 0.4)";
-  }
-  if (score < 2.85) {
-    return theme === "dark" ? "#FDE047" : "#CA8A04";
-  }
-  if (score <= 3.05) {
-    return theme === "dark" ? "#FB923C" : "#EA580C";
-  }
-  return theme === "dark" ? "#F87171" : "#DC2626";
-}
-
 const PAGE_SIZE = 20;
-
-interface RiskDistribution {
-  higher: number;
-  lower: number;
-  moderate: number;
-  total: number;
-}
 
 interface Props {
   millCount: number;
   mills: MillDirEntry[];
-  riskDistribution: RiskDistribution;
   rspoCertified: number;
+  totalArea: number;
+  totalForestArea: number;
+  totalForestLoss: number;
 }
 
 function IconSearch() {
@@ -187,65 +169,65 @@ function RspoDonut({ certified, total }: { certified: number; total: number }) {
   );
 }
 
-const RISK_TIERS = [
-  {
-    key: "lower" as const,
-    label: "Lower risk",
-    lightColor: "#CA8A04",
-    darkColor: "#FDE047",
-  },
-  {
-    key: "moderate" as const,
-    label: "Moderate",
-    lightColor: "#EA580C",
-    darkColor: "#FB923C",
-  },
-  {
-    key: "higher" as const,
-    label: "Higher risk",
-    lightColor: "#DC2626",
-    darkColor: "#F87171",
-  },
+function fmtKm2(v: number): string {
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M km²`;
+  if (v >= 1_000) return `${Math.round(v / 1_000).toLocaleString()}K km²`;
+  return `${Math.round(v).toLocaleString()} km²`;
+}
+
+const AREA_TIERS = [
+  { key: "total" as const, label: "Total catchment area", lightColor: "#64748B", darkColor: "#94A3B8" },
+  { key: "forest" as const, label: "Total forest area", lightColor: "#16A34A", darkColor: "#4ADE80" },
+  { key: "loss" as const, label: "Total forest loss", lightColor: "#DC2626", darkColor: "#F87171" },
 ];
 
-function RiskDistributionCard({
-  distribution,
+function AreaBreakdownCard({
+  totalArea,
+  totalForestArea,
+  totalForestLoss,
 }: {
-  distribution: {
-    lower: number;
-    moderate: number;
-    higher: number;
-    total: number;
-  };
+  totalArea: number;
+  totalForestArea: number;
+  totalForestLoss: number;
 }) {
   const { theme } = useTheme();
-  const { lower, moderate, higher, total } = distribution;
-  const counts = { lower, moderate, higher };
+  const forestPct = totalArea > 0 ? Math.sqrt(totalForestArea / totalArea) * 100 : 0;
+  const lossPct = totalArea > 0 ? Math.sqrt(totalForestLoss / totalArea) * 100 : 0;
+
+  const values = { total: totalArea, forest: totalForestArea, loss: totalForestLoss };
 
   return (
     <div className={styles.impactCard}>
-      <span className={styles.impactLabel}>Risk distribution</span>
-      <div className={styles.riskRows}>
-        {RISK_TIERS.map(({ key, label, lightColor, darkColor }) => {
-          const count = counts[key];
-          const color = theme === "dark" ? darkColor : lightColor;
-          const pct = total > 0 ? (count / total) * 100 : 0;
-          return (
-            <div className={styles.riskRow} key={key}>
-              <span className={styles.riskDot} style={{ background: color }} />
-              <span className={styles.riskLabel}>{label}</span>
-              <div className={styles.riskBarTrack}>
-                <div
-                  className={styles.riskBarFill}
-                  style={{ width: `${pct.toFixed(1)}%`, background: color }}
-                />
-              </div>
-              <span className={styles.riskCount}>
-                {count.toLocaleString()} ({Math.round(pct)}%)
-              </span>
+      <span className={styles.impactLabel}>Area breakdown</span>
+      <div className={styles.areaVizWrap}>
+        <div className={styles.areaViz}>
+          <div className={styles.areaTotal}>
+            <div
+              className={styles.areaForest}
+              style={{ width: `${forestPct}%`, height: `${forestPct}%` }}
+            >
+              <div
+                className={styles.areaLoss}
+                style={{
+                  width: forestPct > 0 ? `${(lossPct / forestPct) * 100}%` : "0%",
+                  height: forestPct > 0 ? `${(lossPct / forestPct) * 100}%` : "0%",
+                }}
+              />
             </div>
-          );
-        })}
+          </div>
+        </div>
+        <div className={styles.areaLegend}>
+          {AREA_TIERS.map(({ key, label, lightColor, darkColor }) => (
+            <div className={styles.areaLegendRow} key={key}>
+              <span
+                className={styles.areaLegendSwatch}
+                style={{ background: theme === "dark" ? darkColor : lightColor }}
+              />
+              <span className={styles.areaLegendLabel}>{label}</span>
+              <span className={styles.areaLegendValue}>{fmtKm2(values[key])}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -255,10 +237,11 @@ export function MillsClient({
   mills,
   rspoCertified,
   millCount,
-  riskDistribution,
+  totalArea,
+  totalForestArea,
+  totalForestLoss,
 }: Props) {
   const router = useRouter();
-  const { theme } = useTheme();
 
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(-1);
@@ -266,6 +249,7 @@ export function MillsClient({
 
   const [sortKey, setSortKey] = React.useState<SortKey>("label");
   const [sortDir, setSortDir] = React.useState<SortDir>("asc");
+  const [tableFilter, setTableFilter] = React.useState("");
   const [page, setPage] = React.useState(1);
 
   const q = query.trim().toLowerCase();
@@ -284,7 +268,7 @@ export function MillsClient({
 
   React.useEffect(() => {
     setPage(1);
-  }, [sortKey, sortDir]);
+  }, [sortKey, sortDir, tableFilter]);
 
   function handleSearchKeyDown(e: React.KeyboardEvent) {
     if (!showResults || searchResults.length === 0) {
@@ -322,15 +306,6 @@ export function MillsClient({
           const bv = b.rspo ? 1 : 0;
           return sortDir === "asc" ? av - bv : bv - av;
         }
-        if (sortKey === "riskScore") {
-          const nullFallback =
-            sortDir === "asc"
-              ? Number.POSITIVE_INFINITY
-              : Number.NEGATIVE_INFINITY;
-          const av = a.riskScore ?? nullFallback;
-          const bv = b.riskScore ?? nullFallback;
-          return sortDir === "asc" ? av - bv : bv - av;
-        }
         const av = (a[sortKey] as string) ?? "";
         const bv = (b[sortKey] as string) ?? "";
         return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
@@ -338,8 +313,22 @@ export function MillsClient({
     [mills, sortKey, sortDir]
   );
 
-  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
-  const pageRows = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const tf = tableFilter.trim().toLowerCase();
+  const filtered = React.useMemo(
+    () =>
+      tf
+        ? sorted.filter(
+            (m) =>
+              m.label.toLowerCase().includes(tf) ||
+              m.country.toLowerCase().includes(tf) ||
+              m.province.toLowerCase().includes(tf)
+          )
+        : sorted,
+    [sorted, tf]
+  );
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {
@@ -439,16 +428,33 @@ export function MillsClient({
           <RspoDonut certified={rspoCertified} total={millCount} />
         </div>
 
-        <RiskDistributionCard distribution={riskDistribution} />
+        <AreaBreakdownCard
+          totalArea={totalArea}
+          totalForestArea={totalForestArea}
+          totalForestLoss={totalForestLoss}
+        />
       </div>
 
       {/* Mill directory table */}
       <section>
         <div className={styles.tableHeader}>
-          <span className={styles.sectionTitle}>All mills</span>
-          <span className={styles.tableCount}>
-            {sorted.length.toLocaleString()} mills
-          </span>
+          <div className={styles.tableHeaderLeft}>
+            <span className={styles.sectionTitle}>All mills</span>
+            <span className={styles.tableCount}>
+              {filtered.length.toLocaleString()} mills
+            </span>
+          </div>
+          <div className={styles.tableFilterWrap}>
+            <IconSearch />
+            <input
+              aria-label="Filter mills"
+              className={styles.tableFilterInput}
+              onChange={(e) => setTableFilter(e.target.value)}
+              placeholder="Filter by name, country, province…"
+              type="search"
+              value={tableFilter}
+            />
+          </div>
         </div>
         <div className={styles.tableWrap}>
           <table className={styles.table}>
@@ -473,12 +479,12 @@ export function MillsClient({
                   </span>
                 </th>
                 <th
-                  className={`${styles.thScore} ${sortKey === "riskScore" ? styles.thActive : ""}`}
-                  onClick={() => handleSort("riskScore")}
+                  className={`${styles.thProvince} ${sortKey === "province" ? styles.thActive : ""}`}
+                  onClick={() => handleSort("province")}
                 >
                   <span className={styles.thInner}>
-                    Risk
-                    <SortIcon active={sortKey === "riskScore"} dir={sortDir} />
+                    Province
+                    <SortIcon active={sortKey === "province"} dir={sortDir} />
                   </span>
                 </th>
                 <th
@@ -511,16 +517,7 @@ export function MillsClient({
                       </Link>
                     </td>
                     <td className={styles.tdCountry}>{mill.country}</td>
-                    <td className={styles.tdScore}>
-                      {mill.riskScore !== null && (
-                        <span
-                          className={styles.riskDotCell}
-                          style={{
-                            background: scoreColor(mill.riskScore, theme),
-                          }}
-                        />
-                      )}
-                    </td>
+                    <td className={styles.tdProvince}>{mill.province}</td>
                     <td className={styles.tdRspo}>
                       {mill.rspo ? (
                         <span className={styles.rspoBadgeYes}>Yes</span>
