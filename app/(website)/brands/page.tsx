@@ -1,5 +1,8 @@
 import pageStyles from "@/components/page-layout.module.css";
-import { loadRankingBrands } from "@/lib/server/aggregates-data";
+import {
+  loadMillSummaryStats,
+  loadRankingBrands,
+} from "@/lib/server/aggregates-data";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
 import styles from "./brands.module.css";
@@ -7,41 +10,35 @@ import { BrandsClient } from "./brands-client";
 
 export const revalidate = 60;
 
-function scoreCategory(score: number): "red" | "amber" | "teal" {
-  if (score > 3.05) {
-    return "red";
-  }
-  if (score >= 2.85) {
-    return "amber";
-  }
-  return "teal";
-}
-
 export default async function Page() {
-  const [rankingBrands, landingPageContent] = await Promise.all([
-    loadRankingBrands(),
-    cmsClient.getLandingPageContent("brands"),
-  ]);
+  const [rankingBrands, millSummaryStats, landingPageContent] =
+    await Promise.all([
+      loadRankingBrands(),
+      loadMillSummaryStats(),
+      cmsClient.getLandingPageContent("brands"),
+    ]);
 
   const brands = rankingBrands ?? [];
-  const avgScore =
-    brands.length > 0
-      ? brands.reduce(
-          (sum, b) =>
-            sum +
-            (Number(
-              (b as { averageCurrentRisk?: unknown }).averageCurrentRisk
-            ) || 0),
-          0
-        ) / brands.length
-      : 0;
 
   const stats = [
     { label: "Brands tracked", value: String(brands.length) },
     {
-      label: "Avg deforestation score",
-      value: avgScore.toFixed(2),
-      dotCategory: scoreCategory(avgScore),
+      label: "Mills",
+      value: millSummaryStats?.millCount != null
+        ? millSummaryStats.millCount.toLocaleString()
+        : "—",
+    },
+    {
+      label: "Countries",
+      value: millSummaryStats?.countryCount != null
+        ? String(millSummaryStats.countryCount)
+        : "—",
+    },
+    {
+      label: "Mill owners",
+      value: millSummaryStats?.companyCount != null
+        ? millSummaryStats.companyCount.toLocaleString()
+        : "—",
     },
   ] as {
     label: string;

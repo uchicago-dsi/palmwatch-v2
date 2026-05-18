@@ -126,7 +126,7 @@
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 }
 
@@ -244,7 +244,7 @@
 
 .thScore {
   composes: th;
-  width: 160px;
+  width: 180px;
 }
 
 .thMills {
@@ -310,8 +310,12 @@
 }
 
 .tdScore {
-  width: 160px;
+  width: 180px;
   padding: 12px 16px;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.6);
+  text-align: right;
 }
 
 .scoreWrap {

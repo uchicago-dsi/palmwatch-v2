@@ -2,8 +2,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { ShowMoreButton } from "@/components/show-more-button";
-import { useShowMore } from "@/hooks/use-show-more";
 import styles from "./brands.module.css";
 
 type BrandRow = {
@@ -19,7 +17,7 @@ type StatCard = {
   value: string;
   dotCategory?: "red" | "amber" | "teal";
 };
-type SortKey = "overallScore" | "consumer_brand" | "millCount";
+type SortKey = "overallScore" | "consumer_brand" | "averagePastRisk";
 type SortDir = "asc" | "desc";
 
 interface Props {
@@ -108,12 +106,6 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
   );
 }
 
-const LEGEND = [
-  { label: "Lower risk", swatchClass: styles.swatchTeal },
-  { label: "Moderate", swatchClass: styles.swatchAmber },
-  { label: "Higher risk", swatchClass: styles.swatchRed },
-];
-
 export function BrandsClient({ brands, stats }: Props) {
   const [sortKey, setSortKey] = React.useState<SortKey>("overallScore");
   const [sortDir, setSortDir] = React.useState<SortDir>("desc");
@@ -152,13 +144,6 @@ export function BrandsClient({ brands, stats }: Props) {
     });
     return rows.map((r, i) => ({ ...r, rank: i + 1 }));
   }, [enriched, sortKey, sortDir]);
-
-  const {
-    visibleItems: visibleRows,
-    hiddenCount,
-    expanded,
-    toggle: toggleShowMore,
-  } = useShowMore(sorted);
 
   const router = useRouter();
 
@@ -227,7 +212,7 @@ export function BrandsClient({ brands, stats }: Props) {
                   onClick={() => handleSort("overallScore")}
                 >
                   <span className={styles.thInner}>
-                    Score
+                    Recent Deforestation Score
                     <SortIcon
                       active={sortKey === "overallScore"}
                       dir={sortDir}
@@ -235,19 +220,22 @@ export function BrandsClient({ brands, stats }: Props) {
                   </span>
                 </th>
                 <th
-                  className={`${styles.thMills} ${sortKey === "millCount" ? styles.thActive : ""}`}
-                  onClick={() => handleSort("millCount")}
+                  className={`${styles.thScore} ${sortKey === "averagePastRisk" ? styles.thActive : ""}`}
+                  onClick={() => handleSort("averagePastRisk")}
                 >
                   <span className={styles.thInner}>
-                    Mills
-                    <SortIcon active={sortKey === "millCount"} dir={sortDir} />
+                    Past Deforestation Score
+                    <SortIcon
+                      active={sortKey === "averagePastRisk"}
+                      dir={sortDir}
+                    />
                   </span>
                 </th>
                 <th className={styles.thArrow} />
               </tr>
             </thead>
             <tbody>
-              {visibleRows.map((row) => (
+              {sorted.map((row) => (
                 <tr
                   className={styles.tr}
                   key={row.consumer_brand}
@@ -264,22 +252,10 @@ export function BrandsClient({ brands, stats }: Props) {
                     </Link>
                   </td>
                   <td className={styles.tdScore}>
-                    <div className={styles.scoreWrap}>
-                      <div className={styles.scoreBarTrack}>
-                        <div
-                          className={`${styles.scoreBar} ${scoreColorClass(row.overallScore)}`}
-                          style={{
-                            width: `${Math.max(0, (row.overallScore / 5) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                      <span className={styles.scoreNum}>
-                        {row.overallScore.toFixed(2)}
-                      </span>
-                    </div>
+                    {row.overallScore.toFixed(2)}
                   </td>
-                  <td className={styles.tdMills}>
-                    {row.millCount.toLocaleString()}
+                  <td className={styles.tdScore}>
+                    {row.averagePastRisk.toFixed(2)}
                   </td>
                   <td className={styles.tdArrow}>
                     <svg
@@ -303,59 +279,9 @@ export function BrandsClient({ brands, stats }: Props) {
             </tbody>
           </table>
         </div>
-        <ShowMoreButton
-          expanded={expanded}
-          hiddenCount={hiddenCount}
-          onToggle={toggleShowMore}
-        />
-
-        {/* Legend */}
-        <div className={styles.legend}>
-          {LEGEND.map(({ label, swatchClass: sc }) => (
-            <div className={styles.legendItem} key={label}>
-              <span className={`${styles.legendSwatch} ${sc}`} />
-              <span className={styles.legendLabel}>{label}</span>
-            </div>
-          ))}
-        </div>
       </section>
 
-      {/* Browse all brands */}
-      <section>
-        <h2 className={styles.browseTitle}>Browse all brands</h2>
-        <div className={styles.browseGrid}>
-          {enriched
-            .slice()
-            .sort((a, b) => a.consumer_brand.localeCompare(b.consumer_brand))
-            .map((brand) => (
-              <Link
-                className={styles.browseCard}
-                href={brand.href}
-                key={brand.consumer_brand}
-              >
-                <span className={styles.browseCardName}>
-                  {brand.consumer_brand}
-                </span>
-                <svg
-                  aria-hidden
-                  className={styles.browseCardChevron}
-                  fill="none"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  width="16"
-                >
-                  <path
-                    d="M9 18l6-6-6-6"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.75"
-                  />
-                </svg>
-              </Link>
-            ))}
-        </div>
-      </section>
+
     </div>
   );
 }
