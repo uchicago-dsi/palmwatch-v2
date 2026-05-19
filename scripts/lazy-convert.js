@@ -1,4 +1,4 @@
-const fs = require("fs");
+const fs = require("node:fs");
 
 const old_data = [
   {
@@ -106,7 +106,7 @@ const old_data = [
   },
 ];
 
-old_data.forEach((company) => {
+for (const company of old_data) {
   const newData = {
     name: company.name,
     country: company.country,
@@ -122,4 +122,4 @@ old_data.forEach((company) => {
 \n  export const ${company.name}: BrandSchema = ${stringified}`;
 
   fs.writeFileSync(newFile, fileContents);
-});
+}

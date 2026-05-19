@@ -6,7 +6,6 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fullYearRangeColumns } from "../config/years";
-import type { SearchListPayload } from "../domain/search-list";
 import { stringifyForPrecompute } from "../lib/json-big-int";
 import { precomputedSlug } from "../lib/precomputed-slug";
 import queryClient from "../server/mill-data-query";
@@ -28,7 +27,7 @@ async function main() {
 
   await queryClient.init(DATA_DIR);
 
-  const searchList = queryClient.getSearchList() as SearchListPayload;
+  const searchList = queryClient.getSearchList();
   await writeJson("search-list.json", searchList);
 
   await writeJson(
@@ -72,7 +71,7 @@ async function main() {
     }
     umlSeen.add(id);
     const slug = precomputedSlug(id);
-    const info = queryClient.getUml(id).objects();
+    const info = queryClient.getUml(id)?.objects() ?? [];
     const brands = queryClient.getBrandUsageByUml(id);
     await writeJson(`mill/${slug}.json`, { brands, info });
   }

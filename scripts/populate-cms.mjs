@@ -1,7 +1,10 @@
-#!/bin/bash/zx
-// read cms_config.json
-// exported from nav bar search
-const config = await JSON.parse(await $`cat scripts/cms_config.json`);
+#!/usr/bin/env node
+import { readFileSync } from "node:fs";
+
+// read cms_config.json — exported from nav bar search
+const config = JSON.parse(
+  readFileSync(new URL("./cms_config.json", import.meta.url), "utf8")
+);
 const sanityToken = "";
 const sanityId = ""; // id
 const datasetName = "production";
@@ -35,12 +38,21 @@ const makeAndDoMutations = async (elements, type, prop) => {
       makeMutations(elements.slice(i, i + batchSize), type, prop)
     );
   }
-  // call each mutation
   for (const mutations of mutationCalls) {
-    await $`curl 'https://${sanityId}.api.sanity.io/v2021-06-07/data/mutate/${datasetName}' \
-    -H 'Authorization: Bearer ${sanityToken}' \
-    -H 'Content-Type: application/json' \
-    --data-binary ${JSON.stringify(mutations)}`;
+    const res = await fetch(
+      `https://${sanityId}.api.sanity.io/v2021-06-07/data/mutate/${datasetName}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${sanityToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(mutations),
+      }
+    );
+    if (!res.ok) {
+      throw new Error(`Sanity mutate failed: HTTP ${res.status}`);
+    }
   }
 };
 
