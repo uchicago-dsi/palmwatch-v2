@@ -1,11 +1,11 @@
 import type { TypedObject } from "sanity";
 
-export type BrandSchema = {
-  /*
-   * The name of the brand.
-   */
-  name: string;
+export interface BrandSchema {
   altName?: string;
+  content?: TypedObject | TypedObject[];
+  country: string;
+  description: string | React.ReactNode;
+  descriptionAttribution: string | React.ReactNode;
   /*
    * List of disclosure PDFs by year
    */
@@ -13,10 +13,10 @@ export type BrandSchema = {
     year: string;
     filename: string;
   }[];
-  description: string | React.ReactNode;
-  descriptionAttribution: string | React.ReactNode;
-  country: string;
-  rspoMemberSince: string;
   externalLink: string;
-  content?: TypedObject | TypedObject[];
-};
+  /*
+   * The name of the brand.
+   */
+  name: string;
+  rspoMemberSince: string;
+}

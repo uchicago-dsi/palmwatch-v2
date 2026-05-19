@@ -1,19 +1,19 @@
-import { ColgatePalmolive } from "./Colgate-Palmolive";
-import { Ferrero } from "./Ferrero";
-import { FrieslandCampina } from "./FrieslandCampina";
-import { GeneralMills } from "./GeneralMills";
-import { Hershey } from "./Hershey";
-import { JohnsonAndJohnson } from "./JohnsonAndJohnson";
-import { Kellogg } from "./Kellogg";
-import { LOreal } from "./LOreal";
-import { Mars } from "./Mars";
-import { Mondelez } from "./Mondelez";
-import { Nestle } from "./Nestle";
-import { PepsiCo } from "./PepsiCo";
-import { ProcterAndGamble } from "./ProctorAndGamble";
-import { ReckittBenckiser } from "./ReckittBenckiser";
+import { ColgatePalmolive } from "./colgate-palmolive";
+import { Ferrero } from "./ferrero";
+import { FrieslandCampina } from "./friesland-campina";
+import { GeneralMills } from "./general-mills";
+import { Hershey } from "./hershey";
+import { JohnsonAndJohnson } from "./johnson-and-johnson";
+import { Kellogg } from "./kellogg";
+import { LOreal } from "./l-oreal";
+import { Mars } from "./mars";
+import { Mondelez } from "./mondelez";
+import { Nestle } from "./nestle";
+import { PepsiCo } from "./pepsi-co";
+import { ProcterAndGamble } from "./proctor-and-gamble";
+import { ReckittBenckiser } from "./reckitt-benckiser";
 import type { BrandSchema } from "./types";
-import { Unilever } from "./Unilever";
+import { Unilever } from "./unilever";
 
 const brands: { [key: string]: BrandSchema } = {
   "Colgate-Palmolive": ColgatePalmolive,
