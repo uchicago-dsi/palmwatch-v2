@@ -95,6 +95,7 @@
 /* ── Map (full width) ────────────────────────────────────────────────────────── */
 
 .mapCard {
+  padding: 20px;
   overflow: hidden;
   background: hsl(var(--b1));
   border: 1px solid hsl(var(--bc) / 0.1);
@@ -104,12 +105,12 @@
 .mapFrame {
   position: relative;
   width: 100%;
-  height: 440px;
+  height: 60vh;
 }
 
 .mapPlaceholder {
   width: 100%;
-  height: 440px;
+  height: 60vh;
   background: hsl(var(--b2));
 }
 
@@ -294,17 +295,15 @@
 
 .matrixBrandLink {
   font-size: 0.875rem;
-  font-weight: 500;
   color: hsl(var(--bc));
-  text-decoration: none;
-  transition: color 100ms ease;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: hsl(var(--bc) / 0.3);
+  transition: text-decoration-color 100ms ease;
 }
 
 .matrixBrandLink:hover {
-  color: hsl(var(--bc) / 0.65);
-  text-decoration: underline;
-  text-decoration-color: hsl(var(--bc) / 0.3);
-  text-underline-offset: 2px;
+  text-decoration-color: hsl(var(--bc) / 0.7);
 }
 
 .matrixCell {
@@ -596,4 +595,61 @@
   padding: 0 2px;
   font-size: 0.75rem;
   color: hsl(var(--bc) / 0.3);
+}
+
+/* ── Chart tooltip ───────────────────────────────────────────────────────────── */
+
+.chartTooltip {
+  padding: 8px 10px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.12);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+}
+
+.chartTooltipYear {
+  margin: 0 0 5px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: hsl(var(--bc) / 0.5);
+}
+
+.chartTooltipRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.chartTooltipLabel {
+  flex: 1;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.6);
+}
+
+.chartTooltipValue {
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc));
+}
+
+/* ── Province show-all toggle ────────────────────────────────────────────────── */
+
+.provinceShowAllBtn {
+  padding: 0;
+  padding-left: 150px;
+  margin-top: 10px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.45);
+  cursor: pointer;
+  appearance: none;
+  background: transparent;
+  border: none;
+  transition: color 100ms ease;
+}
+
+.provinceShowAllBtn:hover {
+  color: hsl(var(--bc) / 0.75);
 }

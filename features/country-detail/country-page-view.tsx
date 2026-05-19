@@ -4,10 +4,10 @@ import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import {
   Area,
-  Bar,
   ComposedChart,
   Line,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
@@ -297,9 +297,32 @@ function CumulativeChart({ data }: { data: CumulativePoint[] }) {
 
 // ── Yearly chart ─────────────────────────────────────────────────────────────
 
+function YearlyTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { value: number }[];
+  label?: number;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  const val = payload[0]?.value ?? 0;
+  return (
+    <div className={styles.chartTooltip}>
+      <p className={styles.chartTooltipYear}>{label}</p>
+      <div className={styles.chartTooltipRow}>
+        <span className={styles.chartTooltipLabel}>Annual loss</span>
+        <span className={styles.chartTooltipValue}>{formatKm2(val)} km²</span>
+      </div>
+    </div>
+  );
+}
+
 function YearlyChart({ data }: { data: YearlyPoint[] }) {
   const { theme } = useTheme();
-  const barColor = theme === "dark" ? "#F09595" : "#E24B4A";
+  const lineColor = theme === "dark" ? "#F09595" : "#E24B4A";
+  const gradientId = "countryAnnualGrad";
 
   if (data.length === 0) {
     return <div className={styles.chartBody} />;
@@ -314,8 +337,14 @@ function YearlyChart({ data }: { data: YearlyPoint[] }) {
     <ResponsiveContainer height="100%" width="100%">
       <ComposedChart
         data={data}
-        margin={{ top: 8, right: 56, left: 4, bottom: 0 }}
+        margin={{ top: 8, right: 12, left: 4, bottom: 0 }}
       >
+        <defs>
+          <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor={lineColor} stopOpacity={0.15} />
+            <stop offset="100%" stopColor={lineColor} stopOpacity={0.02} />
+          </linearGradient>
+        </defs>
         <XAxis
           axisLine={{ stroke: "hsl(var(--bc) / 0.1)" }}
           dataKey="year"
@@ -333,12 +362,24 @@ function YearlyChart({ data }: { data: YearlyPoint[] }) {
           ticks={[0, Math.round(maxVal / 2), maxVal]}
           width={40}
         />
-        <Bar
+        <Tooltip
+          content={<YearlyTooltip />}
+          cursor={{ stroke: "hsl(var(--bc) / 0.15)", strokeWidth: 1 }}
+        />
+        <Area
           dataKey="annualKm2"
-          fill={barColor}
+          fill={`url(#${gradientId})`}
           isAnimationActive={false}
-          opacity={0.75}
-          radius={[2, 2, 0, 0]}
+          stroke="none"
+          type="monotone"
+        />
+        <Line
+          dataKey="annualKm2"
+          dot={false}
+          isAnimationActive={false}
+          stroke={lineColor}
+          strokeWidth={2}
+          type="monotone"
         />
       </ComposedChart>
     </ResponsiveContainer>
@@ -349,38 +390,37 @@ function YearlyChart({ data }: { data: YearlyPoint[] }) {
 
 type ProvinceRow = { name: string; loss: number };
 
+const PROVINCE_LIMIT = 10;
+
 function ProvinceChart({ mills }: { mills: UmlData[] }) {
-  const rows = useMemo<ProvinceRow[]>(() => {
+  const [showAll, setShowAll] = useState(false);
+
+  const allRows = useMemo<ProvinceRow[]>(() => {
     const map = new Map<string, number>();
     for (const mill of mills) {
       const prov = mill.Province?.trim();
-      if (!prov) {
-        continue;
-      }
+      if (!prov) continue;
       map.set(prov, (map.get(prov) ?? 0) + millTreelossSince2001(mill));
     }
     return [...map.entries()]
       .map(([name, loss]) => ({ name, loss }))
-      .sort((a, b) => b.loss - a.loss)
-      .slice(0, 10);
+      .sort((a, b) => b.loss - a.loss);
   }, [mills]);
 
-  if (rows.length < 3) {
-    return null;
-  }
+  if (allRows.length < 3) return null;
 
-  const maxLoss = rows[0].loss || 1;
+  const visibleRows = showAll ? allRows : allRows.slice(0, PROVINCE_LIMIT);
+  const maxLoss = allRows[0].loss || 1;
+  const hiddenCount = allRows.length - PROVINCE_LIMIT;
 
   return (
     <div className={styles.provinceCard}>
       <div className={styles.provinceTitleRow}>
         <p className={styles.provinceTitle}>Forest loss by province</p>
-        <span className={styles.provinceSub}>
-          km² lost since 2001 (top {rows.length})
-        </span>
+        <span className={styles.provinceSub}>km² lost since 2001</span>
       </div>
       <div className={styles.provinceList}>
-        {rows.map((row) => (
+        {visibleRows.map((row) => (
           <div className={styles.provinceRow} key={row.name}>
             <span className={styles.provinceName}>{row.name}</span>
             <div className={styles.provinceBarWrap}>
@@ -395,6 +435,15 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
           </div>
         ))}
       </div>
+      {allRows.length > PROVINCE_LIMIT && (
+        <button
+          className={styles.provinceShowAllBtn}
+          onClick={() => setShowAll((s) => !s)}
+          type="button"
+        >
+          {showAll ? "Show less" : `Show all ${allRows.length} provinces`}
+        </button>
+      )}
     </div>
   );
 }
@@ -522,15 +571,6 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                 </span>
               </th>
               <th
-                className={`${styles.thCountry} ${sortKey === "country" ? styles.thActive : ""}`}
-                onClick={() => handleSort("country")}
-              >
-                <span className={styles.thInner}>
-                  Country{" "}
-                  <SortIcon active={sortKey === "country"} dir={sortDir} />
-                </span>
-              </th>
-              <th
                 className={`${styles.thProv} ${sortKey === "province" ? styles.thActive : ""}`}
                 onClick={() => handleSort("province")}
               >
@@ -595,7 +635,6 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                         </span>
                       )}
                     </td>
-                    <td className={styles.tdCountry}>{mill.Country}</td>
                     <td className={styles.tdProv}>{mill.Province}</td>
                     <td className={styles.tdDist}>{mill.District}</td>
                     <td className={styles.tdParent}>
@@ -623,7 +662,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
               })
             ) : (
               <tr>
-                <td className={styles.noResults} colSpan={7}>
+                <td className={styles.noResults} colSpan={6}>
                   No mills match &ldquo;{q}&rdquo;
                 </td>
               </tr>
@@ -778,6 +817,9 @@ export function CountryPageView({
 
       {/* Map full width */}
       <div className={styles.mapCard}>
+        <p className={styles.chartTitle}>
+          Mill deforestation map: Forest loss in km²
+        </p>
         <div className={styles.mapFrame}>
           <QueryProvider>
             <PalmwatchMapDynamic
