@@ -421,12 +421,12 @@
 }
 
 .chartTooltip {
+  min-width: 140px;
   padding: 8px 10px;
   background: hsl(var(--b1));
   border: 1px solid hsl(var(--bc) / 0.12);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 140px;
 }
 
 .chartTooltipYear {

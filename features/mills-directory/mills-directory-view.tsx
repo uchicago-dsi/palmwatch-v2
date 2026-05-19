@@ -17,8 +17,8 @@ import type { ForestLossYearPoint } from "@/domain/schemas/aggregates";
 import type {
   ForestLossQuartilePoint,
   MillDirEntry,
-} from "@/lib/server/mill-directory-data";
-import styles from "./mills.module.css";
+} from "@/server/mill-directory-data";
+import styles from "./mills-directory.module.css";
 
 type SortKey = "label" | "country" | "province" | "rspo";
 type SortDir = "asc" | "desc";
@@ -26,19 +26,22 @@ type SortDir = "asc" | "desc";
 const PAGE_SIZE = 20;
 
 interface Props {
-  millCount: number;
   countryCount: number;
+  disclaimer?: React.ReactNode;
+  forestLossByYear?: ForestLossYearPoint[];
+  forestLossQuartiles?: ForestLossQuartilePoint[];
+  millCount: number;
   mills: MillDirEntry[];
   rspoCertified: number;
   totalArea: number;
   totalForestArea: number;
   totalForestLoss: number;
-  forestLossByYear?: ForestLossYearPoint[];
-  forestLossQuartiles?: ForestLossQuartilePoint[];
 }
 
 function medianOf(arr: number[]): number {
-  if (arr.length === 0) return 0;
+  if (arr.length === 0) {
+    return 0;
+  }
   const sorted = [...arr].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 0
@@ -351,9 +354,15 @@ function AreaBreakdownCard({
 }
 
 function fmtKm2Axis(v: number): string {
-  if (v === 0) return "0";
-  if (v >= 1000) return `${(v / 1000).toFixed(1)}k`;
-  if (v >= 1) return v.toFixed(1);
+  if (v === 0) {
+    return "0";
+  }
+  if (v >= 1000) {
+    return `${(v / 1000).toFixed(1)}k`;
+  }
+  if (v >= 1) {
+    return v.toFixed(1);
+  }
   return v.toFixed(2);
 }
 
@@ -366,7 +375,9 @@ function QuartileTooltip({
   payload?: { value: number; name: string }[];
   label?: number;
 }) {
-  if (!active || !payload || payload.length === 0) return null;
+  if (!(active && payload) || payload.length === 0) {
+    return null;
+  }
   const q1 = payload.find((p) => p.name === "q1")?.value ?? 0;
   const band = payload.find((p) => p.name === "band")?.value ?? 0;
   const median = payload.find((p) => p.name === "median")?.value;
@@ -377,7 +388,9 @@ function QuartileTooltip({
       {median !== undefined && (
         <div className={styles.chartTooltipRow}>
           <span className={styles.chartTooltipLabel}>Median</span>
-          <span className={styles.chartTooltipValue}>{median.toFixed(3)} km²</span>
+          <span className={styles.chartTooltipValue}>
+            {median.toFixed(3)} km²
+          </span>
         </div>
       )}
       <div className={styles.chartTooltipRow}>
@@ -505,6 +518,7 @@ export function MillsClient({
   totalForestLoss,
   forestLossByYear,
   forestLossQuartiles,
+  disclaimer,
 }: Props) {
   const router = useRouter();
 
@@ -712,13 +726,13 @@ export function MillsClient({
             <div className={styles.statCard}>
               <span className={styles.statLabel}>Forest loss per year</span>
               <span className={styles.statValue}>
-                {medianLoss !== null ? fmtKm2(medianLoss) : "—"}
+                {medianLoss === null ? "—" : fmtKm2(medianLoss)}
               </span>
             </div>
             <div className={styles.statCard}>
               <span className={styles.statLabel}>Percent forest lost</span>
               <span className={styles.statValue}>
-                {pctLost !== null ? `${pctLost.toFixed(1)}%` : "—"}
+                {pctLost === null ? "—" : `${pctLost.toFixed(1)}%`}
               </span>
             </div>
           </div>
@@ -889,6 +903,9 @@ export function MillsClient({
           )}
         </div>
       </section>
+      {disclaimer == null ? null : (
+        <div className={styles.disclaimer}>{disclaimer}</div>
+      )}
     </div>
   );
 }
