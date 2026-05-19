@@ -33,33 +33,33 @@ export const forestLossColorBreaks = [
 
 export const cumulativeLossColorBreaks = [
   {
-    value: 2,
+    value: 60,
     color: [255, 255, 178],
-    label: "0 - 2km²",
+    label: "0 – 60 km²",
     tooltip: "",
   },
   {
-    value: 10,
+    value: 150,
     color: [254, 204, 92],
-    label: "2 - 10km²",
+    label: "60 – 150 km²",
     tooltip: "",
   },
   {
-    value: 30,
+    value: 350,
     color: [253, 141, 60],
-    label: "10 - 30km²",
+    label: "150 – 350 km²",
     tooltip: "",
   },
   {
-    value: 75,
+    value: 700,
     color: [240, 59, 32],
-    label: "30 - 75km²",
+    label: "350 – 700 km²",
     tooltip: "",
   },
   {
     value: 10 ** 12,
     color: [189, 0, 38],
-    label: "> 75km²",
+    label: "> 700 km²",
     tooltip: "",
   },
 ];

@@ -1,7 +1,7 @@
 import path from "node:path";
 import { all, desc, escape, loadArrow, op } from "arquero";
 import type ColumnTable from "arquero/dist/types/table/column-table";
-import { fullYearRangeColumns, minYear } from "@/config/years";
+import { fullYearRangeColumns, maxYear } from "@/config/years";
 import type { CompanyData, UmlData } from "@/domain";
 import { buildTreelossRollups } from "./treeloss-rollups.generated";
 
@@ -523,42 +523,34 @@ class MillDataQuery {
 
   @cache("countrySummaryStats")
   getCountriesSummary() {
-    const preMinYearColumns = Array.from(
-      { length: minYear - 2001 },
+    const allYearColumns = Array.from(
+      { length: maxYear - 2001 + 1 },
       (_, i) => `treeloss_km_${2001 + i}`
     );
 
     const countryStats = this.uml!.derive({
-      _treelossMinToMax: escape((d: any) =>
-        fullYearRangeColumns.reduce(
+      _treeloss2001ToMax: escape((d: any) =>
+        allYearColumns.reduce(
           (s: number, col: string) => s + (Number(d[col]) || 0),
           0
         )
       ),
-      _forestAreaAtMinYear: escape((d: any) => {
-        const preLoss = preMinYearColumns.reduce(
-          (s: number, col: string) => s + (Number(d[col]) || 0),
-          0
-        );
-        return Math.max(0, (Number(d.km_forest_area_00) || 0) - preLoss);
-      }),
     })
       .groupby("Country")
       .rollup({
         count: () => op.count(),
         totalForestLoss: (d: any) =>
-          op.round(op.sum(d._treelossMinToMax) * 100) / 100,
+          op.round(op.sum(d._treeloss2001ToMax) * 100) / 100,
         totalArea: (d: UmlData) =>
           op.round(op.sum(d.km_area as any) * 100) / 100,
-        totalForestArea: (d: any) =>
-          op.round(op.sum(d._forestAreaAtMinYear) * 100) / 100,
+        totalForestArea: (d: UmlData) =>
+          op.round(op.sum(d.km_forest_area_00 as any) * 100) / 100,
         pctForestLoss: (d: any) =>
           op.round(
-            (op.sum(d._treelossMinToMax) / op.sum(d._forestAreaAtMinYear)) *
-              1000
+            (op.sum(d._treeloss2001ToMax) / op.sum(d.km_forest_area_00)) * 1000
           ) / 10,
         pctForestLossString: (d: any) =>
-          `${op.round((op.sum(d._treelossMinToMax) / op.sum(d._forestAreaAtMinYear)) * 1000) / 10} %`,
+          `${op.round((op.sum(d._treeloss2001ToMax) / op.sum(d.km_forest_area_00)) * 1000) / 10} %`,
         currentRisk: (d: UmlData) =>
           op.round(op.mean(d.risk_score_current) * 100) / 100,
         futureRisk: (d: UmlData) =>

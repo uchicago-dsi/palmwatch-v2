@@ -20,11 +20,12 @@ const fullYearRangeColumns = fullYearRange.map((y) => `treeloss_km_${y}`);
 const latestTreelossKmColumn = `treeloss_km_${maxYear}`;
 
 /** Start year for cumulative deforestation layer. */
-const CUMULATIVE_LOSS_START_YEAR = 2017;
+const CUMULATIVE_LOSS_START_YEAR = 2001;
 
-/** Year range used to compute the cumulative deforestation column. */
-const cumulativeYearRange = yearRange.filter(
-  (y) => y >= CUMULATIVE_LOSS_START_YEAR
+/** Year range used to compute the cumulative deforestation column (2001–maxYear). */
+const cumulativeYearRange = Array.from(
+  { length: maxYear - CUMULATIVE_LOSS_START_YEAR + 1 },
+  (_, i) => CUMULATIVE_LOSS_START_YEAR + i
 );
 
 /** Synthetic column key added to each row at runtime (not in raw data). */
