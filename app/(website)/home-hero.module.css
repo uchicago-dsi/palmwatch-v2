@@ -1,3 +1,96 @@
+.hero {
+  position: relative;
+  width: 100%;
+  height: 90vh;
+  height: 90dvh;
+  overflow: hidden;
+  background: hsl(var(--b1));
+}
+
+.heroVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.22) 45%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  color: hsl(var(--bc));
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 3.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.heroSubtitle {
+  margin: 0;
+  font-size: 1.875rem;
+  line-height: 1.3;
+}
+
+.heroCredit {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 0.25rem;
+  z-index: 2;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.45);
+  transform: translateX(48%) translateY(-22.5vh) rotate(90deg);
+}
+
+:global([data-theme="dark"]) .hero {
+  background: #0f1419;
+}
+
+:global([data-theme="dark"]) .heroVideo {
+  opacity: 0.95;
+}
+
+:global([data-theme="dark"]) .heroOverlay {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.28) 50%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+
+:global([data-theme="dark"]) .heroContent {
+  color: #fff;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.65);
+}
+
+:global([data-theme="dark"]) .heroCredit {
+  color: rgba(255, 255, 255, 0.5);
+}
+
 /**
  * Home hero CTA — accent fill + white label (matches `--site-nav-accent`).
  */

@@ -104,6 +104,18 @@
   text-underline-offset: 2px;
 }
 
+.featureCtaGroup {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.featureCtaSep {
+  font-size: 0.875rem;
+  color: hsl(var(--bc) / 0.25);
+}
+
 /* Map heading + instructions — width follows pageInner */
 .mapSectionIntro {
   box-sizing: border-box;

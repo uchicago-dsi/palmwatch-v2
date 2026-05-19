@@ -9,19 +9,20 @@ import landingStyles from "./home-landing.module.css";
 export default async function Home() {
   return (
     <main className="flex h-auto w-full flex-col">
-      <section className="relative h-[100vh] w-full overflow-hidden bg-black">
+      <section className={heroStyles.hero}>
         <video
           autoPlay
-          className="absolute top-0 left-0 h-full w-full object-cover opacity-25"
+          className={heroStyles.heroVideo}
           loop
           muted
           playsInline
         >
           <source src="cover-video.mp4" type="video/mp4" />
         </video>
-        <div className="relative z-[0] flex h-full flex-col items-center justify-center p-4 text-center text-white">
-          <h1 className="font-bold text-6xl">PalmWatch</h1>
-          <h2 className="text-3xl">
+        <div aria-hidden className={heroStyles.heroOverlay} />
+        <div className={heroStyles.heroContent}>
+          <h1 className={heroStyles.heroTitle}>PalmWatch</h1>
+          <h2 className={heroStyles.heroSubtitle}>
             Explore the impact of palm oil production on deforestation
           </h2>
           <div className="mt-10 flex justify-center">
@@ -34,7 +35,7 @@ export default async function Home() {
           </div>
         </div>
         <a
-          className="absolute right-1 bottom-1 z-[1] translate-x-[48%] translate-y-[-25vh] rotate-90 text-white/50 text-xs"
+          className={heroStyles.heroCredit}
           href="https://www.youtube.com/watch?v=YKJcN81mZgA"
           rel="noopener noreferrer"
           target="_blank"
@@ -119,26 +120,31 @@ export default async function Home() {
                 </div>
                 <h3>Explore Supply Chains</h3>
                 <p>
-                  See the linkages between brands, parent companies, company
-                  groups, and country-level impacts.
+                  Browse the full mill directory or dive into parent companies
+                  and corporate groups to trace supply chain relationships.
                 </p>
-                <Link className={landingStyles.featureCta} href="/groups">
-                  Explore mill groups
-                </Link>
+                <div className={landingStyles.featureCtaGroup}>
+                  <Link className={landingStyles.featureCta} href="/mills">
+                    Browse mills
+                  </Link>
+                  <span className={landingStyles.featureCtaSep}>·</span>
+                  <Link className={landingStyles.featureCta} href="/companies">
+                    View companies
+                  </Link>
+                </div>
               </article>
 
               <article className={landingStyles.featureCard}>
                 <div className={landingStyles.featureIconWrap}>
                   <IconList className={landingStyles.featureIcon} />
                 </div>
-                <h3>Explore Mills</h3>
+                <h3>Explore by Country</h3>
                 <p>
-                  See overview statistics across the mill directory—search mills
-                  and open detail pages for sourcing areas, certifications,
-                  forest metrics, risks, and linked brands.
+                  Compare deforestation trends, mill counts, and forest loss
+                  across palm oil producing countries.
                 </p>
-                <Link className={landingStyles.featureCta} href="/mills">
-                  Browse mills
+                <Link className={landingStyles.featureCta} href="/countries">
+                  Browse countries
                 </Link>
               </article>
             </div>
@@ -159,7 +165,7 @@ export default async function Home() {
               <p>
                 This map shows palm oil mill catchment areas and the tree cover
                 loss within them. Colors indicate cumulative forest loss since
-                2017. Click on any mill area to open its detail page.
+                2001. Click on any mill area to open its detail page.
               </p>
               <p>
                 Use the layer control to switch between years of tree loss data
