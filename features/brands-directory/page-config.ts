@@ -5,7 +5,7 @@ export const getStatConfig = (
   companyCount: number | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
-  const stats = [];
+  const stats: Array<{ title: string; stat: string; className: string }> = [];
   if (brandCount !== null) {
     stats.push({
       title: "Brands",

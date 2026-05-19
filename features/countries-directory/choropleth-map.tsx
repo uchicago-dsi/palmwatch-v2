@@ -8,7 +8,7 @@ import type { CountryRow } from "./countries-directory-view";
 
 export type IsoMap = Record<string, CountryRow>;
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 const SATELLITE_STYLE = "mapbox://styles/mapbox/satellite-streets-v12";
 
 const MAP_LEGEND = [
@@ -52,7 +52,13 @@ function applyBrightness(map: mapboxgl.Map, theme: "light" | "dark") {
 
 function IconLayersOn() {
   return (
-    <svg fill="none" height="15" viewBox="0 0 24 24" width="15">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="15"
+      viewBox="0 0 24 24"
+      width="15"
+    >
       <polygon
         points="12 2 2 7 12 12 22 7 12 2"
         stroke="currentColor"
@@ -80,7 +86,13 @@ function IconLayersOn() {
 
 function IconLayersOff() {
   return (
-    <svg fill="none" height="15" viewBox="0 0 24 24" width="15">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="15"
+      viewBox="0 0 24 24"
+      width="15"
+    >
       <polygon
         points="12 2 2 7 12 12 22 7 12 2"
         stroke="currentColor"
@@ -177,6 +189,7 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
       offset: 12,
     });
 
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: map layer setup on load
     map.on("load", async () => {
       applyBrightness(map, themeRef.current);
 

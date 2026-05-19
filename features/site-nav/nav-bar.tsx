@@ -10,6 +10,7 @@ import { NavSearch } from "./nav-search";
 function IconSun(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
+      aria-hidden="true"
       fill="none"
       height="16"
       viewBox="0 0 24 24"
@@ -31,6 +32,7 @@ function IconSun(props: React.SVGProps<SVGSVGElement>) {
 function IconMoon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
+      aria-hidden="true"
       fill="none"
       height="16"
       viewBox="0 0 24 24"
@@ -74,7 +76,7 @@ export const NavBar: React.FC = () => {
 
   React.useEffect(() => {
     setMenuOpen(false);
-  }, [pathname]);
+  }, []);
 
   React.useEffect(() => {
     if (!menuOpen) {
@@ -107,7 +109,7 @@ export const NavBar: React.FC = () => {
                 type="button"
               >
                 <svg
-                  aria-hidden
+                  aria-hidden="true"
                   fill="none"
                   height="20"
                   stroke="currentColor"
@@ -134,9 +136,9 @@ export const NavBar: React.FC = () => {
                   type="button"
                 >
                   {theme === "dark" ? (
-                    <IconMoon aria-hidden />
+                    <IconMoon aria-hidden="true" />
                   ) : (
-                    <IconSun aria-hidden />
+                    <IconSun aria-hidden="true" />
                   )}
                 </button>
               </nav>
@@ -169,7 +171,7 @@ export const NavBar: React.FC = () => {
 
       {menuOpen && (
         <div
-          aria-hidden
+          aria-hidden="true"
           className={styles.mobileBackdrop}
           onClick={() => setMenuOpen(false)}
         />
@@ -186,7 +188,7 @@ export const NavBar: React.FC = () => {
           type="button"
         >
           <svg
-            aria-hidden
+            aria-hidden="true"
             fill="none"
             height="18"
             stroke="currentColor"
@@ -230,9 +232,9 @@ export const NavBar: React.FC = () => {
               type="button"
             >
               {theme === "dark" ? (
-                <IconMoon aria-hidden />
+                <IconMoon aria-hidden="true" />
               ) : (
-                <IconSun aria-hidden />
+                <IconSun aria-hidden="true" />
               )}
             </button>
           </div>

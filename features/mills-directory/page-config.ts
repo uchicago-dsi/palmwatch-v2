@@ -5,7 +5,7 @@ export const basicStatsConfig = (
   companyCount: number | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
-  const stats = [];
+  const stats: Array<{ title: string; stat: string; className: string }> = [];
   if (brandCount !== null) {
     stats.push({
       title: "Brands",
@@ -43,7 +43,7 @@ export const forestStatsConfig = (
   totalArea: number | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
-  const stats = [];
+  const stats: Array<{ title: string; stat: string; className: string }> = [];
   if (totalArea !== null) {
     stats.push({
       title: "Total Area Within Mill Catchments (km2)",
@@ -66,10 +66,9 @@ export const forestStatsConfig = (
       if (totalForestArea !== null) {
         stats.push({
           title: "Percent Forest Loss",
-          stat:
-            formatter.format(
-              ((totalArea - totalForestArea) / totalForestArea) * 100
-            ) + "%",
+          stat: `${formatter.format(
+            ((totalArea - totalForestArea) / totalForestArea) * 100
+          )}%`,
           className: "",
         });
       }
@@ -83,7 +82,7 @@ export const rspoStatsConfig = (
   notRspoCertified: number | null
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
-  const stats = [];
+  const stats: Array<{ title: string; stat: string; className: string }> = [];
   if (rspoCertified !== null) {
     stats.push({
       title: "RSPO Certified",

@@ -2,27 +2,32 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
+import type { RankingBrandRow } from "@/domain/schemas/aggregates";
 import styles from "./brands-directory.module.css";
 
-type BrandRow = {
-  consumer_brand: string;
-  averageCurrentRisk: number;
-  averageFutureRisk: number;
-  averagePastRisk: number;
-  millCount: number;
-};
+type BrandRow = RankingBrandRow;
 
-type StatCard = {
+interface StatCard {
+  dotCategory?: "red" | "amber" | "teal";
   label: string;
   value: string;
-  dotCategory?: "red" | "amber" | "teal";
-};
+}
 type SortKey =
   | "overallScore"
   | "consumer_brand"
   | "averagePastRisk"
   | "millCount";
 type SortDir = "asc" | "desc";
+
+function scoreDotClass(category: StatCard["dotCategory"]): string {
+  if (category === "red") {
+    return styles.scoreDotRed;
+  }
+  if (category === "amber") {
+    return styles.scoreDotAmber;
+  }
+  return styles.scoreDotTeal;
+}
 
 interface Props {
   brands: BrandRow[];
@@ -34,7 +39,7 @@ function computeOverall(b: BrandRow) {
   return b.averageCurrentRisk;
 }
 
-function scoreColorClass(score: number) {
+function _scoreColorClass(score: number) {
   if (score < 2.85) {
     return styles.barTeal;
   }
@@ -44,7 +49,7 @@ function scoreColorClass(score: number) {
   return styles.barRed;
 }
 
-function swatchClass(score: number) {
+function _swatchClass(score: number) {
   if (score < 2.85) {
     return styles.swatchTeal;
   }
@@ -56,7 +61,13 @@ function swatchClass(score: number) {
 
 function IconSortBoth() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4-4 4 4M16 15l-4 4-4-4"
         stroke="currentColor"
@@ -70,7 +81,13 @@ function IconSortBoth() {
 
 function IconSortUp() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 15l4-4 4 4"
         stroke="currentColor"
@@ -84,7 +101,13 @@ function IconSortUp() {
 
 function IconSortDown() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4 4 4-4"
         stroke="currentColor"
@@ -176,13 +199,7 @@ export function BrandsClient({ brands, stats, disclaimer }: Props) {
             {s.dotCategory ? (
               <div className={styles.statValueRow}>
                 <span
-                  className={`${styles.scoreDot} ${
-                    s.dotCategory === "red"
-                      ? styles.scoreDotRed
-                      : s.dotCategory === "amber"
-                        ? styles.scoreDotAmber
-                        : styles.scoreDotTeal
-                  }`}
+                  className={`${styles.scoreDot} ${scoreDotClass(s.dotCategory)}`}
                 />
                 <span className={styles.statValue}>{s.value}</span>
               </div>
@@ -276,7 +293,7 @@ export function BrandsClient({ brands, stats, disclaimer }: Props) {
                   </td>
                   <td className={styles.tdArrow}>
                     <svg
-                      aria-hidden
+                      aria-hidden="true"
                       fill="none"
                       height="14"
                       viewBox="0 0 24 24"

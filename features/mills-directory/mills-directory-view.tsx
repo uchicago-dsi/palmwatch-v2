@@ -52,7 +52,7 @@ function medianOf(arr: number[]): number {
 function IconSearch() {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={styles.searchIcon}
       fill="none"
       height="18"
@@ -72,7 +72,13 @@ function IconSearch() {
 
 function IconSortBoth() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4-4 4 4M16 15l-4 4-4-4"
         stroke="currentColor"
@@ -86,7 +92,13 @@ function IconSortBoth() {
 
 function IconSortUp() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 15l4-4 4 4"
         stroke="currentColor"
@@ -100,7 +112,13 @@ function IconSortUp() {
 
 function IconSortDown() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4 4 4-4"
         stroke="currentColor"
@@ -140,6 +158,7 @@ function RspoDonut({ certified, total }: { certified: number; total: number }) {
   return (
     <div className={styles.rspoDonutLayout}>
       <svg
+        aria-hidden="true"
         className={styles.rspoDonutSvg}
         height="90"
         viewBox="0 0 90 90"
@@ -225,7 +244,9 @@ function RiskDistribution({ mills }: { mills: MillDirEntry[] }) {
     const withScore = mills.filter((m) => m.riskScore !== null);
     const total = withScore.length;
     return RISK_TIERS.map((tier) => {
-      const count = withScore.filter((m) => tier.test(m.riskScore!)).length;
+      const count = withScore.filter(
+        (m) => m.riskScore !== null && tier.test(m.riskScore)
+      ).length;
       const pct = total > 0 ? Math.round((count / total) * 100) : 0;
       return { ...tier, count, pct };
     });
@@ -427,7 +448,7 @@ function ForestLossQuartileChart({
 
   const maxVal = Math.max(...data.map((d) => d.q3), 0.01);
   const firstYear = data[0]?.year ?? 2001;
-  const lastYear = data[data.length - 1]?.year ?? 2025;
+  const lastYear = data.at(-1)?.year ?? 2025;
   const midYear = Math.round((firstYear + lastYear) / 2);
   const yMax = maxVal * 1.15;
   const yMid = Number.parseFloat((yMax / 2).toFixed(2));
@@ -543,11 +564,11 @@ export function MillsClient({
 
   React.useEffect(() => {
     setActiveIdx(-1);
-  }, [q]);
+  }, []);
 
   React.useEffect(() => {
     setPage(1);
-  }, [sortKey, sortDir, tableFilter]);
+  }, []);
 
   function handleSearchKeyDown(e: React.KeyboardEvent) {
     if (!showResults || searchResults.length === 0) {
@@ -674,7 +695,7 @@ export function MillsClient({
                     {mill.country}
                   </span>
                   <svg
-                    aria-hidden
+                    aria-hidden="true"
                     className={styles.searchResultChevron}
                     fill="none"
                     height="14"
@@ -852,7 +873,7 @@ export function MillsClient({
                     </td>
                     <td className={styles.tdArrow}>
                       <svg
-                        aria-hidden
+                        aria-hidden="true"
                         fill="none"
                         height="14"
                         viewBox="0 0 24 24"

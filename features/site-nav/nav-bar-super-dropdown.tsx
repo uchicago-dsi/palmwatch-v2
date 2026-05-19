@@ -34,7 +34,7 @@ export const NavBarSuperDropdown: React.FC<NavBarSuperDropdownProps> = ({
       >
         <span className={styles.navMenuTriggerLabel}>{label}</span>
         <svg
-          aria-hidden
+          aria-hidden="true"
           className={`${styles.navMenuChevron} ${isActive ? styles.navMenuChevronOpen : ""}`}
           fill="none"
           height="10"

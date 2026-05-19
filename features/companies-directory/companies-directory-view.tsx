@@ -9,7 +9,10 @@ export type CompanyEntry =
   | { label: string; type: "group"; href: string }
   | { label: string; type: "both"; ownerHref: string; groupHref: string };
 
-type StatCard = { label: string; value: string };
+interface StatCard {
+  label: string;
+  value: string;
+}
 type SortKey = "label" | "type";
 type SortDir = "asc" | "desc";
 type FilterType = "all" | "owner" | "group";
@@ -17,6 +20,16 @@ type FilterType = "all" | "owner" | "group";
 const PAGE_SIZE = 20;
 
 const TYPE_ORDER = { owner: 0, both: 1, group: 1 } as const;
+
+function companyTypeLabel(type: CompanyEntry["type"]): string {
+  if (type === "owner") {
+    return "Mill owner";
+  }
+  if (type === "group") {
+    return "Corporate group";
+  }
+  return "Mill owner · Group";
+}
 
 interface Props {
   companies: CompanyEntry[];
@@ -55,7 +68,7 @@ function getSearchHref(company: CompanyEntry): string {
 function IconSearch() {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={styles.searchIcon}
       fill="none"
       height="18"
@@ -75,7 +88,13 @@ function IconSearch() {
 
 function IconSortBoth() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4-4 4 4M16 15l-4 4-4-4"
         stroke="currentColor"
@@ -89,7 +108,13 @@ function IconSortBoth() {
 
 function IconSortUp() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 15l4-4 4 4"
         stroke="currentColor"
@@ -103,7 +128,13 @@ function IconSortUp() {
 
 function IconSortDown() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4 4 4-4"
         stroke="currentColor"
@@ -180,11 +211,11 @@ export function CompaniesClient({ companies, stats }: Props) {
 
   React.useEffect(() => {
     setActiveIdx(-1);
-  }, [q]);
+  }, []);
 
   React.useEffect(() => {
     setPage(1);
-  }, [filter, tableFilter, sortKey, sortDir]);
+  }, []);
 
   React.useEffect(() => {
     if (activeIdx < 0 || !resultsRef.current) {
@@ -308,14 +339,10 @@ export function CompaniesClient({ companies, stats }: Props) {
                 >
                   <span>{company.label}</span>
                   <span className={styles.searchResultMeta}>
-                    {company.type === "owner"
-                      ? "Mill owner"
-                      : company.type === "group"
-                        ? "Corporate group"
-                        : "Mill owner · Group"}
+                    {companyTypeLabel(company.type)}
                   </span>
                   <svg
-                    aria-hidden
+                    aria-hidden="true"
                     className={styles.searchResultChevron}
                     fill="none"
                     height="14"
@@ -486,7 +513,7 @@ export function CompaniesClient({ companies, stats }: Props) {
                       </td>
                       <td className={styles.tdArrow}>
                         <svg
-                          aria-hidden
+                          aria-hidden="true"
                           fill="none"
                           height="14"
                           viewBox="0 0 24 24"
@@ -526,7 +553,10 @@ export function CompaniesClient({ companies, stats }: Props) {
               </button>
               {pageNumbers.map((n, i) =>
                 n === "..." ? (
-                  <span className={styles.pageEllipsis} key={`ellipsis-${i}`}>
+                  <span
+                    className={styles.pageEllipsis}
+                    key={`ellipsis-${String(pageNumbers[i - 1])}-${String(pageNumbers[i + 1])}`}
+                  >
                     …
                   </span>
                 ) : (

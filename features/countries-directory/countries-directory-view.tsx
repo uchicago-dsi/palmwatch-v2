@@ -12,19 +12,23 @@ const ChoroplethMap = dynamic(() => import("./choropleth-map"), {
   loading: () => <div className={styles.mapPlaceholder} />,
 });
 
-export type CountryRow = {
-  name: string;
-  href: string;
-  isoCode: string; // ISO 3166-1 numeric as string, e.g. "360"
+export interface CountryRow {
   count: number;
-  pctForestLoss: number;
-  score: number;
-  pastRisk: number;
   currentRisk: number;
   futureRisk: number;
-};
+  href: string;
+  isoCode: string; // ISO 3166-1 numeric as string, e.g. "360"
+  name: string;
+  pastRisk: number;
+  pctForestLoss: number;
+  score: number;
+}
 
-type StatCard = { label: string; value: string; text?: boolean };
+interface StatCard {
+  label: string;
+  text?: boolean;
+  value: string;
+}
 type SortKey =
   | "name"
   | "count"
@@ -41,7 +45,13 @@ interface Props {
 
 function IconSortBoth() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4-4 4 4M16 15l-4 4-4-4"
         stroke="currentColor"
@@ -55,7 +65,13 @@ function IconSortBoth() {
 
 function IconSortUp() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 15l4-4 4 4"
         stroke="currentColor"
@@ -69,7 +85,13 @@ function IconSortUp() {
 
 function IconSortDown() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4 4 4-4"
         stroke="currentColor"
@@ -282,7 +304,7 @@ export function CountriesClient({ rows, stats }: Props) {
                       </td>
                       <td className={styles.tdArrow}>
                         <svg
-                          aria-hidden
+                          aria-hidden="true"
                           fill="none"
                           height="14"
                           viewBox="0 0 24 24"

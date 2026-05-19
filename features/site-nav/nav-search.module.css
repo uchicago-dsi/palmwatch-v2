@@ -131,16 +131,16 @@
   transition: background 100ms ease;
 }
 
+.resultItem:hover,
+.resultActive {
+  background: #f4f4f5;
+}
+
 /* Override utility bar link color (#fff) for dropdown rows */
 .results .resultItem,
 .results .resultItem:visited,
 .results .resultItem:hover {
   color: #111;
-}
-
-.resultItem:hover,
-.resultActive {
-  background: #f4f4f5;
 }
 
 .resultLabel {

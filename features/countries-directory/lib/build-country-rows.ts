@@ -49,16 +49,16 @@ export function fmtKm2(v: number): string {
   return `${Math.round(v).toLocaleString()} km²`;
 }
 
-export type CountryDirectoryStat = {
+export interface CountryDirectoryStat {
   label: string;
-  value: string;
   text?: boolean;
-};
+  value: string;
+}
 
-export type CountryDirectoryModel = {
+export interface CountryDirectoryModel {
   rows: CountryRow[];
   stats: CountryDirectoryStat[];
-};
+}
 
 export function buildCountryDirectoryModel(
   countryStats: CountryStatRow[],

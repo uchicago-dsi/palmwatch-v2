@@ -2,12 +2,16 @@ import type { CompanyEntry } from "../companies-directory-view";
 
 const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
 
-type MapEntry = { ownerHref?: string; groupHref?: string; label: string };
+interface MapEntry {
+  groupHref?: string;
+  label: string;
+  ownerHref?: string;
+}
 
-export type CompanyDirectoryModel = {
+export interface CompanyDirectoryModel {
   companies: CompanyEntry[];
   stats: { label: string; value: string }[];
-};
+}
 
 export function buildCompanyDirectoryModel(searchList: {
   "Mill Owners": { label: string; href: string }[];
@@ -40,7 +44,7 @@ export function buildCompanyDirectoryModel(searchList: {
       if (ownerHref) {
         return { label, type: "owner", href: ownerHref };
       }
-      return { label, type: "group", href: groupHref! };
+      return { label, type: "group", href: groupHref ?? "" };
     })
     .sort((a, b) => a.label.localeCompare(b.label));
 

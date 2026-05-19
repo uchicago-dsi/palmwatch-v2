@@ -15,12 +15,12 @@ const GROUP_ORDER = ["Countries", "Brands", "Mills", "Companies"] as const;
 
 type GroupLabel = (typeof GROUP_ORDER)[number];
 
-type NavSearchItem = {
-  label: string;
-  href: string;
+interface NavSearchItem {
   category: string;
   groupLabel: GroupLabel;
-};
+  href: string;
+  label: string;
+}
 
 function flattenSearchList(payload: SearchListPayload): NavSearchItem[] {
   const items: NavSearchItem[] = [];
@@ -117,7 +117,7 @@ function groupItems(items: NavSearchItem[]) {
 function IconSearch() {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={styles.searchIcon}
       fill="none"
       height="16"
@@ -138,7 +138,7 @@ function IconSearch() {
 function IconChevron() {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={styles.resultChevron}
       fill="none"
       height="14"
@@ -158,7 +158,7 @@ function IconChevron() {
 
 export function NavSearch() {
   const router = useRouter();
-  const pathname = usePathname();
+  const _pathname = usePathname();
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const resultsRef = React.useRef<HTMLDivElement>(null);
@@ -197,7 +197,7 @@ export function NavSearch() {
     setExpanded(false);
     setDropdownOpen(false);
     setActiveIdx(-1);
-  }, [pathname]);
+  }, []);
 
   const trimmedQuery = query.trim();
   const q = trimmedQuery.toLowerCase();
@@ -224,7 +224,7 @@ export function NavSearch() {
     if (queryReady) {
       setDropdownOpen(true);
     }
-  }, [q, queryReady]);
+  }, [queryReady]);
 
   React.useEffect(() => {
     if (!expanded) {
@@ -347,11 +347,8 @@ export function NavSearch() {
           role="listbox"
         >
           {searchResults.length > 0 ? (
-            groupedResults.map((group, groupIndex) => (
-              <div
-                className={styles.resultGroup}
-                key={`search-group-${groupIndex}`}
-              >
+            groupedResults.map((group) => (
+              <div className={styles.resultGroup} key={group.groupLabel}>
                 <div className={styles.groupHeader} role="presentation">
                   {group.groupLabel}
                 </div>
