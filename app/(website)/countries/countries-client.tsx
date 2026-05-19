@@ -3,9 +3,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { ShowMoreButton } from "@/components/show-more-button";
 import { useTheme } from "@/components/theme-provider";
-import { useShowMore } from "@/hooks/use-show-more";
 import type { IsoMap } from "./choropleth-map";
 import styles from "./countries.module.css";
 
@@ -123,13 +121,6 @@ export function CountriesClient({ rows, stats }: Props) {
       }),
     [rows, sortKey, sortDir]
   );
-
-  const {
-    visibleItems: visibleRows,
-    hiddenCount,
-    expanded,
-    toggle: toggleShowMore,
-  } = useShowMore(sorted);
 
   // Build iso→row map for the map component
   const isoMap = React.useMemo(() => {
@@ -250,7 +241,7 @@ export function CountriesClient({ rows, stats }: Props) {
                   onClick={() => handleSort("futureRisk")}
                 >
                   <span className={styles.thInner}>
-                    Avg future score
+                    Avg future risk score
                     <SortIcon active={sortKey === "futureRisk"} dir={sortDir} />
                   </span>
                 </th>
@@ -258,8 +249,8 @@ export function CountriesClient({ rows, stats }: Props) {
               </tr>
             </thead>
             <tbody>
-              {visibleRows.length > 0
-                ? visibleRows.map((row) => (
+              {sorted.length > 0
+                ? sorted.map((row) => (
                     <tr
                       className={styles.tr}
                       key={row.name}
@@ -312,11 +303,6 @@ export function CountriesClient({ rows, stats }: Props) {
             </tbody>
           </table>
         </div>
-        <ShowMoreButton
-          expanded={expanded}
-          hiddenCount={hiddenCount}
-          onToggle={toggleShowMore}
-        />
       </section>
     </div>
   );

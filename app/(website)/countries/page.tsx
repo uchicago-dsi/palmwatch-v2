@@ -114,7 +114,7 @@ export default async function Page() {
     { label: "Total mills", value: totalMills.toLocaleString() },
     { label: "Top country", value: topCountry?.name ?? "—", text: true },
     {
-      label: `Total forest loss (2001–${maxYear})`,
+      label: `Global forest loss (2001–${maxYear})`,
       value:
         millStats?.totalForestLoss == null
           ? "—"
