@@ -1,8 +1,8 @@
 "use client";
 import type React from "react";
-import styles from "@/app/(website)/_shell/site-chrome.module.css";
 import { SearchableListLayout } from "@/components/searchable-list-layout";
-import { useDropdownStore } from "@/hooks/super-dropdown-store";
+import styles from "@/components/site-chrome.module.css";
+import { useDropdownStore } from "./super-dropdown-store";
 
 interface NavBarSuperDropdownProps {
   description?: string;

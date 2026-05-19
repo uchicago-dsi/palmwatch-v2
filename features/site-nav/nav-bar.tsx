@@ -2,10 +2,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
-import styles from "@/app/(website)/_shell/site-chrome.module.css";
 import { MENU_ITEMS } from "@/components/nav-bar-menu";
+import styles from "@/components/site-chrome.module.css";
 import { useTheme } from "@/components/theme-provider";
-import { NavSearch } from "@/features/site-nav/nav-search";
+import { NavSearch } from "./nav-search";
 
 function IconSun(props: React.SVGProps<SVGSVGElement>) {
   return (
