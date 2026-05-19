@@ -4,10 +4,11 @@ import Link from "next/link";
 import type React from "react";
 import { useMemo } from "react";
 import {
-  Bar,
   CartesianGrid,
   ComposedChart,
+  Line,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
@@ -175,9 +176,41 @@ function AreaBreakdownCard({ entry }: { entry: UmlData }) {
 
 // ── Annual loss chart (2001–maxYear) ─────────────────────────────────────────
 
-function AnnualLossFullChart({ entry }: { entry: UmlData }) {
+function AnnualLossTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className={styles.chartTooltip}>
+      <p className={styles.chartTooltipYear}>{label}</p>
+      {payload.map((p: any) => (
+        <div className={styles.chartTooltipRow} key={p.dataKey}>
+          <span
+            className={styles.chartTooltipSwatch}
+            style={{
+              background: p.stroke,
+              opacity: p.strokeDasharray ? 0.5 : 1,
+            }}
+          />
+          <span className={styles.chartTooltipLabel}>{p.name}</span>
+          <span className={styles.chartTooltipValue}>
+            {p.value != null ? `${formatKm2(p.value)} km²` : "—"}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AnnualLossFullChart({
+  entry,
+  medianMill,
+}: {
+  entry: UmlData;
+  medianMill?: Record<string, number>[] | null;
+}) {
   const { theme } = useTheme();
-  const barColor = theme === "dark" ? "#F09595" : "#E24B4A";
+  const lineColor = theme === "dark" ? "#F09595" : "#E24B4A";
+  const medianColor = theme === "dark" ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)";
+  const medianRow = medianMill?.[0];
 
   const data = useMemo(
     () =>
@@ -186,55 +219,97 @@ function AnnualLossFullChart({ entry }: { entry: UmlData }) {
         loss:
           Number((entry as Record<string, unknown>)[`treeloss_km_${year}`]) ||
           0,
+        median: medianRow ? (medianRow[`median${year}`] ?? null) : null,
       })),
-    [entry]
+    [entry, medianRow]
   );
 
-  const maxVal = Math.max(...data.map((d) => d.loss), 0.01);
+  const maxVal = Math.max(
+    ...data.map((d) => d.loss),
+    ...data.map((d) => d.median ?? 0),
+    0.01
+  );
   const firstYear = allYearsSince2001[0];
   const lastYear = allYearsSince2001[allYearsSince2001.length - 1];
   const midYear = Math.round((firstYear + lastYear) / 2);
 
   return (
-    <ResponsiveContainer height="100%" width="100%">
-      <ComposedChart
-        data={data}
-        margin={{ top: 8, right: 12, left: 4, bottom: 0 }}
-      >
-        <CartesianGrid
-          stroke="hsl(var(--bc) / 0.06)"
-          strokeDasharray="3 3"
-          vertical={false}
-        />
-        <XAxis
-          axisLine={{ stroke: "hsl(var(--bc) / 0.1)" }}
-          dataKey="year"
-          tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
-          tickLine={false}
-          ticks={[firstYear, midYear, lastYear]}
-        />
-        <YAxis
-          axisLine={false}
-          domain={[0, maxVal * 1.1]}
-          tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
-          tickFormatter={(v) => formatKm2(v)}
-          tickLine={false}
-          ticks={[
-            0,
-            Number.parseFloat((maxVal / 2).toFixed(1)),
-            Number.parseFloat(maxVal.toFixed(1)),
-          ]}
-          width={38}
-        />
-        <Bar
-          dataKey="loss"
-          fill={barColor}
-          isAnimationActive={false}
-          opacity={0.75}
-          radius={[2, 2, 0, 0]}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
+    <div className={styles.chartWithLegend}>
+      <div className={styles.chartLegend}>
+        <span className={styles.chartLegendItem}>
+          <span className={styles.chartLegendLine} style={{ background: lineColor }} />
+          This mill
+        </span>
+        {medianRow && (
+          <span className={styles.chartLegendItem}>
+            <span
+              className={styles.chartLegendDash}
+              style={{ borderColor: medianColor }}
+            />
+            Median mill
+          </span>
+        )}
+      </div>
+      <div className={styles.chartInner}>
+        <ResponsiveContainer height="100%" width="100%">
+          <ComposedChart
+            data={data}
+            margin={{ top: 4, right: 12, left: 4, bottom: 0 }}
+          >
+            <CartesianGrid
+              stroke="hsl(var(--bc) / 0.06)"
+              strokeDasharray="3 3"
+              vertical={false}
+            />
+            <XAxis
+              axisLine={{ stroke: "hsl(var(--bc) / 0.1)" }}
+              dataKey="year"
+              tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
+              tickLine={false}
+              ticks={[firstYear, midYear, lastYear]}
+            />
+            <YAxis
+              axisLine={false}
+              domain={[0, maxVal * 1.1]}
+              tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
+              tickFormatter={(v) => formatKm2(v)}
+              tickLine={false}
+              ticks={[
+                0,
+                Number.parseFloat((maxVal / 2).toFixed(1)),
+                Number.parseFloat(maxVal.toFixed(1)),
+              ]}
+              width={38}
+            />
+            <Tooltip
+              content={<AnnualLossTooltip />}
+              cursor={{ stroke: "hsl(var(--bc) / 0.1)", strokeWidth: 1 }}
+            />
+            <Line
+              dataKey="loss"
+              dot={false}
+              isAnimationActive={false}
+              name="This mill"
+              stroke={lineColor}
+              strokeWidth={2}
+              type="monotone"
+            />
+            {medianRow && (
+              <Line
+                dataKey="median"
+                dot={false}
+                isAnimationActive={false}
+                name="Median mill"
+                stroke={medianColor}
+                strokeDasharray="4 3"
+                strokeWidth={1.5}
+                type="monotone"
+              />
+            )}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 }
 
@@ -242,7 +317,7 @@ function AnnualLossFullChart({ entry }: { entry: UmlData }) {
 
 export function MillPageView({ model, cmsContent }: MillPageViewProps) {
   const { theme } = useTheme();
-  const { millPayload } = model;
+  const { millPayload, medianMill } = model;
   const entry = millPayload.info[0] as UmlData | undefined;
   const brands = millPayload.brands;
 
@@ -278,7 +353,10 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
 
   const hasParent = parentCompany && parentCompany.trim();
   const hasGroup =
-    groupName && groupName.trim() && groupName.trim() !== parentCompany?.trim();
+    groupName &&
+    groupName.trim() &&
+    groupName.trim().toUpperCase() !== "UNKNOWN" &&
+    groupName.trim() !== parentCompany?.trim();
 
   return (
     <div className={styles.page}>
@@ -422,7 +500,7 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
           <p className={styles.chartTitle}>Annual forest loss</p>
           <p className={styles.chartCaption}>km² per year, 2001–{maxYear}</p>
           <div className={styles.chartBody}>
-            <AnnualLossFullChart entry={entry} />
+            <AnnualLossFullChart entry={entry} medianMill={medianMill} />
           </div>
         </div>
       </div>
@@ -492,6 +570,68 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
 
       {/* CMS content */}
       {cmsContent && <div className={styles.cmsCard}>{cmsContent}</div>}
+
+      {/* Mill record */}
+      <div className={styles.recordCard}>
+        <p className={styles.recordTitle}>Mill record</p>
+        <div className={styles.recordGrid}>
+          {[
+            { label: "Mill name", value: entry["Mill Name"] },
+            { label: "UML ID", value: entry["UML ID"] },
+            {
+              label: "Parent company",
+              value: entry["Parent Company"],
+              href: entry["Parent Company"]?.trim()
+                ? `/owner/${encodeURIComponent(entry["Parent Company"].trim())}`
+                : undefined,
+            },
+            {
+              label: "Group name",
+              value: entry["Group Name"],
+              href:
+                entry["Group Name"]?.trim() &&
+                entry["Group Name"].trim().toUpperCase() !== "UNKNOWN"
+                  ? `/group/${encodeURIComponent(entry["Group Name"].trim())}`
+                  : undefined,
+            },
+            {
+              label: "Country",
+              value: entry.Country,
+              href: entry.Country?.trim()
+                ? `/country/${encodeURIComponent(entry.Country.trim())}`
+                : undefined,
+            },
+            { label: "Province", value: entry.Province },
+            { label: "District", value: entry.District },
+            { label: "RSPO status", value: entry["RSPO Status"] },
+            {
+              label: "RSPO type",
+              value: entry["RSPO Type"] != null ? String(entry["RSPO Type"]) : null,
+            },
+            { label: "Confidence level", value: entry["Confidence level"] },
+            {
+              label: "Date RSPO certification status",
+              value: entry["Date RSPO Certification Status"],
+            },
+            { label: "GPS coordinates", value: entry["GPS coordinates"] },
+          ].map(({ label, value, href }: { label: string; value: string | null | undefined; href?: string }) => (
+            <div className={styles.recordItem} key={label}>
+              <span className={styles.recordLabel}>{label}</span>
+              {value ? (
+                href ? (
+                  <Link className={styles.recordLink} href={href}>
+                    {value}
+                  </Link>
+                ) : (
+                  <span className={styles.recordValue}>{value}</span>
+                )
+              ) : (
+                <span className={styles.recordValue}>—</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

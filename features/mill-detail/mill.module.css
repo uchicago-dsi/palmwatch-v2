@@ -327,6 +327,93 @@
   text-align: center;
 }
 
+/* Chart legend + inner wrapper */
+
+.chartWithLegend {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chartLegend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.chartLegendItem {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.6);
+}
+
+.chartLegendLine {
+  display: inline-block;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.chartLegendDash {
+  display: inline-block;
+  width: 16px;
+  height: 0;
+  border-top: 2px dashed;
+  opacity: 0.6;
+}
+
+.chartInner {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Chart tooltip */
+
+.chartTooltip {
+  padding: 8px 10px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.12);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 160px;
+}
+
+.chartTooltipYear {
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: hsl(var(--bc) / 0.5);
+}
+
+.chartTooltipRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 3px;
+}
+
+.chartTooltipSwatch {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.chartTooltipLabel {
+  flex: 1;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.6);
+}
+
+.chartTooltipValue {
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc));
+}
+
 /* ── Brands sourcing matrix ──────────────────────────────────────────────────── */
 
 .matrixCard {
@@ -382,17 +469,15 @@
 
 .matrixBrandLink {
   font-size: 0.875rem;
-  font-weight: 500;
   color: hsl(var(--bc));
-  text-decoration: none;
-  transition: color 100ms ease;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: hsl(var(--bc) / 0.3);
+  transition: text-decoration-color 100ms ease;
 }
 
 .matrixBrandLink:hover {
-  color: hsl(var(--bc) / 0.65);
-  text-decoration: underline;
-  text-decoration-color: hsl(var(--bc) / 0.3);
-  text-underline-offset: 2px;
+  text-decoration-color: hsl(var(--bc) / 0.7);
 }
 
 .matrixCell {
@@ -406,6 +491,84 @@
   height: 8px;
   background: hsl(var(--bc) / 0.65);
   border-radius: 50%;
+}
+
+/* ── Mill record ─────────────────────────────────────────────────────────────── */
+
+.recordCard {
+  padding: 20px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.recordTitle {
+  margin: 0 0 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.recordGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+}
+
+@media (max-width: 600px) {
+  .recordGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.recordItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid hsl(var(--bc) / 0.06);
+}
+
+.recordItem:nth-child(odd) {
+  padding-right: 24px;
+}
+
+.recordItem:nth-last-child(-n+2) {
+  border-bottom: none;
+}
+
+@media (max-width: 600px) {
+  .recordItem:last-child {
+    border-bottom: none;
+  }
+  .recordItem:nth-last-child(2) {
+    border-bottom: 1px solid hsl(var(--bc) / 0.06);
+  }
+}
+
+.recordLabel {
+  font-size: 0.6875rem;
+  color: hsl(var(--bc) / 0.45);
+}
+
+.recordValue {
+  font-size: 0.875rem;
+  color: hsl(var(--bc));
+  word-break: break-word;
+}
+
+.recordLink {
+  font-size: 0.875rem;
+  color: hsl(var(--bc));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: hsl(var(--bc) / 0.3);
+  word-break: break-word;
+  transition: text-decoration-color 100ms ease;
+}
+
+.recordLink:hover {
+  text-decoration-color: hsl(var(--bc) / 0.7);
 }
 
 /* ── CMS content ─────────────────────────────────────────────────────────────── */
