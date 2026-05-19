@@ -2,9 +2,14 @@
   position: relative;
   width: 100%;
   height: 90vh;
-  height: 90dvh;
   overflow: hidden;
   background: hsl(var(--b1));
+}
+
+@supports (height: 90dvh) {
+  .hero {
+    height: 90dvh;
+  }
 }
 
 .heroVideo {

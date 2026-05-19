@@ -87,6 +87,7 @@ export default async function RootLayout({
       </Head>
       <body className={inter.variable}>
         <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: inline theme bootstrap before paint
           dangerouslySetInnerHTML={{
             __html: `try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');}catch(e){}`,
           }}

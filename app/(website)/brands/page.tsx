@@ -55,11 +55,7 @@ export default async function Page() {
   return (
     <main className={pageStyles.pageShell}>
       <div className={pageStyles.pageInner}>
-        <BrandsClient
-          brands={brands as Parameters<typeof BrandsClient>[0]["brands"]}
-          disclaimer={disclaimer}
-          stats={stats}
-        />
+        <BrandsClient brands={brands} disclaimer={disclaimer} stats={stats} />
       </div>
     </main>
   );

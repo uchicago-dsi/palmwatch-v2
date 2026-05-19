@@ -14,6 +14,11 @@ html {
 
 body {
   min-height: 100vh;
-  min-height: 100dvh;
   @apply bg-base-200 text-base-content;
+}
+
+@supports (min-height: 100dvh) {
+  body {
+    min-height: 100dvh;
+  }
 }

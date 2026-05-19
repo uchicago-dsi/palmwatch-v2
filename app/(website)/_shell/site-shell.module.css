@@ -14,7 +14,12 @@
   flex-direction: column;
   /* At least full viewport; routes + siteMain flex so footer sits at bottom when content is short */
   min-height: 100vh;
-  min-height: 100dvh;
+}
+
+@supports (min-height: 100dvh) {
+  .siteShell {
+    min-height: 100dvh;
+  }
 }
 
 .siteMain {

@@ -26,14 +26,14 @@ export default async function Page() {
           >
             <p className="mb-4 font-medium text-base">FAQ</p>
             <div>
-              {aboutPageContent.faq.map((item: any, index: number) => (
+              {aboutPageContent.faq.map((item, index, faq) => (
                 <div
                   className={`collapse-arrow collapse rounded-none ${
-                    index < aboutPageContent.faq.length - 1
+                    index < faq.length - 1
                       ? "border-base-content/10 border-b"
                       : ""
                   }`}
-                  key={index}
+                  key={item.heading}
                 >
                   <input name="faq-accordion" type="radio" />
                   <div className="collapse-title px-0 py-3 font-medium text-sm">

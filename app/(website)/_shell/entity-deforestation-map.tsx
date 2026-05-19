@@ -24,10 +24,10 @@ const DARK_STYLE =
   process.env.NEXT_PUBLIC_MAPBOX_STYLE ||
   "mapbox://styles/dhalpern/cln0e32pu06ba01qxcgrp4gv9";
 
-export type MillsDeforestationMapProps = {
+export interface MillsDeforestationMapProps {
   dataTable: MapProps["dataTable"];
   noFlyMap?: boolean;
-};
+}
 
 /** Entity pages with preloaded mill rows (country, owner, group, single mill). */
 export function MillsDeforestationMap({

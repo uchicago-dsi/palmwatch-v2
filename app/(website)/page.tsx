@@ -13,7 +13,7 @@ export default async function Home() {
         <video autoPlay className={heroStyles.heroVideo} loop muted playsInline>
           <source src="cover-video.mp4" type="video/mp4" />
         </video>
-        <div aria-hidden className={heroStyles.heroOverlay} />
+        <div aria-hidden="true" className={heroStyles.heroOverlay} />
         <div className={heroStyles.heroContent}>
           <h1 className={heroStyles.heroTitle}>PalmWatch</h1>
           <h2 className={heroStyles.heroSubtitle}>
@@ -188,7 +188,12 @@ export default async function Home() {
 
 function IconChart({ className }: { className?: string }) {
   return (
-    <svg aria-hidden className={className} fill="none" viewBox="0 0 24 24">
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <path
         d="M3 20h18M3 20V5"
         stroke="currentColor"
@@ -207,7 +212,12 @@ function IconChart({ className }: { className?: string }) {
 
 function IconChain({ className }: { className?: string }) {
   return (
-    <svg aria-hidden className={className} fill="none" viewBox="0 0 24 24">
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <path
         d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.71 1.71"
         stroke="currentColor"
@@ -228,7 +238,12 @@ function IconChain({ className }: { className?: string }) {
 
 function IconList({ className }: { className?: string }) {
   return (
-    <svg aria-hidden className={className} fill="none" viewBox="0 0 24 24">
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <circle cx="5.5" cy="6.5" fill="currentColor" r="1.75" />
       <circle cx="5.5" cy="12" fill="currentColor" r="1.75" />
       <circle cx="5.5" cy="17.5" fill="currentColor" r="1.75" />
