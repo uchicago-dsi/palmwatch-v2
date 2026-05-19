@@ -9,7 +9,7 @@ import {
   type MarkerProps,
   useControl,
 } from "react-map-gl";
-import "@/app/styles/mapbox-geocoder.css";
+import "./mapbox-geocoder.css";
 
 const noop = () => {};
 
