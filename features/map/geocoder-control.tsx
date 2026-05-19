@@ -11,7 +11,7 @@ import {
 } from "react-map-gl";
 import "./mapbox-geocoder.css";
 
-const noop = () => {};
+const noop = () => undefined;
 
 type GeocoderControlProps = Omit<
   GeocoderOptions,
@@ -41,8 +41,9 @@ type GeocoderControlProps = Omit<
 };
 
 /* eslint-disable complexity,max-statements */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Mapbox geocoder control wiring
 export default function GeocoderControl(_props: GeocoderControlProps) {
-  const [marker, setMarker] = useState(null);
+  const [_marker, _setMarker] = useState(null);
   const props = {
     marker: true,
     onLoading: noop,
@@ -52,6 +53,7 @@ export default function GeocoderControl(_props: GeocoderControlProps) {
     ..._props,
   };
 
+  // biome-ignore lint/suspicious/noExplicitAny: MapboxGeocoder control instance
   const geocoder = useControl<any>(
     () => {
       const ctrl = new MapboxGeocoder({
@@ -61,20 +63,29 @@ export default function GeocoderControl(_props: GeocoderControlProps) {
       });
       ctrl.on("loading", props.onLoading);
       ctrl.on("results", props.onResults);
-      ctrl.on("result", (evt: any) => {
-        props?.onResult && props.onResult(evt);
+      ctrl.on(
+        "result",
+        (evt: {
+          result?: {
+            center?: number[];
+            geometry?: { type?: string; coordinates?: number[] };
+          };
+        }) => {
+          props?.onResult?.(evt);
 
-        const { result } = evt;
-        const location =
-          result &&
-          (result.center ||
-            (result.geometry?.type === "Point" && result.geometry.coordinates));
-        // if (location && props.marker) {
-        //   setMarker(<Marker {...props.marker} longitude={location[0]} latitude={location[1]} />);
-        // } else {
-        //   setMarker(null);
-        // }
-      });
+          const { result } = evt;
+          const _location =
+            result &&
+            (result.center ||
+              (result.geometry?.type === "Point" &&
+                result.geometry.coordinates));
+          // if (location && props.marker) {
+          //   setMarker(<Marker {...props.marker} longitude={location[0]} latitude={location[1]} />);
+          // } else {
+          //   setMarker(null);
+          // }
+        }
+      );
       ctrl.on("error", props.onError);
       return ctrl;
     },

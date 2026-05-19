@@ -8,8 +8,8 @@ export const Legend: React.FC<{ colorStops: ColorStop[]; label: string }> = ({
   <div className="card absolute bottom-8 left-2 bg-base-100 p-2">
     <div className="flex flex-col space-y-1">
       <p>{label}</p>
-      {colorStops.map((colorStop, i) => (
-        <div className="flex flex-row" key={i}>
+      {colorStops.map((colorStop) => (
+        <div className="flex flex-row" key={colorStop.label}>
           <div
             className="h-4 w-4 rounded-full"
             style={{

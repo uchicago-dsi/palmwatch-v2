@@ -21,7 +21,7 @@ export const HomePageMap = () => {
           choroplethColumn={cumulativeLossColumn}
           choroplethScheme="cumulativeLoss"
           dataIdColumn="UML ID"
-          dataTable={data!}
+          dataTable={data ?? []}
           geoDataUrl="/data/mill-catchment.geojson"
           geoIdColumn="UML ID"
           initialView={viewport ?? undefined}

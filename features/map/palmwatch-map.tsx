@@ -12,13 +12,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import Map, {
+import ReactMap, {
   AttributionControl,
   Layer,
   type MapRef,
   NavigationControl,
   Source,
   useControl,
+  type ViewStateChangeEvent,
 } from "react-map-gl";
 import { useTheme } from "@/components/theme-provider";
 import { colorFunctions } from "@/lib/color-function";
@@ -63,24 +64,28 @@ function applyThemeBrightness(map: MapboxGLMap, theme: "light" | "dark") {
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
-export type MapViewport = { longitude: number; latitude: number; zoom: number };
+export interface MapViewport {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+}
 
-export type MapProps = {
-  geoDataUrl: string;
-  dataTable: Array<Record<string, unknown>> | object[];
-  geoIdColumn: string;
-  dataIdColumn: string;
+export interface MapProps {
   choroplethColumn: string;
   choroplethScheme: keyof typeof colorFunctions;
-  showLayerStepper?: boolean;
-  showGeocoder?: boolean;
-  onMapMove?: (v: any) => void;
-  noFlyMap?: boolean;
-  mapStyle?: string;
-  showClusters?: boolean;
-  onFeatureClick?: (umlId: string) => void;
+  dataIdColumn: string;
+  dataTable: Record<string, unknown>[] | object[];
+  geoDataUrl: string;
+  geoIdColumn: string;
   initialView?: MapViewport;
-};
+  mapStyle?: string;
+  noFlyMap?: boolean;
+  onFeatureClick?: (umlId: string) => void;
+  onMapMove?: (v: ViewStateChangeEvent) => void;
+  showClusters?: boolean;
+  showGeocoder?: boolean;
+  showLayerStepper?: boolean;
+}
 
 type LayerMode = "total" | "byYear" | "scores";
 type ScoreType = "past" | "recent" | "future";
@@ -124,8 +129,9 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   noFlyMap,
   mapStyle: mapStyleProp,
   showClusters,
-  onFeatureClick,
+  onFeatureClick: _onFeatureClick,
   initialView,
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: map orchestration
 }) => {
   const { theme } = useTheme();
   const mapRef = React.useRef<MapRef | null>(null);
@@ -153,11 +159,15 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   const [currentChoroplethColumn, setCurrentChoroplethColumn] =
     useState(choroplethColumn);
   const isCumulative = currentChoroplethColumn === cumulativeLossColumn;
-  const currentYear = currentChoroplethColumn.includes("score")
-    ? -1
-    : isCumulative
-      ? -2
-      : Number.parseInt(currentChoroplethColumn?.split("_")?.[2]);
+  let _currentYear = Number.parseInt(
+    currentChoroplethColumn?.split("_")?.[2] ?? "",
+    10
+  );
+  if (currentChoroplethColumn.includes("score")) {
+    _currentYear = -1;
+  } else if (isCumulative) {
+    _currentYear = -2;
+  }
   const [mode, setMode] = useState<LayerMode>("total");
   const [year, setYear] = useState(maxYear);
   const [scoreType, setScoreType] = useState<ScoreType>("recent");
@@ -174,7 +184,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   frozenRef.current = frozen;
   const justFrozeRef = useRef(false);
   const umlStore = useActiveUmlStore();
-  const setUml = umlStore.setUml;
+  const _setUml = umlStore.setUml;
   const activeUml = umlStore.currentUml;
 
   // Clear tooltip when the map unmounts (e.g. navigating away and back)
@@ -188,14 +198,16 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     }
   }, [theme]);
 
-  const getColor = (data: Record<string, any>) => {
-    const value = data?.[currentChoroplethColumn];
-    return colorFunction(value);
+  const getColor = (data: Record<string, unknown>) => {
+    const raw = data[currentChoroplethColumn];
+    const value = raw === undefined || raw === null ? undefined : Number(raw);
+    return colorFunction(Number.isFinite(value) ? value : undefined);
   };
   const { data, isLoading, isError } = useQuery<GeoJSON.FeatureCollection>(
     ["geoData"],
     async () => await fetch(geoDataUrl).then((res) => res.json())
   );
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: geo + table join for viewport
   const { initialMapView, dataDict } = useMemo(() => {
     if (isLoading || isError) {
       return {};
@@ -215,7 +227,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
 
     const filteredGeoFeatures =
       data?.features?.filter((feature) => {
-        const id = feature.properties![geoIdColumn] as string;
+        const id = feature.properties?.[geoIdColumn] as string;
         return id in dataDict;
       }) ?? [];
 
@@ -335,7 +347,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       return [];
     }
     return data.features.filter((f) => {
-      const id = f.properties![geoIdColumn] as string;
+      const id = f.properties?.[geoIdColumn] as string;
       if (!(id in dataDict)) {
         return false;
       }
@@ -380,12 +392,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     if (initialMapView?.zoom != null && Number.isFinite(initialMapView.zoom)) {
       syncZoomFromView(initialMapView.zoom);
     }
-  }, [
-    initialMapView?.zoom,
-    initialMapView?.latitude,
-    initialMapView?.longitude,
-    syncZoomFromView,
-  ]);
+  }, [initialMapView?.zoom, syncZoomFromView]);
 
   useEffect(() => {
     setChoroplethColumnInTooltip(currentChoroplethColumn);
@@ -429,6 +436,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     initialMapView?.longitude,
     initialMapView?.zoom,
     noFlyMap,
+    initialMapView,
   ]);
 
   const fillOpacity = theme === "light" ? 0.35 : 0.45;
@@ -438,7 +446,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   const layers = [
     new GeoJsonLayer({
       id: "main-map-layer",
-      data: (filteredGeoData ?? data)!,
+      data: filteredGeoData ??
+        data ?? { type: "FeatureCollection", features: [] },
       opacity: fillOpacity,
       stroked: true,
       filled: true,
@@ -455,20 +464,22 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         if (frozenRef.current) {
           return;
         }
-        object
-          ? setData(x, y, object.properties["UML ID"])
-          : setData(null, null, null);
+        if (object) {
+          setData(x, y, object.properties["UML ID"]);
+        } else {
+          setData(null, null, null);
+        }
       },
       onClick: (info) => {
-        const id = info.object.properties![geoIdColumn] as string;
+        const id = info.object.properties?.[geoIdColumn] as string;
         justFrozeRef.current = true;
         setData(info.x, info.y, id);
         freeze();
       },
       getFillColor: (d) => {
-        const id = d.properties![geoIdColumn] as string;
-        const data = dataDict?.[id] as any;
-        const color = getColor(data);
+        const id = d.properties?.[geoIdColumn] as string;
+        const row = dataDict?.[id] as Record<string, unknown> | undefined;
+        const color = getColor(row ?? {});
         return color as [number, number, number, number];
       },
       updateTriggers: {
@@ -487,7 +498,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       id: "mill-point",
       data: millPinFeatures,
       getPosition: (d) => {
-        const row = dataDict?.[d.properties![geoIdColumn] as string] as Record<
+        const row = dataDict?.[d.properties?.[geoIdColumn] as string] as Record<
           string,
           unknown
         >;
@@ -529,7 +540,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   return (
     <div className="flex h-full w-full">
       <div className="relative h-full min-h-0 w-full">
-        <Map
+        <ReactMap
           attributionControl={false}
           bearing={0}
           initialViewState={{
@@ -563,7 +574,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           onMove={(e) => syncZoomFromView(e.viewState.zoom)}
           onMoveEnd={(e) => {
             syncZoomFromView(e.viewState.zoom);
-            onMapMove && onMapMove(e);
+            onMapMove?.(e);
           }}
           pitch={0}
           projection={MAP_PROJECTION}
@@ -573,7 +584,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         >
           {showGeocoder && (
             <GeocoderControl
-              mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN!}
+              mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ""}
               position="top-left"
             />
           )}
@@ -653,7 +664,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
               />
             </Source>
           )}
-        </Map>
+        </ReactMap>
 
         {showLayerStepper && layerControlsVisible && (
           <div
@@ -698,7 +709,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
               <div className="flex items-center gap-2.5">
                 <input
                   className="flex-1 accent-base-content"
-                  max={fullYearRange[fullYearRange.length - 1]}
+                  max={fullYearRange.at(-1)}
                   min={fullYearRange[0]}
                   onChange={(e) => {
                     const y = Number(e.target.value);
@@ -762,6 +773,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
                   Legend
                 </span>
                 <svg
+                  aria-hidden="true"
                   className={`flex-shrink-0 text-base-content/40 transition-transform duration-150 ${legendOpen ? "" : "-rotate-90"}`}
                   fill="none"
                   height="10"
@@ -781,8 +793,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
                 <div
                   className={`mt-1.5 flex flex-col gap-1 transition-opacity ${fillVisible ? "opacity-100" : "opacity-30"}`}
                 >
-                  {scale.map((stop, i) => (
-                    <div className="flex items-center gap-2" key={i}>
+                  {scale.map((stop) => (
+                    <div className="flex items-center gap-2" key={stop.label}>
                       <div
                         className="h-2.5 w-2.5 flex-shrink-0 rounded-sm"
                         style={{
@@ -840,14 +852,14 @@ export const ServerMap: React.FC<{ dataUrl: string } & MapProps> = ({
   </DataProvider>
 );
 
-const MapLayerStepper: React.FC<{
+const _MapLayerStepper: React.FC<{
   setChoroplethColumn: (column: string) => void;
   setChoroplethScheme: (scheme: keyof typeof colorFunctions) => void;
   choroplethColumn: string;
   choroplethScheme: keyof typeof colorFunctions;
 }> = ({
-  setChoroplethColumn,
-  setChoroplethScheme,
-  choroplethColumn,
-  choroplethScheme,
+  setChoroplethColumn: _setChoroplethColumn,
+  setChoroplethScheme: _setChoroplethScheme,
+  choroplethColumn: _choroplethColumn,
+  choroplethScheme: _choroplethScheme,
 }) => <div />;

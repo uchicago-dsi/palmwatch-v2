@@ -2,18 +2,18 @@
 import { create } from "zustand";
 import { cumulativeLossColumn } from "@/config/years";
 
-export type TooltipStore = {
-  x: number | null;
-  y: number | null;
-  id: string | null;
-  frozen: boolean;
+export interface TooltipStore {
   /** Matches PalmwatchMap coloring (year column or risk_score_*). */
   choroplethColumn: string;
-  setData: (x: number | null, y: number | null, id: string | null) => void;
-  setChoroplethColumn: (column: string) => void;
   freeze: () => void;
+  frozen: boolean;
+  id: string | null;
+  setChoroplethColumn: (column: string) => void;
+  setData: (x: number | null, y: number | null, id: string | null) => void;
   unfreeze: () => void;
-};
+  x: number | null;
+  y: number | null;
+}
 
 export const useTooltipStore = create<TooltipStore>((set) => ({
   x: null,

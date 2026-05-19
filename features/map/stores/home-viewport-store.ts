@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import type { MapViewport } from "../palmwatch-map";
 
-type HomeViewportStore = {
-  viewport: MapViewport | null;
+interface HomeViewportStore {
   setViewport: (v: MapViewport) => void;
-};
+  viewport: MapViewport | null;
+}
 
 export const useHomeViewportStore = create<HomeViewportStore>((set) => ({
   viewport: null,

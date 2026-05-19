@@ -7,6 +7,7 @@ import {
   latestTreelossKmColumn,
 } from "@/config/years";
 import type { UmlData } from "@/domain";
+import { umlRowField } from "@/lib/data-row";
 import { useTooltipStore } from "./stores/tooltip-store";
 
 function formatKm2(val: number): string {
@@ -22,21 +23,27 @@ function getForestLossValue(
 ): number | null {
   if (choroplethColumn === cumulativeLossColumn) {
     return cumulativeYearRange.reduce((sum, yr) => {
-      const val = (info as Record<string, unknown>)[`treeloss_km_${yr}`];
+      const val = umlRowField(info, `treeloss_km_${yr}`);
       return sum + (typeof val === "number" ? val : 0);
     }, 0);
   }
   if (choroplethColumn.startsWith("treeloss_km_")) {
-    const val = (info as Record<string, unknown>)[choroplethColumn];
+    const val = umlRowField(info, choroplethColumn);
     return typeof val === "number" ? val : null;
   }
-  const val = (info as Record<string, unknown>)[latestTreelossKmColumn];
+  const val = umlRowField(info, latestTreelossKmColumn);
   return typeof val === "number" ? val : null;
 }
 
 function ArrowUpRight() {
   return (
-    <svg aria-hidden fill="none" height="12" viewBox="0 0 12 12" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 12 12"
+      width="12"
+    >
       <path
         d="M2 10L10 2M10 2H4M10 2V8"
         stroke="currentColor"
@@ -50,11 +57,11 @@ function ArrowUpRight() {
 
 export const MapTooltip = () => {
   const { x, y, id, frozen, choroplethColumn, unfreeze } = useTooltipStore();
-  const { data, isLoading } = useQuery<{ info: Array<UmlData> }>(
+  const { data, isLoading } = useQuery<{ info: UmlData[] }>(
     [`millonly-${id}`],
     async () =>
-      fetch(`/api/mill/${encodeURIComponent(id!)}?millOnly=true`).then((r) =>
-        r.json()
+      fetch(`/api/mill/${encodeURIComponent(id as string)}?millOnly=true`).then(
+        (r) => r.json()
       ),
     { enabled: !!id }
   );
@@ -85,7 +92,7 @@ export const MapTooltip = () => {
     return null;
   }
 
-  const millHref = `/mill/${encodeURIComponent(id!)}`;
+  const millHref = `/mill/${encodeURIComponent(id)}`;
 
   const lossVal = getForestLossValue(info, choroplethColumn);
 
