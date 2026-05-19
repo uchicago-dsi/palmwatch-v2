@@ -24,21 +24,24 @@ export default async function Page() {
     { label: "Brands tracked", value: String(brands.length) },
     {
       label: "Mills",
-      value: millSummaryStats?.millCount != null
-        ? millSummaryStats.millCount.toLocaleString()
-        : "—",
+      value:
+        millSummaryStats?.millCount == null
+          ? "—"
+          : millSummaryStats.millCount.toLocaleString(),
     },
     {
       label: "Countries",
-      value: millSummaryStats?.countryCount != null
-        ? String(millSummaryStats.countryCount)
-        : "—",
+      value:
+        millSummaryStats?.countryCount == null
+          ? "—"
+          : String(millSummaryStats.countryCount),
     },
     {
       label: "Mill owners",
-      value: millSummaryStats?.companyCount != null
-        ? millSummaryStats.companyCount.toLocaleString()
-        : "—",
+      value:
+        millSummaryStats?.companyCount == null
+          ? "—"
+          : millSummaryStats.companyCount.toLocaleString(),
     },
   ] as {
     label: string;

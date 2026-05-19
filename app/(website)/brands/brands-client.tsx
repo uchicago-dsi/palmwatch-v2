@@ -17,7 +17,7 @@ type StatCard = {
   value: string;
   dotCategory?: "red" | "amber" | "teal";
 };
-type SortKey = "overallScore" | "consumer_brand" | "averagePastRisk";
+type SortKey = "overallScore" | "consumer_brand" | "averagePastRisk" | "millCount";
 type SortDir = "asc" | "desc";
 
 interface Props {
@@ -208,6 +208,15 @@ export function BrandsClient({ brands, stats }: Props) {
                   </span>
                 </th>
                 <th
+                  className={`${styles.thMills} ${sortKey === "millCount" ? styles.thActive : ""}`}
+                  onClick={() => handleSort("millCount")}
+                >
+                  <span className={styles.thInner}>
+                    Linked mills
+                    <SortIcon active={sortKey === "millCount"} dir={sortDir} />
+                  </span>
+                </th>
+                <th
                   className={`${styles.thScore} ${sortKey === "overallScore" ? styles.thActive : ""}`}
                   onClick={() => handleSort("overallScore")}
                 >
@@ -251,6 +260,9 @@ export function BrandsClient({ brands, stats }: Props) {
                       {row.consumer_brand}
                     </Link>
                   </td>
+                  <td className={styles.tdMills}>
+                    {row.millCount.toLocaleString()}
+                  </td>
                   <td className={styles.tdScore}>
                     {row.overallScore.toFixed(2)}
                   </td>
@@ -280,8 +292,6 @@ export function BrandsClient({ brands, stats }: Props) {
           </table>
         </div>
       </section>
-
-
     </div>
   );
 }
