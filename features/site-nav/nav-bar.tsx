@@ -127,7 +127,6 @@ export const NavBar: React.FC = () => {
               >
                 <NavSearch />
                 <Link href="/about">About</Link>
-                <Link href="/contact">Contact</Link>
                 <button
                   aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
                   className={styles.themeToggle}
@@ -219,9 +218,6 @@ export const NavBar: React.FC = () => {
           <div className={styles.mobileDivider} />
           <Link className={styles.mobileLink} href="/about">
             About
-          </Link>
-          <Link className={styles.mobileLink} href="/contact">
-            Contact
           </Link>
           <div className={styles.mobileThemeRow}>
             <span className={styles.mobileThemeLabel}>

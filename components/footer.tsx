@@ -10,7 +10,7 @@ const ACKNOWLEDGEMENT_COPY =
 
 const QUICK_LINKS = [
   { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contact", href: "/about#contact" },
   { label: "Admin Login", href: "/cms" },
 ];
 

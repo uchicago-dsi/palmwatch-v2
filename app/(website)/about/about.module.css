@@ -1,0 +1,57 @@
+.proseContent {
+  color: hsl(var(--bc) / 0.8);
+}
+
+.proseContent h1,
+.proseContent h2,
+.proseContent h3,
+.proseContent h4,
+.proseContent h5,
+.proseContent h6 {
+  color: hsl(var(--bc));
+  font-weight: 500;
+}
+
+.proseContent p {
+  color: hsl(var(--bc) / 0.8);
+}
+
+.proseContent a {
+  color: hsl(var(--bc));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: hsl(var(--bc) / 0.3);
+}
+
+.proseContent a:hover {
+  text-decoration-color: hsl(var(--bc) / 0.6);
+}
+
+.proseContent strong {
+  color: hsl(var(--bc));
+  font-weight: 600;
+}
+
+.proseContent li {
+  color: hsl(var(--bc) / 0.8);
+}
+
+.proseContent li::marker {
+  color: hsl(var(--bc) / 0.4);
+}
+
+.proseContent blockquote {
+  border-left-color: hsl(var(--bc) / 0.2);
+  color: hsl(var(--bc) / 0.7);
+}
+
+.proseContent hr {
+  border-color: hsl(var(--bc) / 0.1);
+}
+
+.proseContent code {
+  color: hsl(var(--bc));
+  background: hsl(var(--bc) / 0.07);
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
+}

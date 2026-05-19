@@ -13,6 +13,7 @@ const nextConfig = {
     return [
       { source: "/owners", destination: "/companies", permanent: true },
       { source: "/groups", destination: "/companies", permanent: true },
+      { source: "/contact", destination: "/about#contact", permanent: true },
     ];
   },
 };
