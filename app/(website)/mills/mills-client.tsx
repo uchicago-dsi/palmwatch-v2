@@ -1,9 +1,23 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useMemo } from "react";
+import {
+  Area,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useTheme } from "@/components/theme-provider";
-import type { MillDirEntry } from "@/lib/server/mill-directory-data";
+import type { ForestLossYearPoint } from "@/domain/schemas/aggregates";
+import type {
+  ForestLossQuartilePoint,
+  MillDirEntry,
+} from "@/lib/server/mill-directory-data";
 import styles from "./mills.module.css";
 
 type SortKey = "label" | "country" | "province" | "rspo";
@@ -13,11 +27,23 @@ const PAGE_SIZE = 20;
 
 interface Props {
   millCount: number;
+  countryCount: number;
   mills: MillDirEntry[];
   rspoCertified: number;
   totalArea: number;
   totalForestArea: number;
   totalForestLoss: number;
+  forestLossByYear?: ForestLossYearPoint[];
+  forestLossQuartiles?: ForestLossQuartilePoint[];
+}
+
+function medianOf(arr: number[]): number {
+  if (arr.length === 0) return 0;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[mid - 1] + sorted[mid]) / 2
+    : sorted[mid];
 }
 
 function IconSearch() {
@@ -169,16 +195,95 @@ function RspoDonut({ certified, total }: { certified: number; total: number }) {
   );
 }
 
+const RISK_TIERS = [
+  {
+    label: "Lower risk",
+    lightColor: "#1D9E75",
+    darkColor: "#5DCAA5",
+    test: (s: number) => s < 2.85,
+  },
+  {
+    label: "Moderate",
+    lightColor: "#EF9F27",
+    darkColor: "#FAC775",
+    test: (s: number) => s >= 2.85 && s <= 3.05,
+  },
+  {
+    label: "Higher risk",
+    lightColor: "#E24B4A",
+    darkColor: "#F09595",
+    test: (s: number) => s > 3.05,
+  },
+];
+
+function RiskDistribution({ mills }: { mills: MillDirEntry[] }) {
+  const { theme } = useTheme();
+  const tiers = useMemo(() => {
+    const withScore = mills.filter((m) => m.riskScore !== null);
+    const total = withScore.length;
+    return RISK_TIERS.map((tier) => {
+      const count = withScore.filter((m) => tier.test(m.riskScore!)).length;
+      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+      return { ...tier, count, pct };
+    });
+  }, [mills]);
+
+  return (
+    <div>
+      <span className={styles.impactLabel}>Risk distribution</span>
+      <div className={styles.riskRows}>
+        {tiers.map((tier) => {
+          const color = theme === "dark" ? tier.darkColor : tier.lightColor;
+          return (
+            <div className={styles.riskRow} key={tier.label}>
+              <span className={styles.riskDot} style={{ background: color }} />
+              <span className={styles.riskLabel}>{tier.label}</span>
+              <div className={styles.riskBarTrack}>
+                <div
+                  className={styles.riskBarFill}
+                  style={{ width: `${tier.pct}%`, background: color }}
+                />
+              </div>
+              <span className={styles.riskCount}>
+                {tier.count.toLocaleString()} ({tier.pct}%)
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function fmtKm2(v: number): string {
-  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M km²`;
-  if (v >= 1_000) return `${Math.round(v / 1_000).toLocaleString()}K km²`;
+  if (v >= 1_000_000) {
+    return `${(v / 1_000_000).toFixed(1)}M km²`;
+  }
+  if (v >= 1000) {
+    return `${Math.round(v / 1000).toLocaleString()}K km²`;
+  }
   return `${Math.round(v).toLocaleString()} km²`;
 }
 
 const AREA_TIERS = [
-  { key: "total" as const, label: "Total catchment area", lightColor: "#64748B", darkColor: "#94A3B8" },
-  { key: "forest" as const, label: "Total forest area", lightColor: "#16A34A", darkColor: "#4ADE80" },
-  { key: "loss" as const, label: "Total forest loss", lightColor: "#DC2626", darkColor: "#F87171" },
+  {
+    key: "total" as const,
+    label: "Total catchment area",
+    lightColor: "#64748B",
+    darkColor: "#94A3B8",
+  },
+  {
+    key: "forest" as const,
+    label: "Total forest area",
+    lightColor: "#16A34A",
+    darkColor: "#4ADE80",
+  },
+  {
+    key: "loss" as const,
+    label: "Total forest loss",
+    lightColor: "#DC2626",
+    darkColor: "#F87171",
+  },
 ];
 
 function AreaBreakdownCard({
@@ -191,10 +296,16 @@ function AreaBreakdownCard({
   totalForestLoss: number;
 }) {
   const { theme } = useTheme();
-  const forestPct = totalArea > 0 ? Math.sqrt(totalForestArea / totalArea) * 100 : 0;
-  const lossPct = totalArea > 0 ? Math.sqrt(totalForestLoss / totalArea) * 100 : 0;
+  const forestPct =
+    totalArea > 0 ? Math.sqrt(totalForestArea / totalArea) * 100 : 0;
+  const lossPct =
+    totalArea > 0 ? Math.sqrt(totalForestLoss / totalArea) * 100 : 0;
 
-  const values = { total: totalArea, forest: totalForestArea, loss: totalForestLoss };
+  const values = {
+    total: totalArea,
+    forest: totalForestArea,
+    loss: totalForestLoss,
+  };
 
   return (
     <div className={styles.impactCard}>
@@ -209,8 +320,10 @@ function AreaBreakdownCard({
               <div
                 className={styles.areaLoss}
                 style={{
-                  width: forestPct > 0 ? `${(lossPct / forestPct) * 100}%` : "0%",
-                  height: forestPct > 0 ? `${(lossPct / forestPct) * 100}%` : "0%",
+                  width:
+                    forestPct > 0 ? `${(lossPct / forestPct) * 100}%` : "0%",
+                  height:
+                    forestPct > 0 ? `${(lossPct / forestPct) * 100}%` : "0%",
                 }}
               />
             </div>
@@ -221,13 +334,162 @@ function AreaBreakdownCard({
             <div className={styles.areaLegendRow} key={key}>
               <span
                 className={styles.areaLegendSwatch}
-                style={{ background: theme === "dark" ? darkColor : lightColor }}
+                style={{
+                  background: theme === "dark" ? darkColor : lightColor,
+                }}
               />
               <span className={styles.areaLegendLabel}>{label}</span>
-              <span className={styles.areaLegendValue}>{fmtKm2(values[key])}</span>
+              <span className={styles.areaLegendValue}>
+                {fmtKm2(values[key])}
+              </span>
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function fmtKm2Axis(v: number): string {
+  if (v === 0) return "0";
+  if (v >= 1000) return `${(v / 1000).toFixed(1)}k`;
+  if (v >= 1) return v.toFixed(1);
+  return v.toFixed(2);
+}
+
+function QuartileTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { value: number; name: string }[];
+  label?: number;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  const q1 = payload.find((p) => p.name === "q1")?.value ?? 0;
+  const band = payload.find((p) => p.name === "band")?.value ?? 0;
+  const median = payload.find((p) => p.name === "median")?.value;
+  const q3 = q1 + band;
+  return (
+    <div className={styles.chartTooltip}>
+      <p className={styles.chartTooltipYear}>{label}</p>
+      {median !== undefined && (
+        <div className={styles.chartTooltipRow}>
+          <span className={styles.chartTooltipLabel}>Median</span>
+          <span className={styles.chartTooltipValue}>{median.toFixed(3)} km²</span>
+        </div>
+      )}
+      <div className={styles.chartTooltipRow}>
+        <span className={styles.chartTooltipLabel}>Q1 (25th pct)</span>
+        <span className={styles.chartTooltipValue}>{q1.toFixed(3)} km²</span>
+      </div>
+      <div className={styles.chartTooltipRow}>
+        <span className={styles.chartTooltipLabel}>Q3 (75th pct)</span>
+        <span className={styles.chartTooltipValue}>{q3.toFixed(3)} km²</span>
+      </div>
+    </div>
+  );
+}
+
+function ForestLossQuartileChart({
+  data,
+}: {
+  data: ForestLossQuartilePoint[];
+}) {
+  const { theme } = useTheme();
+  const lineColor = theme === "dark" ? "#F09595" : "#E24B4A";
+  const bandColor = theme === "dark" ? "#F09595" : "#E24B4A";
+
+  const chartData = useMemo(
+    () =>
+      data.map((d) => ({
+        year: d.year,
+        q1: d.q1,
+        band: d.q3 - d.q1,
+        median: d.median,
+      })),
+    [data]
+  );
+
+  const maxVal = Math.max(...data.map((d) => d.q3), 0.01);
+  const firstYear = data[0]?.year ?? 2001;
+  const lastYear = data[data.length - 1]?.year ?? 2025;
+  const midYear = Math.round((firstYear + lastYear) / 2);
+  const yMax = maxVal * 1.15;
+  const yMid = Number.parseFloat((yMax / 2).toFixed(2));
+
+  return (
+    <div className={styles.annualLossCard}>
+      <p className={styles.annualLossTitle}>Annual forest loss per mill</p>
+      <p className={styles.annualLossCaption}>
+        km² · median with Q1–Q3 band · {firstYear}–{lastYear}
+      </p>
+      <div className={styles.annualLossBody}>
+        <ResponsiveContainer height="100%" width="100%">
+          <ComposedChart
+            data={chartData}
+            margin={{ top: 4, right: 12, left: 4, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id="quartileBand" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor={bandColor} stopOpacity={0.18} />
+                <stop offset="100%" stopColor={bandColor} stopOpacity={0.06} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              stroke="hsl(var(--bc) / 0.06)"
+              strokeDasharray="3 3"
+              vertical={false}
+            />
+            <XAxis
+              axisLine={{ stroke: "hsl(var(--bc) / 0.1)" }}
+              dataKey="year"
+              tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
+              tickLine={false}
+              ticks={[firstYear, midYear, lastYear]}
+            />
+            <YAxis
+              axisLine={false}
+              domain={[0, yMax]}
+              tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
+              tickFormatter={fmtKm2Axis}
+              tickLine={false}
+              ticks={[0, yMid, Number.parseFloat(yMax.toFixed(2))]}
+              width={38}
+            />
+            <Tooltip
+              content={<QuartileTooltip />}
+              cursor={{ stroke: "hsl(var(--bc) / 0.15)", strokeWidth: 1 }}
+            />
+            {/* Invisible base to anchor the band at Q1 */}
+            <Area
+              dataKey="q1"
+              fill="transparent"
+              isAnimationActive={false}
+              stackId="band"
+              stroke="none"
+              type="monotone"
+            />
+            {/* Q1–Q3 shaded band */}
+            <Area
+              dataKey="band"
+              fill="url(#quartileBand)"
+              isAnimationActive={false}
+              stackId="band"
+              stroke="none"
+              type="monotone"
+            />
+            <Line
+              dataKey="median"
+              dot={false}
+              isAnimationActive={false}
+              stroke={lineColor}
+              strokeWidth={2}
+              type="monotone"
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
@@ -237,9 +499,12 @@ export function MillsClient({
   mills,
   rspoCertified,
   millCount,
+  countryCount,
   totalArea,
   totalForestArea,
   totalForestLoss,
+  forestLossByYear,
+  forestLossQuartiles,
 }: Props) {
   const router = useRouter();
 
@@ -421,11 +686,52 @@ export function MillsClient({
         )}
       </div>
 
+      {/* Stat cards */}
+      {(() => {
+        const medianLoss = forestLossByYear?.length
+          ? medianOf(forestLossByYear.map((p) => p.annualKm2))
+          : null;
+        const pctLost =
+          totalForestArea > 0
+            ? (totalForestLoss / totalForestArea) * 100
+            : null;
+        return (
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Mills</span>
+              <span className={styles.statValue}>
+                {millCount.toLocaleString()}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Countries</span>
+              <span className={styles.statValue}>
+                {countryCount.toLocaleString()}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Forest loss per year</span>
+              <span className={styles.statValue}>
+                {medianLoss !== null ? fmtKm2(medianLoss) : "—"}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Percent forest lost</span>
+              <span className={styles.statValue}>
+                {pctLost !== null ? `${pctLost.toFixed(1)}%` : "—"}
+              </span>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Impact cards */}
       <div className={styles.impactGrid}>
         <div className={styles.impactCard}>
           <span className={styles.impactLabel}>RSPO certification</span>
           <RspoDonut certified={rspoCertified} total={millCount} />
+          <div className={styles.riskDivider} />
+          <RiskDistribution mills={mills} />
         </div>
 
         <AreaBreakdownCard
@@ -434,6 +740,11 @@ export function MillsClient({
           totalForestLoss={totalForestLoss}
         />
       </div>
+
+      {/* Annual forest loss quartile chart */}
+      {forestLossQuartiles && forestLossQuartiles.length > 0 && (
+        <ForestLossQuartileChart data={forestLossQuartiles} />
+      )}
 
       {/* Mill directory table */}
       <section>

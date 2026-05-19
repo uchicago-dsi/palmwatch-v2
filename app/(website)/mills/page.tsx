@@ -1,6 +1,9 @@
 import pageStyles from "@/components/page-layout.module.css";
 import { loadMillSummaryStats } from "@/lib/server/aggregates-data";
-import { loadMillDirectory } from "@/lib/server/mill-directory-data";
+import {
+  loadMillDirectory,
+  loadMillForestLossQuartiles,
+} from "@/lib/server/mill-directory-data";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
 import styles from "./mills.module.css";
@@ -9,11 +12,13 @@ import { MillsClient } from "./mills-client";
 export const revalidate = 60;
 
 export default async function Page() {
-  const [millStats, millDirectory, landingPageContent] = await Promise.all([
-    loadMillSummaryStats(),
-    loadMillDirectory(),
-    cmsClient.getLandingPageContent("mills"),
-  ]);
+  const [millStats, millDirectory, landingPageContent, lossQuartiles] =
+    await Promise.all([
+      loadMillSummaryStats(),
+      loadMillDirectory(),
+      cmsClient.getLandingPageContent("mills"),
+      loadMillForestLossQuartiles(),
+    ]);
 
   if (!millStats) {
     return (
@@ -25,7 +30,15 @@ export default async function Page() {
     );
   }
 
-  const { millCount, rspoCertified, totalArea, totalForestArea, totalForestLoss } = millStats;
+  const {
+    millCount,
+    rspoCertified,
+    totalArea,
+    totalForestArea,
+    totalForestLoss,
+    countryCount,
+    forestLossByYear,
+  } = millStats;
 
   const mills = millDirectory ?? [];
 
@@ -33,6 +46,9 @@ export default async function Page() {
     <main className={pageStyles.pageShell}>
       <div className={pageStyles.pageInner}>
         <MillsClient
+          countryCount={countryCount ?? 0}
+          forestLossByYear={forestLossByYear}
+          forestLossQuartiles={lossQuartiles ?? undefined}
           millCount={millCount ?? 0}
           mills={mills}
           rspoCertified={rspoCertified}
