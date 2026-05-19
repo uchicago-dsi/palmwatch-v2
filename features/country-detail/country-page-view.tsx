@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import {
   Area,
+  Bar,
   ComposedChart,
   Line,
   ResponsiveContainer,
@@ -12,13 +13,7 @@ import {
 } from "recharts";
 import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
-import {
-  cumulativeLossColumn,
-  fullYearRange,
-  maxYear,
-  minYear,
-  yearRange,
-} from "@/config/years";
+import { cumulativeLossColumn, maxYear, yearRange } from "@/config/years";
 import type { UmlData } from "@/domain";
 import type { CountryPagePayload } from "@/domain/schemas/entity-pages";
 import styles from "./country.module.css";
@@ -42,6 +37,7 @@ export type CountryPageViewProps = {
 };
 
 type CumulativePoint = { year: number; cumulativeKm2: number };
+type YearlyPoint = { year: number; annualKm2: number };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -65,8 +61,13 @@ function scoreColor(score: number, theme: "dark" | "light"): string {
   return theme === "dark" ? "#FDE047" : "#CA8A04";
 }
 
-function millTreelossSinceMinYear(mill: UmlData): number {
-  return fullYearRange.reduce(
+const allYearsSince2001 = Array.from(
+  { length: maxYear - 2001 + 1 },
+  (_, i) => 2001 + i
+);
+
+function millTreelossSince2001(mill: UmlData): number {
+  return allYearsSince2001.reduce(
     (s, year) =>
       s + (Number(mill[`treeloss_km_${year}` as keyof UmlData]) || 0),
     0
@@ -75,7 +76,7 @@ function millTreelossSinceMinYear(mill: UmlData): number {
 
 function computeForestTimeseries(mills: UmlData[]): CumulativePoint[] {
   let cumulative = 0;
-  return fullYearRange.map((year) => {
+  return allYearsSince2001.map((year) => {
     const col = `treeloss_km_${year}` as keyof UmlData;
     const annual = mills.reduce(
       (sum, mill) => sum + (Number(mill[col]) || 0),
@@ -83,6 +84,17 @@ function computeForestTimeseries(mills: UmlData[]): CumulativePoint[] {
     );
     cumulative += annual;
     return { year, cumulativeKm2: Math.round(cumulative) };
+  });
+}
+
+function computeYearlyTimeseries(mills: UmlData[]): YearlyPoint[] {
+  return allYearsSince2001.map((year) => {
+    const col = `treeloss_km_${year}` as keyof UmlData;
+    const annual = mills.reduce(
+      (sum, mill) => sum + (Number(mill[col]) || 0),
+      0
+    );
+    return { year, annualKm2: Math.round(annual) };
   });
 }
 
@@ -283,6 +295,56 @@ function CumulativeChart({ data }: { data: CumulativePoint[] }) {
   );
 }
 
+// ── Yearly chart ─────────────────────────────────────────────────────────────
+
+function YearlyChart({ data }: { data: YearlyPoint[] }) {
+  const { theme } = useTheme();
+  const barColor = theme === "dark" ? "#F09595" : "#E24B4A";
+
+  if (data.length === 0) {
+    return <div className={styles.chartBody} />;
+  }
+
+  const maxVal = Math.max(...data.map((d) => d.annualKm2), 1);
+  const firstYear = data[0].year;
+  const lastYear = data[data.length - 1].year;
+  const midYear = Math.round((firstYear + lastYear) / 2);
+
+  return (
+    <ResponsiveContainer height="100%" width="100%">
+      <ComposedChart
+        data={data}
+        margin={{ top: 8, right: 56, left: 4, bottom: 0 }}
+      >
+        <XAxis
+          axisLine={{ stroke: "hsl(var(--bc) / 0.1)" }}
+          dataKey="year"
+          tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
+          tickLine={false}
+          ticks={[firstYear, midYear, lastYear]}
+        />
+        <YAxis
+          axisLine={false}
+          domain={[0, maxVal]}
+          orientation="left"
+          tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
+          tickFormatter={formatKm2}
+          tickLine={false}
+          ticks={[0, Math.round(maxVal / 2), maxVal]}
+          width={40}
+        />
+        <Bar
+          dataKey="annualKm2"
+          fill={barColor}
+          isAnimationActive={false}
+          opacity={0.75}
+          radius={[2, 2, 0, 0]}
+        />
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
+}
+
 // ── Province bar chart ────────────────────────────────────────────────────────
 
 type ProvinceRow = { name: string; loss: number };
@@ -295,7 +357,7 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
       if (!prov) {
         continue;
       }
-      map.set(prov, (map.get(prov) ?? 0) + millTreelossSinceMinYear(mill));
+      map.set(prov, (map.get(prov) ?? 0) + millTreelossSince2001(mill));
     }
     return [...map.entries()]
       .map(([name, loss]) => ({ name, loss }))
@@ -314,7 +376,7 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
       <div className={styles.provinceTitleRow}>
         <p className={styles.provinceTitle}>Forest loss by province</p>
         <span className={styles.provinceSub}>
-          km² lost since {minYear} (top {rows.length})
+          km² lost since 2001 (top {rows.length})
         </span>
       </div>
       <div className={styles.provinceList}>
@@ -340,10 +402,15 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
 // ── Mills table ───────────────────────────────────────────────────────────────
 
 const MILLS_PAGE_SIZE = 20;
-type MillSortKey = "name" | "score" | "province" | "district";
+type MillSortKey =
+  | "name"
+  | "score"
+  | "country"
+  | "province"
+  | "district"
+  | "parentCompany";
 
 function MillsTable({ mills }: { mills: UmlData[] }) {
-  const { theme } = useTheme();
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState<MillSortKey>("score");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -359,8 +426,9 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
     return mills.filter(
       (m) =>
         m["Mill Name"].toLowerCase().includes(lq) ||
+        (m.Country ?? "").toLowerCase().includes(lq) ||
         (m.Province ?? "").toLowerCase().includes(lq) ||
-        (m.District ?? "").toLowerCase().includes(lq)
+        (m["Parent Company"] ?? "").toLowerCase().includes(lq)
     );
   }, [mills, q]);
 
@@ -375,8 +443,10 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
         const fieldMap: Record<MillSortKey, keyof UmlData> = {
           name: "Mill Name",
           score: "risk_score_current",
+          country: "Country",
           province: "Province",
           district: "District",
+          parentCompany: "Parent Company",
         };
         const av = String(a[fieldMap[sortKey]] ?? "");
         const bv = String(b[fieldMap[sortKey]] ?? "");
@@ -422,7 +492,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
               aria-label="Filter mills"
               className={styles.filterInput}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Filter by name, province, district…"
+              placeholder="Filter by name, province, company…"
               type="search"
               value={q}
             />
@@ -447,7 +517,17 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                 onClick={() => handleSort("score")}
               >
                 <span className={styles.thInner}>
-                  Risk <SortIcon active={sortKey === "score"} dir={sortDir} />
+                  Recent score{" "}
+                  <SortIcon active={sortKey === "score"} dir={sortDir} />
+                </span>
+              </th>
+              <th
+                className={`${styles.thCountry} ${sortKey === "country" ? styles.thActive : ""}`}
+                onClick={() => handleSort("country")}
+              >
+                <span className={styles.thInner}>
+                  Country{" "}
+                  <SortIcon active={sortKey === "country"} dir={sortDir} />
                 </span>
               </th>
               <th
@@ -466,6 +546,18 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                 <span className={styles.thInner}>
                   District{" "}
                   <SortIcon active={sortKey === "district"} dir={sortDir} />
+                </span>
+              </th>
+              <th
+                className={`${styles.thParent} ${sortKey === "parentCompany" ? styles.thActive : ""}`}
+                onClick={() => handleSort("parentCompany")}
+              >
+                <span className={styles.thInner}>
+                  Parent company{" "}
+                  <SortIcon
+                    active={sortKey === "parentCompany"}
+                    dir={sortDir}
+                  />
                 </span>
               </th>
               <th className={styles.thArrow} />
@@ -498,14 +590,17 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                     </td>
                     <td className={styles.tdScore}>
                       {score !== null && (
-                        <span
-                          className={styles.riskDotCell}
-                          style={{ background: scoreColor(score, theme) }}
-                        />
+                        <span className={styles.scoreNum}>
+                          {score.toFixed(2)}
+                        </span>
                       )}
                     </td>
+                    <td className={styles.tdCountry}>{mill.Country}</td>
                     <td className={styles.tdProv}>{mill.Province}</td>
                     <td className={styles.tdDist}>{mill.District}</td>
+                    <td className={styles.tdParent}>
+                      {mill["Parent Company"]}
+                    </td>
                     <td className={styles.tdArrow}>
                       <svg
                         aria-hidden
@@ -528,7 +623,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
               })
             ) : (
               <tr>
-                <td className={styles.noResults} colSpan={5}>
+                <td className={styles.noResults} colSpan={7}>
                   No mills match &ldquo;{q}&rdquo;
                 </td>
               </tr>
@@ -594,31 +689,27 @@ export function CountryPageView({
     [millsTyped]
   );
 
-  const forestLossSinceMinYear = useMemo(
+  const yearlyTimeseries = useMemo(
+    () => computeYearlyTimeseries(millsTyped),
+    [millsTyped]
+  );
+
+  const forestLossSince2001 = useMemo(
     () =>
-      millsTyped.reduce((sum, mill) => sum + millTreelossSinceMinYear(mill), 0),
+      millsTyped.reduce((sum, mill) => sum + millTreelossSince2001(mill), 0),
     [millsTyped]
   );
 
   const forestLossPct = useMemo(() => {
-    const preMinYearRange = Array.from(
-      { length: minYear - 2001 },
-      (_, i) => 2001 + i
+    const forestAreaAt2000 = millsTyped.reduce(
+      (sum, mill) => sum + (Number(mill.km_forest_area_00) || 0),
+      0
     );
-    const forestAreaAtMinYear = millsTyped.reduce((sum, mill) => {
-      const base = Number(mill.km_forest_area_00) || 0;
-      const preLoss = preMinYearRange.reduce(
-        (s, year) =>
-          s + (Number(mill[`treeloss_km_${year}` as keyof UmlData]) || 0),
-        0
-      );
-      return sum + Math.max(0, base - preLoss);
-    }, 0);
-    if (forestAreaAtMinYear === 0) {
+    if (forestAreaAt2000 === 0) {
       return null;
     }
-    return (forestLossSinceMinYear / forestAreaAtMinYear) * 100;
-  }, [millsTyped, forestLossSinceMinYear]);
+    return (forestLossSince2001 / forestAreaAt2000) * 100;
+  }, [millsTyped, forestLossSince2001]);
 
   const normalizedBrandUsage = useMemo(
     () => brandUsage.map((b) => ({ ...b, years: b.years.map(Number) })),
@@ -650,7 +741,9 @@ export function CountryPageView({
           </div>
         </div>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Deforestation score</span>
+          <span className={styles.statLabel}>
+            Average recent deforestation score
+          </span>
           <div className={styles.statValueRow}>
             <span
               className={styles.scoreDot}
@@ -663,17 +756,17 @@ export function CountryPageView({
         </div>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>
-            Cumulative loss ({minYear}–{maxYear})
+            Cumulative loss (2001–{maxYear})
           </span>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>
-              {formatKm2(forestLossSinceMinYear)} km²
+              {formatKm2(forestLossSince2001)} km²
             </span>
           </div>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>
-            Forest area lost (since {minYear})
+            Forest area lost (2001–{maxYear})
           </span>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>
@@ -683,27 +776,37 @@ export function CountryPageView({
         </div>
       </div>
 
-      {/* Map + chart */}
-      <div className={styles.visualGrid}>
-        <div className={styles.mapCard}>
-          <div className={styles.mapFrame}>
-            <QueryProvider>
-              <PalmwatchMapDynamic
-                choroplethColumn={cumulativeLossColumn}
-                choroplethScheme="cumulativeLoss"
-                dataIdColumn="UML ID"
-                dataTable={millsTyped}
-                geoDataUrl="/data/mill-catchment.geojson"
-                geoIdColumn="UML ID"
-              />
-            </QueryProvider>
+      {/* Map full width */}
+      <div className={styles.mapCard}>
+        <div className={styles.mapFrame}>
+          <QueryProvider>
+            <PalmwatchMapDynamic
+              choroplethColumn={cumulativeLossColumn}
+              choroplethScheme="cumulativeLoss"
+              dataIdColumn="UML ID"
+              dataTable={millsTyped}
+              geoDataUrl="/data/mill-catchment.geojson"
+              geoIdColumn="UML ID"
+              showLayerStepper={true}
+            />
+          </QueryProvider>
+        </div>
+      </div>
+
+      {/* Charts row */}
+      <div className={styles.chartsRow}>
+        <div className={styles.chartCard}>
+          <p className={styles.chartTitle}>Cumulative forest loss</p>
+          <p className={styles.chartCaption}>km² lost since 2001</p>
+          <div className={styles.chartBody}>
+            <CumulativeChart data={forestTimeseries} />
           </div>
         </div>
         <div className={styles.chartCard}>
-          <p className={styles.chartTitle}>Cumulative forest loss</p>
-          <p className={styles.chartCaption}>km² lost since {minYear}</p>
+          <p className={styles.chartTitle}>Annual forest loss</p>
+          <p className={styles.chartCaption}>km² lost per year</p>
           <div className={styles.chartBody}>
-            <CumulativeChart data={forestTimeseries} />
+            <YearlyChart data={yearlyTimeseries} />
           </div>
         </div>
       </div>

@@ -92,20 +92,7 @@
   border-radius: 50%;
 }
 
-/* ── Visual grid (map + chart) ───────────────────────────────────────────────── */
-
-.visualGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  align-items: start;
-}
-
-@media (max-width: 768px) {
-  .visualGrid {
-    grid-template-columns: 1fr;
-  }
-}
+/* ── Map (full width) ────────────────────────────────────────────────────────── */
 
 .mapCard {
   overflow: hidden;
@@ -117,20 +104,35 @@
 .mapFrame {
   position: relative;
   width: 100%;
-  height: 380px;
+  height: 440px;
 }
 
 .mapPlaceholder {
   width: 100%;
-  height: 380px;
+  height: 440px;
   background: hsl(var(--b2));
+}
+
+/* ── Charts row (cumulative + yearly side by side) ───────────────────────────── */
+
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
 }
 
 .chartCard {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  height: 380px;
+  height: 280px;
   padding: 20px;
   background: hsl(var(--b1));
   border: 1px solid hsl(var(--bc) / 0.1);
@@ -431,8 +433,12 @@
 }
 .thScore {
   composes: th;
-  width: 56px;
-  text-align: center;
+  width: 110px;
+  text-align: right;
+}
+.thCountry {
+  composes: th;
+  width: 110px;
 }
 .thProv {
   composes: th;
@@ -441,6 +447,10 @@
 .thDist {
   composes: th;
   width: 120px;
+}
+.thParent {
+  composes: th;
+  width: 220px;
 }
 .thArrow {
   composes: th;
@@ -473,21 +483,24 @@
 }
 .tdScore {
   composes: td;
-  text-align: center;
+  text-align: right;
 }
-
-.riskDotCell {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  vertical-align: middle;
-  border-radius: 9999px;
+.scoreNum {
+  font-variant-numeric: tabular-nums;
+}
+.tdCountry {
+  composes: td;
+  color: hsl(var(--bc) / 0.7);
 }
 .tdProv {
   composes: td;
   color: hsl(var(--bc) / 0.7);
 }
 .tdDist {
+  composes: td;
+  color: hsl(var(--bc) / 0.7);
+}
+.tdParent {
   composes: td;
   color: hsl(var(--bc) / 0.7);
 }
