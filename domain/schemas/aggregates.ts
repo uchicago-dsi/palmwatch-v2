@@ -30,9 +30,22 @@ export type MillSummaryStatsPayload = z.infer<
   typeof millSummaryStatsPayloadSchema
 >;
 
+const countryStatRowSchema = z
+  .object({
+    Country: z.string(),
+    count: z.number(),
+    pctForestLoss: z.number(),
+    pastRisk: z.number(),
+    currentRisk: z.number(),
+    futureRisk: z.number(),
+  })
+  .passthrough();
+
+export type CountryStatRow = z.infer<typeof countryStatRowSchema>;
+
 /** `aggregates/countries-summary.json`. */
 export const countriesSummaryPayloadSchema = z.object({
-  countryStats: z.array(z.record(z.unknown())),
+  countryStats: z.array(countryStatRowSchema),
 });
 
 export type CountriesSummaryPayload = z.infer<
