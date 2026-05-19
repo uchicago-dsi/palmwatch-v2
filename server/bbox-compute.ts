@@ -6,6 +6,7 @@ import {
 } from "@/domain/schemas/bbox-data";
 import type { FullManifestValidated } from "@/domain/schemas/full-manifest";
 import { fullManifestSchema } from "@/domain/schemas/full-manifest";
+import { umlRowNumber } from "@/lib/data-row";
 import { loadPrecomputedParsed } from "@/server/load-precomputed-parsed";
 
 export type FullManifest = FullManifestValidated;
@@ -29,10 +30,15 @@ function quantileSorted(sorted: number[], q: number): number {
   const pos = (sorted.length - 1) * q;
   const lo = Math.floor(pos);
   const hi = Math.ceil(pos);
-  if (lo === hi) {
-    return sorted[lo]!;
+  const loVal = sorted[lo];
+  const hiVal = sorted[hi];
+  if (loVal === undefined || hiVal === undefined) {
+    return Number.NaN;
   }
-  return sorted[lo]! + (sorted[hi]! - sorted[lo]!) * (pos - lo);
+  if (lo === hi) {
+    return loVal;
+  }
+  return loVal + (hiVal - loVal) * (pos - lo);
 }
 
 function quantile(values: number[], q: number): number {
@@ -47,7 +53,7 @@ function computeBrandUsage(companies: CompanyData[]) {
     if (!map.has(b)) {
       map.set(b, new Set());
     }
-    map.get(b)!.add(Number(c.report_year));
+    map.get(b)?.add(Number(c.report_year));
   }
   return [...map.entries()]
     .map(([consumer_brand, years]) => ({
@@ -64,7 +70,7 @@ function computeQuantileTimeseries(mills: UmlData[]) {
     const colParts = col.split("_");
     const year = Number.parseInt(colParts.at(-1) || "0", 10);
     const values = mills
-      .map((d) => Number((d as Record<string, unknown>)[col]))
+      .map((d) => umlRowNumber(d, col))
       .filter(Number.isFinite);
     const row: Record<string, number | string> = { year };
     for (const q of quantiles) {
@@ -88,7 +94,7 @@ function summaryStats(mills: UmlData[]) {
   };
 }
 
-export async function loadAllMillRows(req: Request): Promise<UmlData[]> {
+export function loadAllMillRows(req: Request): Promise<UmlData[]> {
   return mergeFullShards(req);
 }
 
@@ -110,7 +116,7 @@ export async function mergeFullShards(req: Request): Promise<UmlData[]> {
       if (!r.ok) {
         throw new Error(`invalid shard ${path}`);
       }
-      return r.data as UmlData[];
+      return r.data as unknown as UmlData[];
     })
   );
   return chunks.flat();

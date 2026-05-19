@@ -1,14 +1,14 @@
 import { cumulativeYearRange } from "@/config/years";
 import { loadPrecomputedJson } from "@/server/load-precomputed";
 
-export type MillDirEntry = {
-  label: string;
-  href: string;
+export interface MillDirEntry {
   country: string;
+  href: string;
+  label: string;
   province: string;
-  rspo: boolean;
   riskScore: number | null;
-};
+  rspo: boolean;
+}
 
 function rowToEntry(row: Record<string, unknown>): MillDirEntry {
   const id = row["UML ID"] as string;
@@ -25,12 +25,12 @@ function rowToEntry(row: Record<string, unknown>): MillDirEntry {
   };
 }
 
-export type ForestLossQuartilePoint = {
-  year: number;
-  q1: number;
+export interface ForestLossQuartilePoint {
   median: number;
+  q1: number;
   q3: number;
-};
+  year: number;
+}
 
 function quantile(sorted: number[], q: number): number {
   if (sorted.length === 0) {
@@ -46,14 +46,14 @@ function quantile(sorted: number[], q: number): number {
 
 async function loadAllShards(
   req?: Request
-): Promise<Array<Record<string, unknown>>> {
+): Promise<Record<string, unknown>[]> {
   const manifest = await loadPrecomputedJson<{ shardCount: number }>(
     "full-manifest.json",
     req
   );
   const shards = await Promise.all(
     Array.from({ length: manifest.shardCount }, (_, i) =>
-      loadPrecomputedJson<Array<Record<string, unknown>>>(
+      loadPrecomputedJson<Record<string, unknown>[]>(
         `full/shard-${String(i).padStart(5, "0")}.json`,
         req
       )

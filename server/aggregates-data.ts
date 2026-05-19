@@ -1,6 +1,7 @@
 import type {
   CountriesSummaryPayload,
   MillSummaryStatsPayload,
+  RankingBrandRow,
 } from "@/domain/schemas/aggregates";
 import {
   countriesSummaryPayloadSchema,
@@ -33,7 +34,7 @@ export async function loadCountriesSummary(
 
 export async function loadRankingBrands(
   req?: Request
-): Promise<Record<string, unknown>[] | null> {
+): Promise<RankingBrandRow[] | null> {
   const r = await loadPrecomputedParsed(
     "aggregates/ranking-brands.json",
     rankingBrandsPayloadSchema,

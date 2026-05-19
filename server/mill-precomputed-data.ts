@@ -2,10 +2,10 @@ import type { BrandData, UmlData } from "@/domain";
 import { millPrecomputedEnvelopeSchema } from "@/domain/schemas/mill-precomputed";
 import { loadPrecomputedParsed } from "@/server/load-precomputed-parsed";
 
-export type MillPrecomputedPayload = {
-  info: UmlData[];
+export interface MillPrecomputedPayload {
   brands: BrandData;
-};
+  info: UmlData[];
+}
 
 /** Loads and validates mill precomputed JSON envelope. Returns `null` when invalid or missing. */
 export async function loadMillPrecomputedPayload(

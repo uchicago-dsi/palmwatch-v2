@@ -5,12 +5,12 @@ import { loadMedianMill } from "@/server/median-mill-data";
 import type { MillPrecomputedPayload } from "@/server/mill-precomputed-data";
 import { loadMillPrecomputedPayload } from "@/server/mill-precomputed-data";
 
-export type MillPageModel = {
-  uml: string;
-  millPayload: MillPrecomputedPayload;
+export interface MillPageModel {
   medianMill: Record<string, number>[] | null;
   millContent: Partial<BrandSchema> | undefined;
-};
+  millPayload: MillPrecomputedPayload;
+  uml: string;
+}
 
 /**
  * Loads validated mill JSON, aggregate medians, and optional Sanity UML profile.

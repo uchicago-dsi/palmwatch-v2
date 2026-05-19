@@ -5,11 +5,11 @@ import { precomputedSlug } from "@/lib/precomputed-slug";
 import cmsClient from "@/sanity/lib/client";
 import { loadBrandPrecomputedPayload } from "@/server/brand-precomputed-data";
 
-export type BrandPageModel = {
+export interface BrandPageModel {
   brand: string;
-  brandPre: BrandPrecomputedPayload;
   brandInfo: BrandSchema;
-};
+  brandPre: BrandPrecomputedPayload;
+}
 
 /**
  * Loads Sanity brand profile and validated precomputed stats for the brand route.

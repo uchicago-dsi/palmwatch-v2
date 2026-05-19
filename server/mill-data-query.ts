@@ -1,21 +1,80 @@
 import path from "node:path";
-import { all, desc, escape, loadArrow, op } from "arquero";
+import { all, escape as aqEscape, desc, loadArrow, op } from "arquero";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 import { fullYearRangeColumns, maxYear } from "@/config/years";
 import type { CompanyData, UmlData } from "@/domain";
+import type { BrandUsageRow } from "@/domain/brand-usage";
+import type {
+  CountryStatRow,
+  ForestLossYearPoint,
+} from "@/domain/schemas/aggregates";
+import { arqueroObjects, umlRowNumber } from "@/lib/data-row";
+import type { LossTimeseriesRow } from "@/lib/rename-output-columns";
+import type {
+  BrandInfoPayload,
+  BrandOwnerRollup,
+  CountriesSummaryPayload,
+  GroupInfoPayload,
+  MedianMillRow,
+  MillSummaryStats,
+  MillSummaryStatsPayload,
+  OwnerBrandRollup,
+  OwnerInfoPayload,
+  RankingBrandRow,
+  RollupEntityPayload,
+  SearchListPayload,
+  UniqueCounts,
+} from "./mill-data-query-types";
 import { buildTreelossRollups } from "./treeloss-rollups.generated";
+
+export type {
+  BrandInfoPayload,
+  BrandOwnerRollup,
+  CountriesSummaryPayload,
+  GroupInfoPayload,
+  MedianMillRow,
+  MillSummaryStats,
+  MillSummaryStatsPayload,
+  OwnerBrandRollup,
+  OwnerInfoPayload,
+  RankingBrandRow,
+  RollupEntityPayload,
+  SearchListPayload,
+  UniqueCounts,
+} from "./mill-data-query-types";
+
+const TRAILING_SLASH_REGEX = /\/$/;
+const TREELOSS_KM_YEAR_REGEX = /^treeloss_km_\d{4}$/;
 
 class MillDataQuery {
   companies?: ColumnTable;
   uml?: ColumnTable;
   initialized = false;
-  cache: Record<string, any> = {};
+  cache: Record<string, unknown> = {};
+
+  private requireUml(): ColumnTable {
+    if (!this.uml) {
+      throw new Error(
+        "MillDataQuery.init() must be called before accessing UML data"
+      );
+    }
+    return this.uml;
+  }
+
+  private requireCompanies(): ColumnTable {
+    if (!this.companies) {
+      throw new Error(
+        "MillDataQuery.init() must be called before accessing company data"
+      );
+    }
+    return this.companies;
+  }
 
   async init(basePath: string = path.join(process.cwd(), "public", "data")) {
     if (this.initialized) {
       return;
     }
-    const root = basePath.replace(/\/$/, "");
+    const root = basePath.replace(TRAILING_SLASH_REGEX, "");
     const [uml, companies] = await Promise.all([
       loadArrow(`${root}/uml.arrow`, { columns: all() }),
       loadArrow(`${root}/companies.arrow`, { columns: all() }),
@@ -27,52 +86,51 @@ class MillDataQuery {
   }
 
   getMillName(name: string) {
-    return this.uml!.filter(escape((d: UmlData) => d["Mill Name"] === name));
+    return this.uml?.filter(aqEscape((d: UmlData) => d["Mill Name"] === name));
   }
 
   getUml(umlId: string) {
-    return this.uml!.filter(escape((d: UmlData) => d["UML ID"] === umlId));
+    return this.uml?.filter(aqEscape((d: UmlData) => d["UML ID"] === umlId));
   }
   getBrandUsage(table: ColumnTable) {
     return table
       .orderby("report_year")
       .groupby("consumer_brand")
       .derive({
-        years: (d: CompanyData) => op.array_agg_distinct(d["report_year"]),
+        years: (d: CompanyData) => op.array_agg_distinct(d.report_year),
       })
       .select("consumer_brand", "years")
       .dedupe("consumer_brand");
   }
 
-  getBrandUsageByUml(umlId: string) {
-    const data = this.companies!.filter(
-      escape((d: CompanyData) => d["UML ID"] === umlId)
+  getBrandUsageByUml(umlId: string): BrandUsageRow[] {
+    const data = this.requireCompanies().filter(
+      aqEscape((d: CompanyData) => d["UML ID"] === umlId)
     );
-    return this.getBrandUsage(data).objects();
+    return arqueroObjects<BrandUsageRow>(this.getBrandUsage(data));
   }
 
-  getBrandUsageByOwner(owner: string) {
-    const data = this.uml!.filter(
-      escape((d: UmlData) => d["Parent Company"] === owner)
-    ).join(this.companies!, ["UML ID", "UML ID"]);
-    return this.getBrandUsage(data).objects();
+  getBrandUsageByOwner(owner: string): BrandUsageRow[] {
+    const data = this.requireUml()
+      .filter(aqEscape((d: UmlData) => d["Parent Company"] === owner))
+      .join(this.requireCompanies(), ["UML ID", "UML ID"]);
+    return arqueroObjects<BrandUsageRow>(this.getBrandUsage(data));
   }
 
   getBrandInfo(
     brand: string,
     cols: string[],
     quantiles: number[] = [0.25, 0.5, 0.75]
-  ) {
-    const companies = this.companies!.filter(
-      escape((d: CompanyData) => d["consumer_brand"] === brand)
-    )
+  ): BrandInfoPayload {
+    const companies = this.requireCompanies()
+      .filter(aqEscape((d: CompanyData) => d.consumer_brand === brand))
       .groupby("UML ID")
       .derive({
-        years: (d: CompanyData) => op.array_agg_distinct(d["report_year"]),
+        years: (d: CompanyData) => op.array_agg_distinct(d.report_year),
       })
       .select("UML ID", "years")
       .dedupe("UML ID")
-      .join(this.uml!, ["UML ID", "UML ID"]);
+      .join(this.requireUml(), ["UML ID", "UML ID"]);
 
     const quantileResults = this.getQuantileTimeseries(
       companies,
@@ -86,19 +144,18 @@ class MillDataQuery {
       })
       .dedupe("Parent Company")
       .select(["Parent Company", "Country", "count"])
-      .orderby(desc("count"))
-      .objects();
+      .orderby(desc("count"));
     return {
-      umlInfo: companies.objects(),
+      umlInfo: arqueroObjects<UmlData>(companies),
       timeseries: quantileResults,
-      owners,
+      owners: arqueroObjects<BrandOwnerRollup>(owners),
     };
   }
 
-  getSummaryStats(table: ColumnTable) {
+  getSummaryStats(table: ColumnTable): MillSummaryStats {
     const averageCurrentRisk = table
       .rollup({
-        mean: (d: UmlData) => op.mean(d["risk_score_current"]),
+        mean: (d: UmlData) => op.mean(d.risk_score_current),
       })
       .objects() as { mean: number }[];
     const uniqueMills = table.count().objects() as { count: number }[];
@@ -120,62 +177,62 @@ class MillDataQuery {
       uniqueGroups: uniqueGroups[0].count,
     };
   }
-  getBrandStats(brand: string) {
-    const companyMills = this.companies!.select(["consumer_brand", "UML ID"])
-      .filter(escape((d: CompanyData) => d["consumer_brand"] === brand))
+  getBrandStats(brand: string): MillSummaryStats {
+    const companyMills = this.requireCompanies()
+      .select(["consumer_brand", "UML ID"])
+      .filter(aqEscape((d: CompanyData) => d.consumer_brand === brand))
       .select("UML ID")
       .dedupe("UML ID")
-      .join(this.uml!, ["UML ID", "UML ID"]);
+      .join(this.requireUml(), ["UML ID", "UML ID"]);
 
     return this.getSummaryStats(companyMills);
   }
 
-  getOwnerStats(owner: string) {
-    const ownerMills = this.uml!.filter(
-      escape((d: UmlData) => d["Parent Company"] === owner)
-    ).dedupe("UML ID");
+  getOwnerStats(owner: string): MillSummaryStats {
+    const ownerMills = this.requireUml()
+      .filter(aqEscape((d: UmlData) => d["Parent Company"] === owner))
+      .dedupe("UML ID");
     return this.getSummaryStats(ownerMills);
   }
-  getFullData(data: ColumnTable) {
+  getFullData(data: ColumnTable): RollupEntityPayload {
     const joinedData = data
       .select("UML ID")
-      .join_right(this.companies!, ["UML ID", "UML ID"]);
+      .join_right(this.requireCompanies(), ["UML ID", "UML ID"]);
 
     const summaryStats = this.getSummaryStats(data);
     const brandUsage = this.getBrandUsage(joinedData);
     const timeseries = this.getQuantileTimeseries(data);
-    const totalForestLoss = data
-      .dedupe("UML ID")
-      .rollup({
-        totlaForestLoss: (d: UmlData) => op.sum(d.sum_of_treeloss_km as any),
+    const forestLossRows = arqueroObjects<{ totlaForestLoss: number }>(
+      data.dedupe("UML ID").rollup({
+        totlaForestLoss: () => op.sum("sum_of_treeloss_km"),
       })
-      // @ts-expect-error
-      .objects()[0].totlaForestLoss;
+    );
+    const totlaForestLoss = forestLossRows[0]?.totlaForestLoss ?? 0;
     return {
       ...summaryStats,
-      brandUsage: brandUsage.objects(),
-      mills: data.objects(),
+      brandUsage: arqueroObjects<BrandUsageRow>(brandUsage),
+      mills: arqueroObjects<UmlData>(data),
       timeseries,
-      totalForestLoss,
+      totalForestLoss: totlaForestLoss,
     };
   }
-  getOwnerData(owner: string) {
-    const ownerMills = this.uml!.filter(
-      escape((d: UmlData) => d["Parent Company"] === owner)
-    ).dedupe("UML ID");
+  getOwnerData(owner: string): RollupEntityPayload {
+    const ownerMills = this.requireUml()
+      .filter(aqEscape((d: UmlData) => d["Parent Company"] === owner))
+      .dedupe("UML ID");
     return this.getFullData(ownerMills);
   }
 
-  getGroupData(group: string) {
-    const groupMills = this.uml!.filter(
-      escape((d: UmlData) => d["Group Name"] === group)
-    ).dedupe("UML ID");
+  getGroupData(group: string): RollupEntityPayload {
+    const groupMills = this.requireUml()
+      .filter(aqEscape((d: UmlData) => d["Group Name"] === group))
+      .dedupe("UML ID");
     return this.getFullData(groupMills);
   }
-  getCountryData(country: string) {
-    const groupMills = this.uml!.filter(
-      escape((d: UmlData) => d["Country"] === country)
-    ).dedupe("UML ID");
+  getCountryData(country: string): RollupEntityPayload {
+    const groupMills = this.requireUml()
+      .filter(aqEscape((d: UmlData) => d.Country === country))
+      .dedupe("UML ID");
     return this.getFullData(groupMills);
   }
 
@@ -183,21 +240,20 @@ class MillDataQuery {
     data: ColumnTable,
     cols: string[] = fullYearRangeColumns,
     quantiles: number[] = [0.25, 0.5, 0.75]
-  ) {
-    const quantileResults: Record<string, any>[] = [];
+  ): LossTimeseriesRow[] {
+    const quantileResults: LossTimeseriesRow[] = [];
     for (const col of cols) {
       const colParts = col.split("_");
-      const year = Number.parseInt(colParts.at(-1) || "0");
-      const quantileRollup = quantiles.reduce(
-        (acc, q) => ({
-          ...acc,
-          [`q${q}`]: op.quantile(col, q),
-        }),
-        {}
-      );
-      const _d = data.select(col).rollup(quantileRollup);
+      const year = Number.parseInt(colParts.at(-1) || "0", 10);
+      const quantileRollup: Record<string, ReturnType<typeof op.quantile>> = {};
+      for (const q of quantiles) {
+        quantileRollup[`q${q}`] = op.quantile(col, q);
+      }
+      const rollupRow = arqueroObjects<Record<string, number>>(
+        data.select(col).rollup(quantileRollup)
+      )[0];
       quantileResults.push({
-        ..._d.objects()[0],
+        ...(rollupRow as Pick<LossTimeseriesRow, "q0.25" | "q0.5" | "q0.75">),
         year,
       });
     }
@@ -205,14 +261,14 @@ class MillDataQuery {
   }
 
   /** Per-year sum of `treeloss_km_*` across deduped mills, plus running cumulative. */
-  getForestLossByYear() {
-    const mills = this.uml!.dedupe("UML ID").objects() as UmlData[];
+  getForestLossByYear(): ForestLossYearPoint[] {
+    const mills = arqueroObjects<UmlData>(this.requireUml().dedupe("UML ID"));
     if (mills.length === 0) {
       return [];
     }
 
     const years = Object.keys(mills[0])
-      .filter((key) => /^treeloss_km_\d{4}$/.test(key))
+      .filter((key) => TREELOSS_KM_YEAR_REGEX.test(key))
       .map((key) => Number.parseInt(key.replace("treeloss_km_", ""), 10))
       .sort((a, b) => a - b);
 
@@ -236,10 +292,9 @@ class MillDataQuery {
     owner: string,
     cols: string[],
     quantiles: number[] = [0.25, 0.5, 0.75]
-  ) {
-    const ownerMills = this.uml!.filter(
-      escape((d: UmlData) => d["Parent Company"] === owner)
-    )
+  ): OwnerInfoPayload {
+    const ownerMills = this.requireUml()
+      .filter(aqEscape((d: UmlData) => d["Parent Company"] === owner))
       .groupby("UML ID")
       .dedupe("UML ID");
 
@@ -249,19 +304,18 @@ class MillDataQuery {
       quantiles
     );
     const brands = ownerMills
-      .join(this.companies!, ["UML ID", "UML ID"])
+      .join(this.requireCompanies(), ["UML ID", "UML ID"])
       .groupby("consumer_brand")
       .derive({
         count: () => op.count(),
       })
       .dedupe("consumer_brand")
       .select(["consumer_brand", "count"])
-      .orderby(desc("count"))
-      .objects();
+      .orderby(desc("count"));
     return {
-      umlInfo: ownerMills.objects(),
+      umlInfo: arqueroObjects<UmlData>(ownerMills),
       timeseries: quantileResults,
-      brands,
+      brands: arqueroObjects<OwnerBrandRollup>(brands),
     };
   }
 
@@ -269,16 +323,15 @@ class MillDataQuery {
     group: string,
     cols: string[],
     quantiles: number[] = [0.25, 0.5, 0.75]
-  ) {
-    const data = this.uml!.filter(
-      escape((d: UmlData) => d["Group Name"] === group)
-    )
+  ): GroupInfoPayload {
+    const data = this.requireUml()
+      .filter(aqEscape((d: UmlData) => d["Group Name"] === group))
       .groupby("UML ID")
       .dedupe("UML ID");
 
     const quantileResults = this.getQuantileTimeseries(data, cols, quantiles);
     return {
-      umlInfo: data.objects(),
+      umlInfo: arqueroObjects<UmlData>(data),
       timeseries: quantileResults,
     };
   }
@@ -287,7 +340,7 @@ class MillDataQuery {
     minLng: number,
     maxLat: number,
     maxLng: number
-  ) {
+  ): RollupEntityPayload {
     const mills = this.getMillsInBbox(minLat, minLng, maxLat, maxLng);
     return this.getFullData(mills);
   }
@@ -297,10 +350,10 @@ class MillDataQuery {
     maxLat: number,
     maxLng: number
   ) {
-    return this.uml!.filter(
-      escape((d: UmlData) => {
-        const millLat = +d["Latitude"];
-        const millLng = +d["Longitude"];
+    return this.requireUml().filter(
+      aqEscape((d: UmlData) => {
+        const millLat = +d.Latitude;
+        const millLng = +d.Longitude;
         return (
           millLat >= minLat &&
           millLat <= maxLat &&
@@ -312,86 +365,99 @@ class MillDataQuery {
   }
 
   getFullMillInfo() {
-    return this.uml!;
+    return this.requireUml();
   }
 
   /** Build-time export for precomputed JSON (Node only). */
-  getCompaniesObjects() {
-    return this.companies!.objects() as CompanyData[];
+  getCompaniesObjects(): CompanyData[] {
+    if (!this.companies) {
+      return [];
+    }
+    return arqueroObjects<CompanyData>(this.companies);
   }
 
   @cache("searchList")
-  getSearchList() {
-    const companyData = this.companies!.select("consumer_brand")
-      .dedupe("consumer_brand")
-      .objects() as CompanyData[];
+  getSearchList(): SearchListPayload {
+    const companyData = this.companies
+      ? arqueroObjects<CompanyData>(
+          this.companies.select("consumer_brand").dedupe("consumer_brand")
+        )
+      : [];
     const brandList: { label: string; href: string; imgPath?: string }[] =
       companyData.map((d) => ({
-        label: d["consumer_brand"],
-        href: `/brand/${d["consumer_brand"]}`,
+        label: d.consumer_brand,
+        href: `/brand/${d.consumer_brand}`,
       }));
 
-    const umlData = this.uml!.select(["UML ID", "Mill Name"])
-      .dedupe("UML ID")
-      .objects() as UmlData[];
+    const umlData = this.uml
+      ? arqueroObjects<UmlData>(
+          this.uml.select(["UML ID", "Mill Name"]).dedupe("UML ID")
+        )
+      : [];
     const millList: { label: string; href: string }[] = umlData.map((d) => ({
       label: d["Mill Name"],
       href: `/mill/${d["UML ID"]}`,
     }));
 
-    const groups = this.uml!.select("Group Name")
-      .dedupe("Group Name")
-      .objects() as UmlData[];
+    const groups = this.uml
+      ? arqueroObjects<UmlData>(
+          this.uml.select("Group Name").dedupe("Group Name")
+        )
+      : [];
     const groupsList = groups.map((d) => ({
       label: d["Group Name"],
       href: `/group/${d["Group Name"]}`,
     }));
 
-    const companies = this.uml!.select("Parent Company")
-      .dedupe("Parent Company")
-      .objects() as UmlData[];
+    const companies = this.uml
+      ? arqueroObjects<UmlData>(
+          this.uml.select("Parent Company").dedupe("Parent Company")
+        )
+      : [];
 
     const comapniesList = companies.map((d) => ({
       label: d["Parent Company"] || "",
       href: `/owner/${d["Parent Company"]}`,
     }));
 
-    const countries = this.uml!.select("Country")
-      .dedupe("Country")
-      .objects() as UmlData[];
+    const countries = this.uml
+      ? arqueroObjects<UmlData>(this.uml.select("Country").dedupe("Country"))
+      : [];
 
     const countryList = countries.map((d) => ({
-      label: d["Country"],
-      href: `/country/${d["Country"]}`,
+      label: d.Country,
+      href: `/country/${d.Country}`,
     }));
 
-    const result = {
+    const result: SearchListPayload = {
       Brands: brandList,
       Mills: millList,
       "Mill Owners": comapniesList,
       "Mill Groups": groupsList,
       Countries: countryList,
-    } as const;
+    };
 
-    this.cache["searchList"] = result;
+    this.cache.searchList = result;
 
     return result;
   }
 
   // utils
-  filterUniqueList(v: any, i: number, a: any[]) {
+  filterUniqueList<T>(v: T, i: number, a: T[]) {
     return a.indexOf(v) === i;
   }
-  filterUniqueByKey = (key: string) => (v: any, i: number, a: any[]) =>
-    a.findIndex((d) => d[key] === v[key]) === i;
+  filterUniqueByKey =
+    (key: string) =>
+    (v: Record<string, unknown>, i: number, a: Record<string, unknown>[]) =>
+      a.findIndex((d) => d[key] === v[key]) === i;
   sortObject(data: { [key: string]: number[] }, key: string) {
     return Object.entries(data)
-      .sort(([k, v]) => v.length)
+      .sort(([_k, v]) => v.length)
       .map(([k, v]) => ({ [key]: k, years: v.sort((a, b) => a - b) }));
   }
   stringifyBigInts(obj: object | object[]) {
     return JSON.parse(
-      JSON.stringify(obj, (key, value) => {
+      JSON.stringify(obj, (_key, value) => {
         if (typeof value === "bigint") {
           return value.toString();
         }
@@ -401,50 +467,65 @@ class MillDataQuery {
   }
 
   @cache("medianMill")
-  getMedianMill() {
-    const t0 = performance.now();
-    const uml = this.uml!.rollup(this.rollups.medianAllYears);
-    return uml.objects();
+  getMedianMill(): MedianMillRow[] {
+    const uml = this.requireUml().rollup(this.rollups.medianAllYears);
+    return arqueroObjects<MedianMillRow>(uml);
   }
 
   @cache("getUniqueCounts")
-  getUniqueCounts() {
-    const brandCount = this.companies!.select("consumer_brand")
+  getUniqueCounts(): UniqueCounts {
+    const brandCount = this.requireCompanies()
+      .select("consumer_brand")
       .dedupe("consumer_brand")
       .count()
       .objects()[0];
-    const countryCount = this.uml!.select("Country")
+    const countryCount = this.requireUml()
+      .select("Country")
       .dedupe("Country")
       .count()
       .objects()[0];
-    const millCount = this.uml!.count().objects()[0];
-    const groupCount = this.uml!.select("Group Name")
+    const millCount = this.requireUml().count().objects()[0];
+    const groupCount = this.requireUml()
+      .select("Group Name")
       .dedupe("Group Name")
       .count()
       .objects()[0];
-    const companyCount = this.uml!.select("Parent Company")
+    const companyCount = this.requireUml()
+      .select("Parent Company")
       .dedupe("Parent Company")
       .count()
       .objects()[0];
 
     return {
       brandCount:
-        "count" in brandCount ? (brandCount["count"] as number) : null,
+        brandCount && "count" in brandCount
+          ? (brandCount.count as number)
+          : null,
       countryCount:
-        "count" in countryCount ? (countryCount["count"] as number) : null,
-      millCount: "count" in millCount ? (millCount["count"] as number) : null,
+        countryCount && "count" in countryCount
+          ? (countryCount.count as number)
+          : null,
+      millCount:
+        millCount && "count" in millCount ? (millCount.count as number) : null,
       groupCount:
-        "count" in groupCount ? (groupCount["count"] as number) : null,
+        groupCount && "count" in groupCount
+          ? (groupCount.count as number)
+          : null,
       companyCount:
-        "count" in companyCount ? (companyCount["count"] as number) : null,
+        companyCount && "count" in companyCount
+          ? (companyCount.count as number)
+          : null,
     };
   }
 
   @cache("getMedianBrandImpacts")
   getMedianBrandImpacts() {
-    const brandImpacts = this.companies!.join(this.uml!, ["UML ID", "UML ID"]);
+    const brandImpacts = this.requireCompanies().join(this.requireUml(), [
+      "UML ID",
+      "UML ID",
+    ]);
 
-    const grouped = brandImpacts
+    const _grouped = brandImpacts
       .dedupe("consumer_brand", "UML ID")
       .groupby(["consumer_brand", "UML ID"])
       .rollup(this.rollups.sumAllYears)
@@ -457,13 +538,16 @@ class MillDataQuery {
     //   })
     // console.log(ranked.objects().slice(0, 10));
   }
-  getRankingOfBrandsByCurrentImpactScore() {
-    const brandImpacts = this.companies!.join(this.uml!, ["UML ID", "UML ID"]);
+  getRankingOfBrandsByCurrentImpactScore(): RankingBrandRow[] {
+    const brandImpacts = this.requireCompanies().join(this.requireUml(), [
+      "UML ID",
+      "UML ID",
+    ]);
     const grouped = brandImpacts
       .derive({
-        _treelossMinToMax: escape((d: any) =>
+        _treelossMinToMax: aqEscape((d: UmlData) =>
           fullYearRangeColumns.reduce(
-            (s: number, col: string) => s + (Number(d[col]) || 0),
+            (s: number, col: string) => s + umlRowNumber(d, col),
             0
           )
         ),
@@ -477,20 +561,21 @@ class MillDataQuery {
           op.round(op.mean(d.risk_score_future) * 100) / 100,
         averagePastRisk: (d: UmlData) =>
           op.round(op.mean(d.risk_score_past) * 100) / 100,
-        totalForestLoss: (d: any) => op.round(op.sum(d._treelossMinToMax)),
+        totalForestLoss: () => op.round(op.sum("_treelossMinToMax")),
         millCount: () => op.count(),
       })
       .orderby(desc("averageCurrentRisk"));
-    return grouped.objects();
+    return arqueroObjects<RankingBrandRow>(grouped);
   }
   @cache("millSummaryStats")
-  getMillSummaryStats() {
-    const millStats = this.uml!.dedupe("UML ID")
+  getMillSummaryStats(): MillSummaryStatsPayload {
+    const millStats = this.requireUml()
+      .dedupe("UML ID")
       .rollup({
         count: () => op.count(),
-        totalForestLoss: (d: UmlData) => op.sum(d.sum_of_treeloss_km as any),
-        totalArea: (d: UmlData) => op.sum(d.km_area as any),
-        totalForestArea: (d: UmlData) => op.sum(d.km_forest_area_00 as any),
+        totalForestLoss: () => op.sum("sum_of_treeloss_km"),
+        totalArea: () => op.sum("km_area"),
+        totalForestArea: () => op.sum("km_forest_area_00"),
       })
       .objects()[0] as {
       count: number;
@@ -498,19 +583,20 @@ class MillDataQuery {
       totalArea: number;
       totalForestArea: number;
     };
-    const timeseries = this.getQuantileTimeseries(this.uml!);
+    const timeseries = this.getQuantileTimeseries(this.requireUml());
     const forestLossByYear = this.getForestLossByYear();
     const uniqueCounts = this.getUniqueCounts();
 
-    const notRspoCertified = this.uml!.filter(
-      escape((d: UmlData) => d["RSPO Status"] === "Not RSPO Certified")
-    )
+    const notRspoCertified = this.requireUml()
+      .filter(
+        aqEscape((d: UmlData) => d["RSPO Status"] === "Not RSPO Certified")
+      )
       .rollup({
         count: () => op.count(),
       })
       .objects()[0] as { count: number };
-    // @ts-expect-error
-    const rspoCertified = uniqueCounts.millCount - notRspoCertified.count;
+    const rspoCertified =
+      (uniqueCounts.millCount ?? 0) - notRspoCertified.count;
     return {
       ...millStats,
       ...uniqueCounts,
@@ -522,35 +608,35 @@ class MillDataQuery {
   }
 
   @cache("countrySummaryStats")
-  getCountriesSummary() {
+  getCountriesSummary(): CountriesSummaryPayload {
     const allYearColumns = Array.from(
       { length: maxYear - 2001 + 1 },
       (_, i) => `treeloss_km_${2001 + i}`
     );
 
-    const countryStats = this.uml!.derive({
-      _treeloss2001ToMax: escape((d: any) =>
-        allYearColumns.reduce(
-          (s: number, col: string) => s + (Number(d[col]) || 0),
-          0
-        )
-      ),
-    })
+    const countryStats = this.requireUml()
+      .derive({
+        _treeloss2001ToMax: aqEscape((d: UmlData) =>
+          allYearColumns.reduce(
+            (s: number, col: string) => s + umlRowNumber(d, col),
+            0
+          )
+        ),
+      })
       .groupby("Country")
       .rollup({
         count: () => op.count(),
-        totalForestLoss: (d: any) =>
-          op.round(op.sum(d._treeloss2001ToMax) * 100) / 100,
-        totalArea: (d: UmlData) =>
-          op.round(op.sum(d.km_area as any) * 100) / 100,
-        totalForestArea: (d: UmlData) =>
-          op.round(op.sum(d.km_forest_area_00 as any) * 100) / 100,
-        pctForestLoss: (d: any) =>
+        totalForestLoss: () =>
+          op.round(op.sum("_treeloss2001ToMax") * 100) / 100,
+        totalArea: () => op.round(op.sum("km_area") * 100) / 100,
+        totalForestArea: () =>
+          op.round(op.sum("km_forest_area_00") * 100) / 100,
+        pctForestLoss: () =>
           op.round(
-            (op.sum(d._treeloss2001ToMax) / op.sum(d.km_forest_area_00)) * 1000
+            (op.sum("_treeloss2001ToMax") / op.sum("km_forest_area_00")) * 1000
           ) / 10,
-        pctForestLossString: (d: any) =>
-          `${op.round((op.sum(d._treeloss2001ToMax) / op.sum(d.km_forest_area_00)) * 1000) / 10} %`,
+        pctForestLossString: () =>
+          `${op.round((op.sum("_treeloss2001ToMax") / op.sum("km_forest_area_00")) * 1000) / 10} %`,
         currentRisk: (d: UmlData) =>
           op.round(op.mean(d.risk_score_current) * 100) / 100,
         futureRisk: (d: UmlData) =>
@@ -558,14 +644,15 @@ class MillDataQuery {
         pastRisk: (d: UmlData) =>
           op.round(op.mean(d.risk_score_past) * 100) / 100,
       })
-      .orderby(desc("count"))
-      .objects();
+      .orderby(desc("count"));
     return {
-      countryStats,
+      countryStats: arqueroObjects<CountryStatRow>(countryStats),
     };
   }
 
-  getRankingOfMillsCurrentImpactScore() {}
+  getRankingOfMillsCurrentImpactScore() {
+    /* Reserved for future mill ranking API. */
+  }
 
   rollups = buildTreelossRollups();
 }
@@ -575,13 +662,13 @@ export default queryClient;
 
 function cache(key: string) {
   return (
-    _target: any,
+    _target: object,
     _propertyKey: string,
     descriptor: PropertyDescriptor
   ) => {
-    const originalMethod = descriptor.value;
-    descriptor.value = function (...args: any[]) {
-      if ((this as MillDataQuery).cache && (this as MillDataQuery).cache[key]) {
+    const originalMethod = descriptor.value as (...args: unknown[]) => unknown;
+    descriptor.value = function (this: MillDataQuery, ...args: unknown[]) {
+      if ((this as MillDataQuery).cache?.[key]) {
         return (this as MillDataQuery).cache[key];
       }
 

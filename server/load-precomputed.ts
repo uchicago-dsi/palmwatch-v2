@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { getCanonicalSiteOrigin } from "@/server/site";
 
 const PRECOMPUTED_PREFIX = "/data/precomputed";
+const LEADING_SLASHES_RE = /^\/+/;
 
 function precomputedFilePath(clean: string): string {
   return path.join(process.cwd(), "public", "data", "precomputed", clean);
@@ -29,7 +30,7 @@ async function tryLoadPrecomputedFromAssetsBinding<T>(
     );
     const res = await assets.fetch(new Request(url));
     if (!res.ok) {
-      await res.body?.cancel?.().catch(() => {});
+      await res.body?.cancel?.().catch(() => undefined);
       return null;
     }
     return (await res.json()) as T;
@@ -59,7 +60,7 @@ export async function loadPrecomputedJson<T>(
   relativePath: string,
   req?: Request
 ): Promise<T> {
-  const clean = relativePath.replace(/^\/+/, "");
+  const clean = relativePath.replace(LEADING_SLASHES_RE, "");
 
   if (process.env.NEXT_PHASE === "phase-production-build") {
     const raw = await readFile(precomputedFilePath(clean), "utf8");

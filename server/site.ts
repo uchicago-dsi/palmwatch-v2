@@ -1,5 +1,7 @@
+const TRAILING_SLASH_RE = /\/$/;
+
 function trimTrailingSlash(s: string): string {
-  return s.replace(/\/$/, "");
+  return s.replace(TRAILING_SLASH_RE, "");
 }
 
 /**
