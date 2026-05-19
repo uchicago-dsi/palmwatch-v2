@@ -8,8 +8,8 @@
 .proseContent h4,
 .proseContent h5,
 .proseContent h6 {
-  color: hsl(var(--bc));
   font-weight: 500;
+  color: hsl(var(--bc));
 }
 
 .proseContent p {
@@ -19,8 +19,8 @@
 .proseContent a {
   color: hsl(var(--bc));
   text-decoration: underline;
-  text-underline-offset: 2px;
   text-decoration-color: hsl(var(--bc) / 0.3);
+  text-underline-offset: 2px;
 }
 
 .proseContent a:hover {
@@ -28,8 +28,8 @@
 }
 
 .proseContent strong {
-  color: hsl(var(--bc));
   font-weight: 600;
+  color: hsl(var(--bc));
 }
 
 .proseContent li {
@@ -41,8 +41,8 @@
 }
 
 .proseContent blockquote {
-  border-left-color: hsl(var(--bc) / 0.2);
   color: hsl(var(--bc) / 0.7);
+  border-left-color: hsl(var(--bc) / 0.2);
 }
 
 .proseContent hr {
@@ -50,8 +50,8 @@
 }
 
 .proseContent code {
+  padding: 0.1em 0.3em;
   color: hsl(var(--bc));
   background: hsl(var(--bc) / 0.07);
   border-radius: 3px;
-  padding: 0.1em 0.3em;
 }

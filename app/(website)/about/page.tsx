@@ -9,10 +9,10 @@ export default async function Page() {
   const aboutPageContent = await cmsClient.getAboutPage();
   return (
     <main className={pageStyles.pageShell}>
-      <div className="max-w-3xl mx-auto">
+      <div className="mx-auto max-w-3xl">
         {/* Main prose content (Overview + Methodology) */}
         <div
-          className={`prose max-w-none mb-4 rounded-[10px] border border-base-content/10 bg-base-100 p-6 ${styles.proseContent}`}
+          className={`prose mb-4 max-w-none rounded-[10px] border border-base-content/10 bg-base-100 p-6 ${styles.proseContent}`}
           id="overview"
         >
           <PortableText value={aboutPageContent.content} />
@@ -24,22 +24,24 @@ export default async function Page() {
             className="mb-4 rounded-[10px] border border-base-content/10 bg-base-100 p-6"
             id="faq"
           >
-            <p className="mb-4 text-base font-medium">FAQ</p>
+            <p className="mb-4 font-medium text-base">FAQ</p>
             <div>
               {aboutPageContent.faq.map((item: any, index: number) => (
                 <div
-                  className={`collapse collapse-arrow rounded-none ${
+                  className={`collapse-arrow collapse rounded-none ${
                     index < aboutPageContent.faq.length - 1
-                      ? "border-b border-base-content/10"
+                      ? "border-base-content/10 border-b"
                       : ""
                   }`}
                   key={index}
                 >
                   <input name="faq-accordion" type="radio" />
-                  <div className="collapse-title px-0 py-3 text-sm font-medium">
+                  <div className="collapse-title px-0 py-3 font-medium text-sm">
                     {item.heading}
                   </div>
-                  <div className={`collapse-content prose max-w-none px-0 text-sm ${styles.proseContent}`}>
+                  <div
+                    className={`collapse-content prose max-w-none px-0 text-sm ${styles.proseContent}`}
+                  >
                     <PortableText value={item.body} />
                   </div>
                 </div>
@@ -51,7 +53,7 @@ export default async function Page() {
         {/* Contributors */}
         {!!aboutPageContent?.contributors && (
           <div
-            className={`prose max-w-none mb-4 rounded-[10px] border border-base-content/10 bg-base-100 p-6 ${styles.proseContent}`}
+            className={`prose mb-4 max-w-none rounded-[10px] border border-base-content/10 bg-base-100 p-6 ${styles.proseContent}`}
             id="contributors"
           >
             <PortableText value={aboutPageContent.contributors} />
@@ -60,7 +62,7 @@ export default async function Page() {
 
         {/* Contact */}
         <div
-          className={`prose max-w-none mb-4 rounded-[10px] border border-base-content/10 bg-base-100 p-6 ${styles.proseContent}`}
+          className={`prose mb-4 max-w-none rounded-[10px] border border-base-content/10 bg-base-100 p-6 ${styles.proseContent}`}
           id="contact"
         >
           <h2>Contact</h2>

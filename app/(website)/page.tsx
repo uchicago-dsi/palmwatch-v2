@@ -10,13 +10,7 @@ export default async function Home() {
   return (
     <main className="flex h-auto w-full flex-col">
       <section className={heroStyles.hero}>
-        <video
-          autoPlay
-          className={heroStyles.heroVideo}
-          loop
-          muted
-          playsInline
-        >
+        <video autoPlay className={heroStyles.heroVideo} loop muted playsInline>
           <source src="cover-video.mp4" type="video/mp4" />
         </video>
         <div aria-hidden className={heroStyles.heroOverlay} />
