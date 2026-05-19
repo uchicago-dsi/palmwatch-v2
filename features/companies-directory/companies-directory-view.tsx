@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import styles from "./companies.module.css";
+import styles from "./companies-directory.module.css";
 
 export type CompanyEntry =
   | { label: string; type: "owner"; href: string }
