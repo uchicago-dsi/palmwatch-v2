@@ -60,10 +60,10 @@ class CmsClient {
     });
   }
   async getLandingPageContent(page: string) {
-    return await this.client.fetch<{ content?: any[]; disclaimer?: any[] }>(
-      landingPageContentQuery,
-      { page }
-    );
+    return await this.client.fetch<{
+      content?: unknown[];
+      disclaimer?: unknown[];
+    }>(landingPageContentQuery, { page });
   }
   async getAboutPage() {
     return await this.client.fetch<AboutPageContent>(aboutPageQuery);

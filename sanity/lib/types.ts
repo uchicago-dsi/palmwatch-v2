@@ -1,11 +1,11 @@
-export type AboutPageContent = {
-  content: Array<any>;
+export interface AboutPageContent {
+  content: unknown[];
+  contributors: unknown[];
   faq: Array<{
     heading: string;
-    body: Array<any>;
+    body: unknown[];
   }>;
-  contributors: Array<any>;
-};
-export type ContactPageContent = {
-  content: Array<any>;
-};
+}
+export interface ContactPageContent {
+  content: unknown[];
+}

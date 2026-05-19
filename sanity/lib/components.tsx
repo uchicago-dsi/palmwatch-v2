@@ -23,7 +23,9 @@ export const myPortableTextComponents = {
     },
   },
   types: {
-    image: (v: any) => {
+    image: (v: {
+      value?: { alt?: string; asset?: { _ref?: string }; link?: string };
+    }) => {
       const alt = v?.value?.alt || "";
       const ref = v?.value?.asset?._ref || "";
       if (!ref) {
@@ -53,7 +55,7 @@ export const myPortableTextComponents = {
   },
 };
 
-export const PortableText: React.FC<{ value: any }> = ({ value }) => {
+export const PortableText: React.FC<{ value: unknown }> = ({ value }) => {
   // @ts-expect-error
   return <OgPortableText components={myPortableTextComponents} value={value} />;
 };
