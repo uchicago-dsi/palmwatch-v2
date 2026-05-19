@@ -30,6 +30,10 @@
   color: hsl(var(--bc) / 0.3);
 }
 
+.breadcrumbCurrent {
+  text-transform: uppercase;
+}
+
 /* ── Header ─────────────────────────────────────────────────────────────────── */
 
 .headerRow {
@@ -46,6 +50,7 @@
   font-weight: 500;
   line-height: 1.2;
   color: hsl(var(--bc));
+  text-transform: uppercase;
 }
 
 .badgeOwner {
@@ -131,6 +136,12 @@
   border-radius: 50%;
 }
 
+.statSublabel {
+  margin-top: 1px;
+  font-size: 0.6875rem;
+  color: hsl(var(--bc) / 0.4);
+}
+
 /* ── Visual grid (map + chart) ───────────────────────────────────────────────── */
 
 .visualGrid {
@@ -165,6 +176,37 @@
   width: 100%;
   height: 380px;
   background: hsl(var(--b2));
+}
+
+/* ── Charts row ──────────────────────────────────────────────────────────────── */
+
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Full-width map card */
+
+.mapCardFull {
+  padding: 20px;
+  overflow: hidden;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.mapFrameFull {
+  position: relative;
+  width: 100%;
+  height: 60vh;
 }
 
 /* Chart card */
@@ -401,6 +443,14 @@
   composes: th;
   width: 160px;
 }
+.thDist {
+  composes: th;
+  width: 120px;
+}
+.thParent {
+  composes: th;
+  width: 200px;
+}
 .thMills {
   composes: th;
   width: 80px;
@@ -449,6 +499,14 @@
   composes: td;
   color: hsl(var(--bc) / 0.7);
 }
+.tdDist {
+  composes: td;
+  color: hsl(var(--bc) / 0.7);
+}
+.tdParent {
+  composes: td;
+  color: hsl(var(--bc) / 0.7);
+}
 .tdOwner {
   composes: td;
 }
@@ -466,12 +524,17 @@
 .cellName {
   font-weight: 500;
   color: hsl(var(--bc));
+  text-transform: uppercase;
   text-decoration: none;
   transition: color 100ms ease;
 }
 
 .cellName:hover {
   color: hsl(var(--bc) / 0.65);
+}
+
+.scoreNum {
+  font-variant-numeric: tabular-nums;
 }
 
 .ownerLink {
