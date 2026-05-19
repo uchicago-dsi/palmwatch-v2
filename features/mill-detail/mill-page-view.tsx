@@ -4,16 +4,16 @@ import Link from "next/link";
 import type React from "react";
 import { useMemo } from "react";
 import {
+  Bar,
   CartesianGrid,
-  Line,
-  LineChart,
+  ComposedChart,
   ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts";
 import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
-import { cumulativeLossColumn, yearRange } from "@/config/years";
+import { cumulativeLossColumn, maxYear, yearRange } from "@/config/years";
 import type { UmlData } from "@/domain";
 import type { MillPageModel } from "@/lib/server/mill-page-data";
 import styles from "./mill.module.css";
@@ -52,6 +52,7 @@ function toTitleCase(str: string): string {
     "PT",
   ]);
   return str
+    .trim()
     .split(" ")
     .map((w) =>
       w.length <= 3 || KEEP.has(w)
@@ -60,6 +61,11 @@ function toTitleCase(str: string): string {
     )
     .join(" ");
 }
+
+const allYearsSince2001 = Array.from(
+  { length: maxYear - 2001 + 1 },
+  (_, i) => 2001 + i
+);
 
 function formatKm2(v: number): string {
   if (v >= 1000) {
@@ -78,15 +84,104 @@ function scoreColor(score: number, theme: "dark" | "light"): string {
   return theme === "dark" ? "#FDE047" : "#CA8A04";
 }
 
-// ── Annual chart ──────────────────────────────────────────────────────────────
+// ── Forest area breakdown ─────────────────────────────────────────────────────
 
-function AnnualChart({ entry }: { entry: UmlData }) {
+const AREA_TIERS = [
+  {
+    key: "total" as const,
+    label: "Total catchment area",
+    lightColor: "#64748B",
+    darkColor: "#94A3B8",
+  },
+  {
+    key: "forest" as const,
+    label: "Total forest area",
+    lightColor: "#16A34A",
+    darkColor: "#4ADE80",
+  },
+  {
+    key: "loss" as const,
+    label: "Total forest loss",
+    lightColor: "#DC2626",
+    darkColor: "#F87171",
+  },
+];
+
+function AreaBreakdownCard({ entry }: { entry: UmlData }) {
   const { theme } = useTheme();
-  const lineColor = theme === "dark" ? "#F09595" : "#E24B4A";
+  const totalArea = Number(entry.km_area) || 0;
+  const totalForestArea = Number(entry.km_forest_area_00) || 0;
+  const totalForestLoss = useMemo(() => {
+    let sum = 0;
+    for (let y = 2001; y <= maxYear; y++) {
+      sum +=
+        Number((entry as Record<string, unknown>)[`treeloss_km_${y}`]) || 0;
+    }
+    return Math.min(sum, totalForestArea);
+  }, [entry, totalForestArea]);
+
+  const forestPct =
+    totalArea > 0 ? Math.sqrt(totalForestArea / totalArea) * 100 : 0;
+  const lossPct =
+    totalArea > 0 ? Math.sqrt(totalForestLoss / totalArea) * 100 : 0;
+  const values = {
+    total: totalArea,
+    forest: totalForestArea,
+    loss: totalForestLoss,
+  };
+
+  return (
+    <div className={styles.chartCardFixed}>
+      <p className={styles.chartTitle}>Forest area breakdown</p>
+      <div className={styles.areaVizWrap}>
+        <div className={styles.areaViz}>
+          <div className={styles.areaTotal}>
+            <div
+              className={styles.areaForest}
+              style={{ width: `${forestPct}%`, height: `${forestPct}%` }}
+            >
+              <div
+                className={styles.areaLoss}
+                style={{
+                  width:
+                    forestPct > 0 ? `${(lossPct / forestPct) * 100}%` : "0%",
+                  height:
+                    forestPct > 0 ? `${(lossPct / forestPct) * 100}%` : "0%",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+        <div className={styles.areaLegend}>
+          {AREA_TIERS.map(({ key, label, lightColor, darkColor }) => (
+            <div className={styles.areaLegendRow} key={key}>
+              <span
+                className={styles.areaLegendSwatch}
+                style={{
+                  background: theme === "dark" ? darkColor : lightColor,
+                }}
+              />
+              <span className={styles.areaLegendLabel}>{label}</span>
+              <span className={styles.areaLegendValue}>
+                {formatKm2(values[key])} km²
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Annual loss chart (2001–maxYear) ─────────────────────────────────────────
+
+function AnnualLossFullChart({ entry }: { entry: UmlData }) {
+  const { theme } = useTheme();
+  const barColor = theme === "dark" ? "#F09595" : "#E24B4A";
 
   const data = useMemo(
     () =>
-      yearRange.map((year) => ({
+      allYearsSince2001.map((year) => ({
         year,
         loss:
           Number((entry as Record<string, unknown>)[`treeloss_km_${year}`]) ||
@@ -96,11 +191,16 @@ function AnnualChart({ entry }: { entry: UmlData }) {
   );
 
   const maxVal = Math.max(...data.map((d) => d.loss), 0.01);
-  const midVal = maxVal / 2;
+  const firstYear = allYearsSince2001[0];
+  const lastYear = allYearsSince2001[allYearsSince2001.length - 1];
+  const midYear = Math.round((firstYear + lastYear) / 2);
 
   return (
     <ResponsiveContainer height="100%" width="100%">
-      <LineChart data={data} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+      <ComposedChart
+        data={data}
+        margin={{ top: 8, right: 12, left: 4, bottom: 0 }}
+      >
         <CartesianGrid
           stroke="hsl(var(--bc) / 0.06)"
           strokeDasharray="3 3"
@@ -111,34 +211,29 @@ function AnnualChart({ entry }: { entry: UmlData }) {
           dataKey="year"
           tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
           tickLine={false}
-          ticks={[
-            yearRange[0],
-            yearRange[Math.floor(yearRange.length / 2)],
-            yearRange[yearRange.length - 1],
-          ]}
+          ticks={[firstYear, midYear, lastYear]}
         />
         <YAxis
           axisLine={false}
-          domain={[0, maxVal * 1.05]}
+          domain={[0, maxVal * 1.1]}
           tick={{ fill: "hsl(var(--bc) / 0.45)", fontSize: 11 }}
-          tickFormatter={(v) => `${v.toFixed(1)}`}
+          tickFormatter={(v) => formatKm2(v)}
           tickLine={false}
           ticks={[
             0,
-            Number.parseFloat(midVal.toFixed(1)),
+            Number.parseFloat((maxVal / 2).toFixed(1)),
             Number.parseFloat(maxVal.toFixed(1)),
           ]}
           width={38}
         />
-        <Line
+        <Bar
           dataKey="loss"
-          dot={{ fill: lineColor, r: 4, strokeWidth: 0 }}
+          fill={barColor}
           isAnimationActive={false}
-          stroke={lineColor}
-          strokeWidth={2}
-          type="monotone"
+          opacity={0.75}
+          radius={[2, 2, 0, 0]}
         />
-      </LineChart>
+      </ComposedChart>
     </ResponsiveContainer>
   );
 }
@@ -156,8 +251,9 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
   }
 
   const millName = toTitleCase(entry["Mill Name"]);
-  const parentCompany = entry["Parent Company"];
-  const groupName = entry["Group Name"];
+  const altName = entry["Alternative name"]?.trim() || null;
+  const parentCompany = entry["Parent Company"]?.trim() ?? "";
+  const groupName = entry["Group Name"]?.trim() ?? "";
   const province = entry.Province;
   const country = entry.Country;
   const rspoStatus = entry["RSPO Status"] ?? "";
@@ -165,22 +261,15 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
     rspoStatus.toLowerCase().includes("certified") &&
     !rspoStatus.toLowerCase().includes("not");
 
-  // Composite deforestation score
-  const scoreRaw = Number(entry.risk_score_current);
-  const dotColor = scoreColor(scoreRaw, theme);
-
-  // Cumulative loss over yearRange
-  const cumulativeLoss = yearRange.reduce(
-    (sum, year) =>
-      sum +
-      (Number((entry as Record<string, unknown>)[`treeloss_km_${year}`]) || 0),
-    0
-  );
-
-  // Forest remaining %
-  const forestRemaining = Math.round(
-    (Number(entry.remaining_proportion_of_forest) || 0) * 100
-  );
+  // Cumulative loss 2001–maxYear
+  const cumulativeLoss2001 = useMemo(() => {
+    let sum = 0;
+    for (let y = 2001; y <= maxYear; y++) {
+      sum +=
+        Number((entry as Record<string, unknown>)[`treeloss_km_${y}`]) || 0;
+    }
+    return sum;
+  }, [entry]);
 
   const normalizedBrands = useMemo(
     () => brands.map((b) => ({ ...b, years: b.years.map(Number) })),
@@ -200,23 +289,16 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
             Mills
           </Link>
           <span className={styles.breadcrumbSep}>/</span>
-          <span>{millName}</span>
+          <span className={styles.breadcrumbCurrent}>{millName}</span>
         </nav>
 
         <h1 className={styles.millName}>{millName}</h1>
+        {altName && <p className={styles.altName}>Also known as {altName}</p>}
 
         <div className={styles.metaRow}>
-          {/* RSPO */}
-          {isRspoCertified ? (
-            <span className={styles.rspoBadge}>RSPO certified</span>
-          ) : (
-            <span className={styles.rspoNone}>Not certified</span>
-          )}
-
           {/* Parent company */}
           {hasParent && (
             <>
-              <span className={styles.metaSep}>·</span>
               <span>
                 Owned by{" "}
                 <Link
@@ -255,62 +337,114 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
         </div>
       </div>
 
-      {/* Stat cards */}
+      {/* Stat cards — row 1 */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Deforestation score</span>
-          <div className={styles.statValueRow}>
-            <span
-              className={styles.scoreDot}
-              style={{ background: dotColor }}
-            />
-            <span className={styles.statValue}>{scoreRaw.toFixed(2)}</span>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>
-            Cumulative loss ({yearRange[0]}–{yearRange[yearRange.length - 1]})
-          </span>
+          <span className={styles.statLabel}>Total forest loss</span>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>
-              {formatKm2(cumulativeLoss)} km²
+              {formatKm2(cumulativeLoss2001)} km²
             </span>
           </div>
+          <span className={styles.statSublabel}>
+            Cumulative forest loss from 2001 to {maxYear}
+          </span>
         </div>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Forest remaining</span>
+          <span className={styles.statLabel}>Catchment area</span>
           <div className={styles.statValueRow}>
-            <span className={styles.statValue}>{forestRemaining}%</span>
+            <span className={styles.statValue}>
+              {formatKm2(Number(entry.km_area))} km²
+            </span>
           </div>
-          <span className={styles.statSublabel}>of original forest area</span>
+          <span className={styles.statSublabel}>
+            Overall area assigned to this mill
+          </span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>RSPO certification</span>
+          <span
+            className={
+              isRspoCertified
+                ? styles.rspoCertifiedValue
+                : styles.rspoUncertifiedValue
+            }
+          >
+            {isRspoCertified ? "RSPO certified" : "Not RSPO certified"}
+          </span>
+          <span className={styles.statSublabel}>
+            {isRspoCertified
+              ? "Meets RSPO standards for responsible sourcing and production."
+              : "Has not obtained RSPO certification for sustainable palm oil."}
+          </span>
+        </div>
+
+        {/* Row 2 */}
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Recent deforestation score</span>
+          <div className={styles.statValueRow}>
+            <span className={styles.statValue}>
+              {Number(entry.risk_score_current).toFixed(2)}
+            </span>
+          </div>
+          <span className={styles.statSublabel}>
+            out of 5 · higher means more recent forest loss
+          </span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Past deforestation score</span>
+          <div className={styles.statValueRow}>
+            <span className={styles.statValue}>
+              {Number(entry.risk_score_past).toFixed(2)}
+            </span>
+          </div>
+          <span className={styles.statSublabel}>
+            out of 5 · higher means more historical forest loss
+          </span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Future deforestation score</span>
+          <div className={styles.statValueRow}>
+            <span className={styles.statValue}>
+              {Number(entry.risk_score_future).toFixed(2)}
+            </span>
+          </div>
+          <span className={styles.statSublabel}>
+            out of 5 · higher means greater projected risk
+          </span>
         </div>
       </div>
 
-      {/* Map + annual chart */}
-      <div className={styles.visualGrid}>
-        <div className={styles.mapCard}>
-          <div className={styles.mapFrame}>
-            <QueryProvider>
-              <PalmwatchMapDynamic
-                choroplethColumn={cumulativeLossColumn}
-                choroplethScheme="cumulativeLoss"
-                dataIdColumn="UML ID"
-                dataTable={millPayload.info}
-                geoDataUrl="/data/mill-catchment.geojson"
-                geoIdColumn="UML ID"
-                noFlyMap={false}
-              />
-            </QueryProvider>
+      {/* Area breakdown + annual loss charts */}
+      <div className={styles.chartsRow}>
+        <AreaBreakdownCard entry={entry} />
+        <div className={styles.chartCardFixed}>
+          <p className={styles.chartTitle}>Annual forest loss</p>
+          <p className={styles.chartCaption}>km² per year, 2001–{maxYear}</p>
+          <div className={styles.chartBody}>
+            <AnnualLossFullChart entry={entry} />
           </div>
         </div>
-        <div className={styles.chartCard}>
-          <p className={styles.chartTitle}>Forest loss per year</p>
-          <div className={styles.chartBody}>
-            <AnnualChart entry={entry} />
-          </div>
-          <p className={styles.chartCaption}>
-            Annual forest tree cover loss (km²)
-          </p>
+      </div>
+
+      {/* Map full width */}
+      <div className={styles.mapCard}>
+        <p className={styles.chartTitle}>
+          Mill deforestation map: Forest loss in km²
+        </p>
+        <div className={styles.mapFrame}>
+          <QueryProvider>
+            <PalmwatchMapDynamic
+              choroplethColumn={cumulativeLossColumn}
+              choroplethScheme="cumulativeLoss"
+              dataIdColumn="UML ID"
+              dataTable={millPayload.info}
+              geoDataUrl="/data/mill-catchment.geojson"
+              geoIdColumn="UML ID"
+              noFlyMap={false}
+              showLayerStepper={true}
+            />
+          </QueryProvider>
         </div>
       </div>
 
