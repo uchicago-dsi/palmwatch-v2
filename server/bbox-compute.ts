@@ -6,7 +6,7 @@ import {
 } from "@/domain/schemas/bbox-data";
 import type { FullManifestValidated } from "@/domain/schemas/full-manifest";
 import { fullManifestSchema } from "@/domain/schemas/full-manifest";
-import { loadPrecomputedParsed } from "@/lib/server/load-precomputed-parsed";
+import { loadPrecomputedParsed } from "@/server/load-precomputed-parsed";
 
 export type FullManifest = FullManifestValidated;
 

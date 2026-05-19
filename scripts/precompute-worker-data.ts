@@ -9,7 +9,7 @@ import { fullYearRangeColumns } from "../config/years";
 import type { SearchListPayload } from "../domain/search-list";
 import { stringifyForPrecompute } from "../lib/json-big-int";
 import { precomputedSlug } from "../lib/precomputed-slug";
-import queryClient from "../lib/server/mill-data-query";
+import queryClient from "../server/mill-data-query";
 
 const ROOT = process.cwd();
 const DATA_DIR = path.join(ROOT, "public", "data");

@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { loadPrecomputedJson } from "@/lib/server/load-precomputed";
+import { loadPrecomputedJson } from "@/server/load-precomputed";
 
 export type PrecomputedParseResult<T> =
   | { ok: true; data: T }

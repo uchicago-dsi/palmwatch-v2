@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { unparse } from "papaparse";
 import { precomputedSlug } from "@/lib/precomputed-slug";
-import { loadOwnerApiDocument } from "@/lib/server/entity-api-data";
-import { readMillDataText } from "@/lib/server/read-mill-data-text";
-import { resolveMillDataBase } from "@/lib/server/resolve-mill-data-base";
 import { timestamp } from "@/lib/timestamp";
+import { loadOwnerApiDocument } from "@/server/entity-api-data";
+import { readMillDataText } from "@/server/read-mill-data-text";
+import { resolveMillDataBase } from "@/server/resolve-mill-data-base";
 
 export async function GET(
   req: NextRequest,

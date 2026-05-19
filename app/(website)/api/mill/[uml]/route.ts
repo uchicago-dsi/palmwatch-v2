@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { precomputedSlug } from "@/lib/precomputed-slug";
-import { loadMillApiPayload } from "@/lib/server/mill-api-data";
+import { loadMillApiPayload } from "@/server/mill-api-data";
 
 export async function GET(
   req: NextRequest,

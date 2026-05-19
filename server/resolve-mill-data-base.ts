@@ -1,6 +1,6 @@
 import path from "node:path";
 import { headers } from "next/headers";
-import { getHostedDataOriginPrefix } from "@/lib/server/site";
+import { getHostedDataOriginPrefix } from "@/server/site";
 
 /**
  * Where Arquero should load `.arrow` files from.

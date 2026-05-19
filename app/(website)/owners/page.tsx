@@ -1,9 +1,9 @@
 import pageStyles from "@/components/page-layout.module.css";
 import { emptySearchListPayload } from "@/domain";
 import { SearchableListLayout } from "@/features/searchable-list";
-import { loadSearchListPayload } from "@/lib/server/search-list-data";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
+import { loadSearchListPayload } from "@/server/search-list-data";
 export const revalidate = 60;
 
 export default async function Page() {

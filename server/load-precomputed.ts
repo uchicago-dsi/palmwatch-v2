@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { headers } from "next/headers";
-import { getCanonicalSiteOrigin } from "@/lib/server/site";
+import { getCanonicalSiteOrigin } from "@/server/site";
 
 const PRECOMPUTED_PREFIX = "/data/precomputed";
 

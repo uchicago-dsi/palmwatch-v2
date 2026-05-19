@@ -32,6 +32,7 @@ Apply these by default unless there is a strong local reason not to:
   - `hooks/` contains cross-feature React hooks.
   - `domain/` contains business types/rules (pure, no React).
   - `lib/` contains pure utilities (no React, no framework routing APIs, no I/O).
+  - `server/` holds server/boundary modules (fetch, env, filesystem, CMS, Next request APIs). Do not put I/O in root `lib/`.
   - `lib/client/` holds **browser-only** helpers (e.g. analytics wrappers); use `"use client"` there—this is the intentional exception to “pure `lib/`”.
   - `config/` contains compile-time constants.
   - Canonical flow: `routes → features → components → {hooks, domain, config, lib}`.

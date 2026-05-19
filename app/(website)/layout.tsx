@@ -6,7 +6,7 @@ import { Feedback } from "@/components/feedback";
 import { Footer } from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { NavBar } from "@/features/site-nav";
-import { getCanonicalSiteOrigin, getUmamiConfig } from "@/lib/server/site";
+import { getCanonicalSiteOrigin, getUmamiConfig } from "@/server/site";
 import shellStyles from "./_shell/site-shell.module.css";
 
 const siteOrigin = getCanonicalSiteOrigin();

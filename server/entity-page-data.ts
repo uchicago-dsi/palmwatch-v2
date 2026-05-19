@@ -6,7 +6,7 @@ import {
   countryPagePayloadSchema,
   groupOwnerPagePayloadSchema,
 } from "@/domain/schemas/entity-pages";
-import { loadPrecomputedParsed } from "@/lib/server/load-precomputed-parsed";
+import { loadPrecomputedParsed } from "@/server/load-precomputed-parsed";
 
 export async function loadGroupPagePayload(
   slug: string,

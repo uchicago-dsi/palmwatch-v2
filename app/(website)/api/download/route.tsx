@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { cleanUnparse } from "@/lib/rename-output-columns";
-import { mergeFullShards } from "@/lib/server/bbox-compute";
-import { readMillDataText } from "@/lib/server/read-mill-data-text";
-import { resolveMillDataBase } from "@/lib/server/resolve-mill-data-base";
 import { timestamp } from "@/lib/timestamp";
+import { mergeFullShards } from "@/server/bbox-compute";
+import { readMillDataText } from "@/server/read-mill-data-text";
+import { resolveMillDataBase } from "@/server/resolve-mill-data-base";
 
 export async function GET(req: Request) {
   const output = new URL(req.url).searchParams.get("output");

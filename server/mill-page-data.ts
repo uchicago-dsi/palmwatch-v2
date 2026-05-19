@@ -1,9 +1,9 @@
 import type { BrandSchema } from "@/config/brands/types";
 import { precomputedSlug } from "@/lib/precomputed-slug";
-import { loadMedianMill } from "@/lib/server/median-mill-data";
-import type { MillPrecomputedPayload } from "@/lib/server/mill-precomputed-data";
-import { loadMillPrecomputedPayload } from "@/lib/server/mill-precomputed-data";
 import cmsClient from "@/sanity/lib/client";
+import { loadMedianMill } from "@/server/median-mill-data";
+import type { MillPrecomputedPayload } from "@/server/mill-precomputed-data";
+import { loadMillPrecomputedPayload } from "@/server/mill-precomputed-data";
 
 export type MillPageModel = {
   uml: string;

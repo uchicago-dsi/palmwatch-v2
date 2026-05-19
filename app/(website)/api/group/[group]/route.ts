@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { precomputedSlug } from "@/lib/precomputed-slug";
-import { loadGroupApiDocument } from "@/lib/server/entity-api-data";
+import { loadGroupApiDocument } from "@/server/entity-api-data";
 
 export async function GET(
   req: NextRequest,

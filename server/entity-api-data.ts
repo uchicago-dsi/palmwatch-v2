@@ -1,5 +1,5 @@
 import { looseEntityApiDocumentSchema } from "@/domain/schemas/entity-api";
-import { loadPrecomputedParsed } from "@/lib/server/load-precomputed-parsed";
+import { loadPrecomputedParsed } from "@/server/load-precomputed-parsed";
 
 export async function loadGroupApiDocument(
   slug: string,

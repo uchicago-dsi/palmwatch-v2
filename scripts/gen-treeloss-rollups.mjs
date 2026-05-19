@@ -1,5 +1,5 @@
 /**
- * Writes lib/server/treeloss-rollups.generated.ts with literal Arquero rollup callbacks.
+ * Writes server/treeloss-rollups.generated.ts with literal Arquero rollup callbacks.
  * Cloudflare Workers disallow new Function / eval; Arquero needs literal d['col'] in sources.
  */
 import fs from "node:fs";
@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 const yearMetaPath = path.join(root, "public/data/year_meta.json");
-const outPath = path.join(root, "lib/server/treeloss-rollups.generated.ts");
+const outPath = path.join(root, "server/treeloss-rollups.generated.ts");
 
 const yearMeta = JSON.parse(fs.readFileSync(yearMetaPath, "utf8"));
 const yearRange = [...yearMeta].sort((a, b) => a - b);

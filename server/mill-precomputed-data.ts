@@ -1,6 +1,6 @@
 import type { BrandData, UmlData } from "@/domain";
 import { millPrecomputedEnvelopeSchema } from "@/domain/schemas/mill-precomputed";
-import { loadPrecomputedParsed } from "@/lib/server/load-precomputed-parsed";
+import { loadPrecomputedParsed } from "@/server/load-precomputed-parsed";
 
 export type MillPrecomputedPayload = {
   info: UmlData[];

@@ -1,6 +1,6 @@
 import type { SearchListPayload } from "@/domain";
 import { searchListPayloadSchema } from "@/domain/schemas/search-list";
-import { loadPrecomputedJson } from "@/lib/server/load-precomputed";
+import { loadPrecomputedJson } from "@/server/load-precomputed";
 
 /** Loads and validates navbar / list search JSON. Returns `null` when invalid or missing. */
 export async function loadSearchListPayload(

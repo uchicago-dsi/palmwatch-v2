@@ -2,7 +2,7 @@ import {
   type MillApiPayload,
   millApiPayloadSchema,
 } from "@/domain/schemas/mill-api";
-import { loadPrecomputedParsed } from "@/lib/server/load-precomputed-parsed";
+import { loadPrecomputedParsed } from "@/server/load-precomputed-parsed";
 
 export async function loadMillApiPayload(
   slug: string,

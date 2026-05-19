@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { emptySearchListPayload } from "@/domain";
-import { loadSearchListPayload } from "@/lib/server/search-list-data";
+import { loadSearchListPayload } from "@/server/search-list-data";
 
 export async function GET(req: Request) {
   const searchList =

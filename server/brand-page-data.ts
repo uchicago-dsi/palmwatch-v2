@@ -2,8 +2,8 @@ import brands from "@/config/brands";
 import type { BrandSchema } from "@/config/brands/types";
 import type { BrandPrecomputedPayload } from "@/domain/schemas/brand-precomputed";
 import { precomputedSlug } from "@/lib/precomputed-slug";
-import { loadBrandPrecomputedPayload } from "@/lib/server/brand-precomputed-data";
 import cmsClient from "@/sanity/lib/client";
+import { loadBrandPrecomputedPayload } from "@/server/brand-precomputed-data";
 
 export type BrandPageModel = {
   brand: string;

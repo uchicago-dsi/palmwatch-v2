@@ -1,5 +1,5 @@
 import { cumulativeYearRange } from "@/config/years";
-import { loadPrecomputedJson } from "@/lib/server/load-precomputed";
+import { loadPrecomputedJson } from "@/server/load-precomputed";
 
 export type MillDirEntry = {
   label: string;
@@ -33,7 +33,9 @@ export type ForestLossQuartilePoint = {
 };
 
 function quantile(sorted: number[], q: number): number {
-  if (sorted.length === 0) return 0;
+  if (sorted.length === 0) {
+    return 0;
+  }
   const pos = q * (sorted.length - 1);
   const lo = Math.floor(pos);
   const hi = Math.ceil(pos);
@@ -42,7 +44,9 @@ function quantile(sorted: number[], q: number): number {
     : sorted[lo] * (hi - pos) + sorted[hi] * (pos - lo);
 }
 
-async function loadAllShards(req?: Request): Promise<Array<Record<string, unknown>>> {
+async function loadAllShards(
+  req?: Request
+): Promise<Array<Record<string, unknown>>> {
   const manifest = await loadPrecomputedJson<{ shardCount: number }>(
     "full-manifest.json",
     req

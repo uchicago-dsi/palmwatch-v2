@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { precomputedSlug } from "@/lib/precomputed-slug";
-import { loadCountryPagePayload } from "@/lib/server/entity-page-data";
+import { loadCountryPagePayload } from "@/server/entity-page-data";
 
 export async function GET(
   req: NextRequest,
