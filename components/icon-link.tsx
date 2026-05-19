@@ -6,6 +6,7 @@ export const IconLink: React.FC<{ label: string; href: string }> = ({
 }) => (
   <Link aria-label={`Link to ${label}`} href={href}>
     <svg
+      aria-hidden="true"
       className="ml-2 inline fill-info"
       height="20px"
       version="1.1"

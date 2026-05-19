@@ -2,5 +2,5 @@
 import type React from "react";
 
 export const ClientComponent: React.FC<{
-  data: Array<Record<string, any>>;
-}> = ({ data }) => null;
+  data: Record<string, unknown>[];
+}> = ({ data: _data }) => null;

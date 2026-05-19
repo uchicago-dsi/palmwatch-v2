@@ -6,7 +6,7 @@ type Theme = "dark" | "light";
 
 const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({
   theme: "dark",
-  toggle: () => {},
+  toggle: () => undefined,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {

@@ -42,7 +42,11 @@ export const Feedback = () => {
               }`}
               data-tip={showTooltip ? "Copied!" : null}
             >
-              <button className="btn btn-sm" onClick={copyCurrUrlToClipboard}>
+              <button
+                className="btn btn-sm"
+                onClick={copyCurrUrlToClipboard}
+                type="button"
+              >
                 Copy
               </button>
             </div>
@@ -50,20 +54,27 @@ export const Feedback = () => {
           <iframe
             className="flex-1 border-base-300 shadow-inner"
             src="https://docs.google.com/forms/d/e/1FAIpQLSc_bWuT5T4WKu0kfU4rbuUqaSlbCtNfTTWdRrt2pc7AmShqUQ/viewform?embedded=true"
+            title="PalmWatch feedback form"
           >
             Loading…
           </iframe>
           <div className="modal-action">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
-              <button className="btn" onClick={() => setModalOpen(false)}>
+              <button
+                className="btn"
+                onClick={() => setModalOpen(false)}
+                type="button"
+              >
                 Close
               </button>
             </form>
           </div>
         </div>
         <form className="modal-backdrop" method="dialog">
-          <button onClick={() => setModalOpen(false)}>close</button>
+          <button onClick={() => setModalOpen(false)} type="button">
+            close
+          </button>
         </form>
       </dialog>
     </>

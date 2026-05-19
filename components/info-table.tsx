@@ -47,13 +47,20 @@ export const InfoTable: React.FC<InfoTableProps> = ({
           </tr>
         </thead>
         <tbody>
-          {data.map((row, i) => (
-            <tr key={i}>
-              {rawColumns.map((key) => (
-                <td key={`${i}${key}`}>{row[key] as React.ReactNode}</td>
-              ))}
-            </tr>
-          ))}
+          {data.map((row) => {
+            const rowKey = rawColumns
+              .map((key) => `${key}:${String(row[key] ?? "")}`)
+              .join("|");
+            return (
+              <tr key={rowKey}>
+                {rawColumns.map((key) => (
+                  <td key={`${rowKey}-${key}`}>
+                    {row[key] as React.ReactNode}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

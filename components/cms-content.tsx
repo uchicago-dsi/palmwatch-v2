@@ -1,7 +1,7 @@
-import { PortableText } from "@portabletext/react";
+import { PortableText } from "@/sanity/lib/components";
 
 interface CmsContent {
-  content?: any;
+  content?: unknown;
 }
 
 export const CmsContent: React.FC<CmsContent> = ({ content }) => {

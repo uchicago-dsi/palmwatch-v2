@@ -14,11 +14,11 @@ import {
 import { DataProvider } from "@/components/data-provider";
 import { toInfoTableRows } from "@/lib/info-table-rows";
 
-export type IqrOverTimeProps = {
-  data: Array<Record<string, unknown>> | object[];
-  type: "brand" | "mill";
+export interface IqrOverTimeProps {
+  data: Record<string, unknown>[] | object[];
   showMedian?: boolean;
-};
+  type: "brand" | "mill";
+}
 
 export const IqrOverTime: React.FC<IqrOverTimeProps> = ({
   data,

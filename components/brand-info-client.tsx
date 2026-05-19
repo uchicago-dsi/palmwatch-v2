@@ -12,13 +12,14 @@ import {
 
 export const BrandInfoClient: React.FC = () => {
   const uml = useActiveUmlStore((state) => state.currentUml);
+  const millId = uml ?? "";
   const { data, isLoading, isError } = useQuery<{ brands: BrandData }>(
-    [`mill-${uml}`],
+    [`mill-${millId}`],
     async () =>
-      await fetch(`/api/mill/${encodeURIComponent(uml!)}`).then((res) =>
+      await fetch(`/api/mill/${encodeURIComponent(millId)}`).then((res) =>
         res.json()
       ),
-    { enabled: !!uml }
+    { enabled: Boolean(uml) }
   );
 
   if (!uml) {

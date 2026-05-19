@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import styles from "@/components/site-chrome.module.css";
 import { FOOTER_BRAND_LOGOS } from "@/config/footer-brand-logos";
@@ -56,18 +57,22 @@ export const Footer: React.FC = () => (
                     rel="noopener noreferrer"
                     target="_blank"
                   >
-                    <img
+                    <Image
                       alt={logo.alt}
                       className={styles.footerLogoImg}
+                      height={48}
                       src={logo.src}
+                      width={160}
                     />
                   </a>
                 ) : (
-                  <img
+                  <Image
                     alt={logo.alt}
                     className={styles.footerLogoImg}
+                    height={48}
                     key={logo.src}
                     src={logo.src}
+                    width={160}
                   />
                 )
               )}

@@ -1,13 +1,13 @@
 import type { BrandData } from "@/domain";
 
-export type { BrandData };
+export type { BrandData } from "@/domain";
 
 import Link from "next/link";
 import type React from "react";
 import { yearRange } from "@/config/years";
 
 const CircleSvg = () => (
-  <svg className="h-3 w-3" viewBox="0 0 24 24">
+  <svg aria-hidden="true" className="h-3 w-3" viewBox="0 0 24 24">
     <circle cx="12" cy="12" fill="rgb(248, 114, 114)" r="12" />
   </svg>
 );
@@ -34,21 +34,19 @@ export const BrandInfo: React.FC<{ data: BrandData }> = ({ data }) => (
         <tbody>
           {data.map((brand) => (
             <tr key={brand.consumer_brand}>
-              <>
-                <td className="pl-2">
-                  <Link
-                    className={brandNameLinkClass}
-                    href={`/brand/${encodeURIComponent(brand.consumer_brand)}`}
-                  >
-                    {brand.consumer_brand}
-                  </Link>
+              <td className="pl-2">
+                <Link
+                  className={brandNameLinkClass}
+                  href={`/brand/${encodeURIComponent(brand.consumer_brand)}`}
+                >
+                  {brand.consumer_brand}
+                </Link>
+              </td>
+              {yearRange.map((year) => (
+                <td key={year}>
+                  {brand.years.includes(year) ? <CircleSvg /> : null}
                 </td>
-                {yearRange.map((year) => (
-                  <td key={year}>
-                    {brand.years.includes(year) ? <CircleSvg /> : null}
-                  </td>
-                ))}
-              </>
+              ))}
             </tr>
           ))}
         </tbody>
