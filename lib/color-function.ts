@@ -2,16 +2,16 @@ import {
   cumulativeLossColorBreaks,
   forestLossColorBreaks,
   riskScoreScheme,
-} from "@/config/mapSchema";
+} from "@/config/map-schema";
 
 const MISSING_COLOR = [0, 0, 0, 0];
 
-export type ColorStop = {
-  value: number;
+export interface ColorStop {
   color: number[];
   label: string;
   tooltip: string;
-};
+  value: number;
+}
 
 export const forestLossColorFunction = (value?: number) => {
   if (value === undefined || value === null) {

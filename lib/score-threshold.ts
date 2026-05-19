@@ -1,8 +1,8 @@
-export type ScoreThreshold = {
+export interface ScoreThreshold {
+  darkColor: string;
   label: "Low risk" | "Moderate" | "High risk";
   lightColor: string;
-  darkColor: string;
-};
+}
 
 export function getScoreThreshold(score: number): ScoreThreshold {
   if (score > 3.05) {

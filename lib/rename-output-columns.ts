@@ -1,11 +1,11 @@
 import { unparse } from "papaparse";
 
-export type LossTimeseriesRow = {
-  year: number;
-  "q0.25": number;
+export interface LossTimeseriesRow {
   "q0.5": number;
+  "q0.25": number;
   "q0.75": number;
-};
+  year: number;
+}
 
 const columnMappings: Record<string, string> = {
   risk_score_current: "Current Deforestation Score",
