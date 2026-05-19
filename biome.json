@@ -15,6 +15,16 @@
   },
   "overrides": [
     {
+      "includes": ["**/index.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["**/app/(website)/globals.css"],
       "linter": {
         "rules": {
