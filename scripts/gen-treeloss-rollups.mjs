@@ -20,13 +20,20 @@ for (let y = minYear; y <= maxYear; y++) {
   fullYearRange.push(y);
 }
 
+// Median covers 2001–maxYear since mill data has treeloss_km_* from 2001.
+const CUMULATIVE_START = 2001;
+const cumulativeYearRange = [];
+for (let y = CUMULATIVE_START; y <= maxYear; y++) {
+  cumulativeYearRange.push(y);
+}
+
 function linesForSum() {
   return fullYearRange
     .map((y) => `    sum${y}: (d: any) => op.sum(d['treeloss_km_${y}']),`)
     .join("\n");
 }
 function linesForMedian() {
-  return fullYearRange
+  return cumulativeYearRange
     .map((y) => `    median${y}: (d: any) => op.median(d['treeloss_km_${y}']),`)
     .join("\n");
 }
