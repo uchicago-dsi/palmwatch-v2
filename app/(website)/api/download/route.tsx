@@ -17,8 +17,8 @@ export async function GET(req: Request) {
         "mill-catchment.geojson"
       );
       const geoData = JSON.parse(geoDataRaw);
-      const features = [];
-      for (const row of data as Record<string, unknown>[]) {
+      const features: GeoJSON.Feature[] = [];
+      for (const row of data as unknown as Record<string, unknown>[]) {
         const feature = geoData.features.find(
           (f: { properties: Record<string, unknown> }) =>
             f.properties["UML ID"] === row["UML ID"]

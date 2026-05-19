@@ -33,7 +33,7 @@ export async function GET(
         "mill-catchment.geojson"
       );
       const geoData = JSON.parse(geoDataRaw);
-      const features = [];
+      const features: GeoJSON.Feature[] = [];
       for (const row of (data.umlInfo as
         | Record<string, unknown>[]
         | undefined) ?? []) {

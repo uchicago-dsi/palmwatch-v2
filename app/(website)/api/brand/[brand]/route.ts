@@ -40,7 +40,7 @@ export async function GET(
         "mill-catchment.geojson"
       );
       const geoData = JSON.parse(geoDataRaw);
-      const features = [];
+      const features: GeoJSON.Feature[] = [];
       for (const row of (data.umlInfo ?? []) as Record<string, unknown>[]) {
         const feature = geoData.features.find(
           (f: { properties: Record<string, unknown> }) =>
@@ -74,7 +74,8 @@ export async function GET(
       );
     }
     case "loss": {
-      const lossDataRaw = (data.timeseries ?? []) as LossTimeseriesRow[];
+      const lossDataRaw = (data.timeseries ??
+        []) as unknown as LossTimeseriesRow[];
       const cleanedLossData = cleanLossData(lossDataRaw);
       return new NextResponse(cleanUnparse(cleanedLossData), {
         headers: {
