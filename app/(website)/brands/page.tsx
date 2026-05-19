@@ -1,12 +1,11 @@
 import pageStyles from "@/components/page-layout.module.css";
+import { BrandsClient } from "@/features/brands-directory";
+import cmsClient from "@/sanity/lib/client";
+import { PortableText } from "@/sanity/lib/components";
 import {
   loadMillSummaryStats,
   loadRankingBrands,
-} from "@/lib/server/aggregates-data";
-import cmsClient from "@/sanity/lib/client";
-import { PortableText } from "@/sanity/lib/components";
-import styles from "./brands.module.css";
-import { BrandsClient } from "./brands-client";
+} from "@/server/aggregates-data";
 
 export const revalidate = 60;
 
@@ -49,18 +48,18 @@ export default async function Page() {
     dotCategory?: "red" | "amber" | "teal";
   }[];
 
+  const disclaimer = landingPageContent?.disclaimer ? (
+    <PortableText value={landingPageContent.disclaimer} />
+  ) : undefined;
+
   return (
     <main className={pageStyles.pageShell}>
       <div className={pageStyles.pageInner}>
         <BrandsClient
           brands={brands as Parameters<typeof BrandsClient>[0]["brands"]}
+          disclaimer={disclaimer}
           stats={stats}
         />
-        {!!landingPageContent?.disclaimer && (
-          <div className={styles.disclaimer}>
-            <PortableText value={landingPageContent.disclaimer} />
-          </div>
-        )}
       </div>
     </main>
   );

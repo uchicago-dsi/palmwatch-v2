@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import styles from "./brands.module.css";
+import styles from "./brands-directory.module.css";
 
 type BrandRow = {
   consumer_brand: string;
@@ -17,11 +17,16 @@ type StatCard = {
   value: string;
   dotCategory?: "red" | "amber" | "teal";
 };
-type SortKey = "overallScore" | "consumer_brand" | "averagePastRisk" | "millCount";
+type SortKey =
+  | "overallScore"
+  | "consumer_brand"
+  | "averagePastRisk"
+  | "millCount";
 type SortDir = "asc" | "desc";
 
 interface Props {
   brands: BrandRow[];
+  disclaimer?: React.ReactNode;
   stats: StatCard[];
 }
 
@@ -106,7 +111,7 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
   );
 }
 
-export function BrandsClient({ brands, stats }: Props) {
+export function BrandsClient({ brands, stats, disclaimer }: Props) {
   const [sortKey, setSortKey] = React.useState<SortKey>("overallScore");
   const [sortDir, setSortDir] = React.useState<SortDir>("desc");
 
@@ -292,6 +297,9 @@ export function BrandsClient({ brands, stats }: Props) {
           </table>
         </div>
       </section>
+      {disclaimer == null ? null : (
+        <div className={styles.disclaimer}>{disclaimer}</div>
+      )}
     </div>
   );
 }
