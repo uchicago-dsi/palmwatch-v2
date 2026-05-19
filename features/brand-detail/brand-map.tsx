@@ -26,6 +26,7 @@ export default function BrandMap({ brand }: { brand: string }) {
           geoIdColumn="UML ID"
           mapStyle={mapStyle}
           showClusters={true}
+          showLayerStepper={true}
         />
       )}
     </DataProvider>

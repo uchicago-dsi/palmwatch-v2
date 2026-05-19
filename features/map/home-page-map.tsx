@@ -37,6 +37,8 @@ export const HomePageMap = () => {
             })
           }
           showClusters={true}
+          showGeocoder={true}
+          showLayerStepper={true}
         />
       )}
     </div>

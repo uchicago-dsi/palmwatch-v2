@@ -1,14 +1,12 @@
 "use client";
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { useTheme } from "@/components/theme-provider";
+import Link from "next/link";
 import {
   cumulativeLossColumn,
   cumulativeYearRange,
   latestTreelossKmColumn,
 } from "@/config/years";
 import type { UmlData } from "@/domain";
-import { getScoreThreshold } from "@/lib/score-threshold";
 import { useTooltipStore } from "./stores/tooltip-store";
 
 function formatKm2(val: number): string {
@@ -52,9 +50,6 @@ function ArrowUpRight() {
 
 export const MapTooltip = () => {
   const { x, y, id, frozen, choroplethColumn, unfreeze } = useTooltipStore();
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const { data, isLoading } = useQuery<{ info: Array<UmlData> }>(
     [`millonly-${id}`],
     async () =>
@@ -90,30 +85,21 @@ export const MapTooltip = () => {
     return null;
   }
 
-  const score = Number(info.risk_score_current);
-  const validScore = Number.isFinite(score) && score > 0;
-  const threshold = validScore ? getScoreThreshold(score) : null;
-  const barColor = threshold
-    ? isDark
-      ? threshold.darkColor
-      : threshold.lightColor
-    : "currentColor";
-  const barPct = validScore ? Math.min(100, Math.round((score / 5) * 100)) : 0;
+  const millHref = `/mill/${encodeURIComponent(id!)}`;
 
   const lossVal = getForestLossValue(info, choroplethColumn);
 
-  const province = info.Province || info.District;
-  const location = [info.Country, province]
-    .filter((p): p is string => typeof p === "string" && p.trim().length > 0)
-    .join(" · ");
-
-  const millHref = `/mill/${encodeURIComponent(id!)}`;
+  const scoreRows = [
+    { label: "Recent score", value: Number(info.risk_score_current) },
+    { label: "Past score", value: Number(info.risk_score_past) },
+    { label: "Future risk score", value: Number(info.risk_score_future) },
+  ];
 
   const inner = (
     <>
       {/* Name + link arrow */}
       <div className="flex items-start justify-between gap-2">
-        <span className="font-medium text-sm leading-snug">
+        <span className="font-medium text-sm uppercase leading-snug">
           {info["Mill Name"]}
         </span>
         <span className="mt-0.5 shrink-0 opacity-35">
@@ -121,36 +107,40 @@ export const MapTooltip = () => {
         </span>
       </div>
 
-      {/* Location */}
-      {location && <div className="mt-0.5 text-xs opacity-60">{location}</div>}
+      {/* UML ID */}
+      <div className="mt-0.5 text-[11px] opacity-40">{info["UML ID"]}</div>
+
+      {/* Country / Province */}
+      {(info.Country || info.Province) && (
+        <div className="mt-0.5 text-xs opacity-60">
+          {[info.Country, info.Province].filter(Boolean).join(" · ")}
+        </div>
+      )}
 
       {/* Divider */}
       <div className="my-2 border-base-content/10 border-t" />
 
-      {/* Score row */}
-      {validScore && threshold && (
-        <div className="mb-1 flex items-center gap-2">
-          <span className="w-8 shrink-0 text-[11px] opacity-40">Score</span>
-          <div className="h-[5px] w-10 shrink-0 overflow-hidden rounded-full bg-base-content/10">
-            <div
-              className="h-full rounded-full"
-              style={{ width: `${barPct}%`, background: barColor }}
-            />
-          </div>
-          <span className="font-medium text-xs">{score.toFixed(1)}</span>
-          <span className="text-[11px]" style={{ color: barColor }}>
-            {threshold.label}
+      {/* Layer value */}
+      {lossVal !== null && lossVal > 0 && (
+        <div className="mb-1 flex items-center justify-between gap-6">
+          <span className="text-[11px] opacity-40">Forest loss</span>
+          <span className="font-medium text-xs tabular-nums">
+            {formatKm2(lossVal)}
           </span>
         </div>
       )}
 
-      {/* Loss row */}
-      {lossVal !== null && lossVal > 0 && (
-        <div className="flex items-center gap-2">
-          <span className="w-8 shrink-0 text-[11px] opacity-40">Loss</span>
-          <span className="font-medium text-xs">{formatKm2(lossVal)}</span>
-        </div>
-      )}
+      {/* Score rows */}
+      <div className="flex flex-col gap-1">
+        {scoreRows.map(({ label, value }) => (
+          <div className="flex items-center justify-between gap-6" key={label}>
+            <span className="text-[11px] opacity-40">{label}</span>
+            <span className="font-medium text-xs tabular-nums">
+              {Number.isFinite(value) ? value.toFixed(2) : "—"}
+            </span>
+          </div>
+        ))}
+      </div>
     </>
   );
 
@@ -158,15 +148,18 @@ export const MapTooltip = () => {
     return (
       <div className="absolute z-40" style={style}>
         <Link
-          className="block rounded-lg border border-base-content/10 bg-base-100 px-3 py-2.5 shadow-lg no-underline transition-opacity hover:opacity-90"
+          className="block rounded-lg border border-base-content/10 bg-base-100 px-3 py-2.5 no-underline shadow-lg transition-opacity hover:opacity-90"
           href={millHref}
         >
           {inner}
         </Link>
         <button
           aria-label="Dismiss"
-          className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full border border-base-content/10 bg-base-100 shadow-sm text-[10px] opacity-70 hover:opacity-100"
-          onClick={(e) => { e.stopPropagation(); unfreeze(); }}
+          className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full border border-base-content/10 bg-base-100 text-[10px] opacity-70 shadow-sm hover:opacity-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            unfreeze();
+          }}
           type="button"
         >
           ×

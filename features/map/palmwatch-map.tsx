@@ -30,9 +30,9 @@ import {
   cumulativeLossColumn,
   cumulativeYearRange,
   fullYearRange,
+  maxYear,
 } from "@/config/years";
 import { useActiveUmlStore } from "@/hooks/use-active-uml-store";
-import { Legend } from "./legend";
 import { MapTooltip } from "./map-tooltip";
 import { useTooltipStore } from "./stores/tooltip-store";
 
@@ -63,87 +63,6 @@ function applyThemeBrightness(map: MapboxGLMap, theme: "light" | "dark") {
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
-function IconLayersOn() {
-  return (
-    <svg fill="none" height="15" viewBox="0 0 24 24" width="15">
-      <polygon
-        points="12 2 2 7 12 12 22 7 12 2"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-      <polyline
-        points="2 17 12 22 22 17"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-      <polyline
-        points="2 12 12 17 22 12"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
-
-function IconClose() {
-  return (
-    <svg aria-hidden fill="none" height="18" viewBox="0 0 24 24" width="18">
-      <path
-        d="M18 6L6 18M6 6l12 12"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
-
-function IconLayersOff() {
-  return (
-    <svg fill="none" height="15" viewBox="0 0 24 24" width="15">
-      <polygon
-        points="12 2 2 7 12 12 22 7 12 2"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeOpacity="0.35"
-        strokeWidth="2"
-      />
-      <polyline
-        points="2 17 12 22 22 17"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeOpacity="0.35"
-        strokeWidth="2"
-      />
-      <polyline
-        points="2 12 12 17 22 12"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeOpacity="0.35"
-        strokeWidth="2"
-      />
-      <line
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="2"
-        x1="3"
-        x2="21"
-        y1="3"
-        y2="21"
-      />
-    </svg>
-  );
-}
-
 export type MapViewport = { longitude: number; latitude: number; zoom: number };
 
 export type MapProps = {
@@ -154,6 +73,7 @@ export type MapProps = {
   choroplethColumn: string;
   choroplethScheme: keyof typeof colorFunctions;
   showLayerStepper?: boolean;
+  showGeocoder?: boolean;
   onMapMove?: (v: any) => void;
   noFlyMap?: boolean;
   mapStyle?: string;
@@ -161,6 +81,35 @@ export type MapProps = {
   onFeatureClick?: (umlId: string) => void;
   initialView?: MapViewport;
 };
+
+type LayerMode = "total" | "byYear" | "scores";
+type ScoreType = "past" | "recent" | "future";
+
+const SCORE_COLUMN: Record<ScoreType, string> = {
+  past: "risk_score_past",
+  recent: "risk_score_current",
+  future: "risk_score_future",
+};
+
+function layerDescription(
+  mode: LayerMode,
+  year: number,
+  score: ScoreType
+): string {
+  if (mode === "total") {
+    return `Cumulative tree cover loss (${CUMULATIVE_LOSS_START_YEAR}–present)`;
+  }
+  if (mode === "byYear") {
+    return `Forest loss in ${year}`;
+  }
+  if (score === "past") {
+    return "Past deforestation score (2001–2019)";
+  }
+  if (score === "recent") {
+    return "Recent deforestation score (2020–2025)";
+  }
+  return "Future deforestation risk score";
+}
 
 export const PalmwatchMap: React.FC<MapProps> = ({
   geoDataUrl,
@@ -170,6 +119,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   choroplethColumn,
   choroplethScheme,
   showLayerStepper,
+  showGeocoder,
   onMapMove,
   noFlyMap,
   mapStyle: mapStyleProp,
@@ -208,7 +158,10 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     : isCumulative
       ? -2
       : Number.parseInt(currentChoroplethColumn?.split("_")?.[2]);
-  const [showLayerPanel, setShowLayerPanel] = useState(false);
+  const [mode, setMode] = useState<LayerMode>("total");
+  const [year, setYear] = useState(maxYear);
+  const [scoreType, setScoreType] = useState<ScoreType>("recent");
+  const [legendOpen, setLegendOpen] = useState(true);
   const { colorFunction, scale } = colorFunctions[currentChoroplethScheme];
   const setData = useTooltipStore((state) => state.setData);
   const setChoroplethColumnInTooltip = useTooltipStore(
@@ -479,7 +432,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   ]);
 
   const fillOpacity = theme === "light" ? 0.35 : 0.45;
-  const polygonFillVisible = fillVisible && (!showClusters || mapZoom >= CLUSTER_MAX_ZOOM);
+  const polygonFillVisible =
+    fillVisible && (!showClusters || mapZoom >= CLUSTER_MAX_ZOOM);
 
   const layers = [
     new GeoJsonLayer({
@@ -498,7 +452,9 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       lineWidthMinPixels: 0.5,
       lineWidthMaxPixels: 6,
       onHover: ({ x, y, object }) => {
-        if (frozenRef.current) return;
+        if (frozenRef.current) {
+          return;
+        }
         object
           ? setData(x, y, object.properties["UML ID"])
           : setData(null, null, null);
@@ -557,19 +513,6 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       },
     }),
   ];
-  const incrementYear = () => {
-    const index = fullYearRange.indexOf(currentYear);
-    if (index < fullYearRange.length - 1) {
-      setCurrentChoroplethColumn(`treeloss_km_${fullYearRange[index + 1]}`);
-    }
-  };
-  const decrementYear = () => {
-    const index = fullYearRange.indexOf(currentYear);
-    if (index > 0) {
-      setCurrentChoroplethColumn(`treeloss_km_${fullYearRange[index - 1]}`);
-    }
-  };
-
   const handleVariable = (variable: string) => {
     if (variable.includes("score")) {
       setCurrentChoroplethScheme("riskScore");
@@ -582,12 +525,6 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   };
 
   const layerControlsVisible = !showClusters || mapZoom >= CLUSTER_MAX_ZOOM;
-
-  useEffect(() => {
-    if (!layerControlsVisible && showLayerPanel) {
-      setShowLayerPanel(false);
-    }
-  }, [layerControlsVisible, showLayerPanel]);
 
   return (
     <div className="flex h-full w-full">
@@ -606,6 +543,13 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           }}
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
           mapStyle={mapStyleProp ?? MAP_STYLE}
+          onClick={() => {
+            if (justFrozeRef.current) {
+              justFrozeRef.current = false;
+            } else {
+              unfreeze();
+            }
+          }}
           onLoad={(e) => {
             syncZoomFromView(e.target.getZoom());
             applyThemeBrightness(e.target as unknown as MapboxGLMap, theme);
@@ -614,13 +558,6 @@ export const PalmwatchMap: React.FC<MapProps> = ({
               hasFlewRef.current = true;
               pendingFlyRef.current = null;
               mapRef.current?.flyTo({ center: [longitude, latitude], zoom });
-            }
-          }}
-          onClick={() => {
-            if (justFrozeRef.current) {
-              justFrozeRef.current = false;
-            } else {
-              unfreeze();
             }
           }}
           onMove={(e) => syncZoomFromView(e.viewState.zoom)}
@@ -634,10 +571,12 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           reuseMaps={true}
           style={{ width: "100%", height: "100%" }}
         >
-          <GeocoderControl
-            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN!}
-            position="top-left"
-          />
+          {showGeocoder && (
+            <GeocoderControl
+              mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN!}
+              position="top-left"
+            />
+          )}
           <NavigationControl showCompass={false} visualizePitch={false} />
           <AttributionControl
             compact={true}
@@ -716,171 +655,167 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           )}
         </Map>
 
-        {layerControlsVisible && showLayerPanel && (
-          <aside
-            aria-label="Map data layers"
-            className="absolute inset-y-0 left-0 z-40 flex w-96 max-w-[min(24rem,90vw)] flex-col overflow-hidden border-base-content/10 border-r bg-base-100 shadow-xl"
-            role="dialog"
+        {showLayerStepper && layerControlsVisible && (
+          <div
+            className="pointer-events-auto absolute z-40 flex flex-col gap-2.5 rounded-xl border border-base-content/10 bg-base-100/95 px-3.5 py-3 shadow-md backdrop-blur-sm"
+            style={{ top: showGeocoder ? 58 : 12, left: 12, maxWidth: 300 }}
           >
-            <div className="flex shrink-0 items-center justify-between gap-2 border-base-content/10 border-b px-3 py-2">
-              <h3 className="m-0 font-semibold text-sm">Map Data Layers</h3>
+            {/* Mode pills */}
+            <div className="flex gap-1.5">
+              {(
+                [
+                  { id: "total" as LayerMode, label: "Total loss" },
+                  { id: "byYear" as LayerMode, label: "By year" },
+                  { id: "scores" as LayerMode, label: "Risk scores" },
+                ] as const
+              ).map(({ id, label }) => (
+                <button
+                  className={`cursor-pointer rounded-full px-3 py-1 text-xs transition-all duration-150 ${
+                    mode === id
+                      ? "bg-base-content font-medium text-base-100"
+                      : "border border-base-content/10 bg-base-100 text-base-content/60 hover:border-base-content/20 hover:text-base-content"
+                  }`}
+                  key={id}
+                  onClick={() => {
+                    setMode(id);
+                    if (id === "total") {
+                      handleVariable(cumulativeLossColumn);
+                    } else if (id === "byYear") {
+                      handleVariable(`treeloss_km_${year}`);
+                    } else {
+                      handleVariable(SCORE_COLUMN[scoreType]);
+                    }
+                  }}
+                  type="button"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* By-year slider */}
+            {mode === "byYear" && (
+              <div className="flex items-center gap-2.5">
+                <input
+                  className="flex-1 accent-base-content"
+                  max={fullYearRange[fullYearRange.length - 1]}
+                  min={fullYearRange[0]}
+                  onChange={(e) => {
+                    const y = Number(e.target.value);
+                    setYear(y);
+                    handleVariable(`treeloss_km_${y}`);
+                  }}
+                  step={1}
+                  type="range"
+                  value={year}
+                />
+                <span className="min-w-[36px] text-right font-medium text-[13px] text-base-content">
+                  {year}
+                </span>
+              </div>
+            )}
+
+            {/* Score type sub-pills */}
+            {mode === "scores" && (
+              <div className="flex gap-1">
+                {(
+                  [
+                    { id: "past" as ScoreType, label: "Past" },
+                    { id: "recent" as ScoreType, label: "Recent" },
+                    { id: "future" as ScoreType, label: "Future risk" },
+                  ] as const
+                ).map(({ id, label }) => (
+                  <button
+                    className={`cursor-pointer rounded-md px-2.5 py-0.5 text-[11px] transition-all duration-150 ${
+                      scoreType === id
+                        ? "bg-base-content font-medium text-base-100"
+                        : "border border-base-content/10 text-base-content/60 hover:border-base-content/20 hover:text-base-content"
+                    }`}
+                    key={id}
+                    onClick={() => {
+                      setScoreType(id);
+                      handleVariable(SCORE_COLUMN[id]);
+                    }}
+                    type="button"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Description */}
+            <p className="m-0 text-[11px] text-base-content/40 leading-snug">
+              {fillVisible
+                ? layerDescription(mode, year, scoreType)
+                : "Overlay hidden"}
+            </p>
+
+            {/* Legend */}
+            <div className="border-base-content/10 border-t pt-2">
               <button
-                aria-label="Close layer panel"
-                className="btn btn-ghost btn-sm btn-square pointer-events-auto shrink-0"
-                onClick={() => setShowLayerPanel(false)}
+                className="flex w-full items-center justify-between gap-2"
+                onClick={() => setLegendOpen((o) => !o)}
                 type="button"
               >
-                <IconClose />
+                <span className="font-medium text-[11px] text-base-content/50">
+                  Legend
+                </span>
+                <svg
+                  className={`flex-shrink-0 text-base-content/40 transition-transform duration-150 ${legendOpen ? "" : "-rotate-90"}`}
+                  fill="none"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  width="10"
+                >
+                  <path
+                    d="M6 9l6 6 6-6"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                  />
+                </svg>
               </button>
-            </div>
-            <div className="prose min-h-0 flex-1 overflow-y-auto px-2 py-2">
-              <ul className="menu w-full rounded-box p-0">
-                <li>
-                  <button
-                    className={`m-0 p-2 ${isCumulative ? "btn-active" : ""}`}
-                    onClick={() => handleVariable(cumulativeLossColumn)}
-                  >
-                    Total Deforestation
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`m-0 p-2 ${!isCumulative && currentYear !== -1 ? "btn-active" : ""}`}
-                    onClick={() => {
-                      const idx = fullYearRange.indexOf(
-                        fullYearRange[fullYearRange.length - 1]
-                      );
-                      handleVariable(`treeloss_km_${fullYearRange[idx]}`);
-                    }}
-                  >
-                    Deforestation By Year
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`m-0 p-2 ${currentYear === -1 ? "btn-active" : ""}`}
-                    onClick={() => handleVariable("risk_score_current")}
-                  >
-                    Deforestation Scores
-                  </button>
-                </li>
-              </ul>
-              {isCumulative ? (
-                <p className="px-1 text-sm opacity-70">
-                  Cumulative tree cover loss from {CUMULATIVE_LOSS_START_YEAR}{" "}
-                  to present within mill catchment areas (km²).
-                </p>
-              ) : currentYear === -1 ? (
-                <>
-                  <h4>Deforestation Score</h4>
-                  <div className="join join-vertical">
-                    {[
-                      {
-                        value: "risk_score_past",
-                        label: "Past Deforestation Score",
-                      },
-                      {
-                        value: "risk_score_current",
-                        label: "Recent Deforestation Score",
-                      },
-                      {
-                        value: "risk_score_future",
-                        label: "Future Deforestation Risk Score",
-                      },
-                    ].map((variable) => (
-                      <button
-                        className={`join-item btn ${
-                          currentChoroplethColumn === variable.value
-                            ? "btn-active"
-                            : ""
-                        }`}
-                        key={variable.value}
-                        onClick={() => handleVariable(variable.value)}
-                      >
-                        {variable.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h4>Data Year</h4>
-                  <div className="join w-full max-w-none">
-                    <button className="join-item btn" onClick={decrementYear}>
-                      «
-                    </button>
-                    <button className="join-item btn">{currentYear}</button>
-                    <button className="join-item btn" onClick={incrementYear}>
-                      »
-                    </button>
-                  </div>
-                </>
+              {legendOpen && (
+                <div
+                  className={`mt-1.5 flex flex-col gap-1 transition-opacity ${fillVisible ? "opacity-100" : "opacity-30"}`}
+                >
+                  {scale.map((stop, i) => (
+                    <div className="flex items-center gap-2" key={i}>
+                      <div
+                        className="h-2.5 w-2.5 flex-shrink-0 rounded-sm"
+                        style={{
+                          background: `rgb(${stop.color[0]},${stop.color[1]},${stop.color[2]})`,
+                        }}
+                      />
+                      <span className="text-[11px] text-base-content/60">
+                        {stop.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-          </aside>
+
+            {/* Overlay toggle */}
+            <div className="border-base-content/10 border-t pt-1.5">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  checked={fillVisible}
+                  className="cursor-pointer"
+                  onChange={() => setFillVisible((v) => !v)}
+                  type="checkbox"
+                />
+                <span className="text-[11px] text-base-content/50">
+                  Show polygon overlay
+                </span>
+              </label>
+            </div>
+          </div>
         )}
 
-        {layerControlsVisible && !showLayerPanel && (
-          <button
-            aria-label="Open layer panel"
-            className="btn pointer-events-auto absolute top-1/2 left-2 z-50 min-h-11 min-w-11 -translate-y-1/2 rounded-r-lg border border-base-content/10 bg-base-100 shadow-xl"
-            onClick={() => setShowLayerPanel(true)}
-            type="button"
-          >
-            <svg
-              aria-hidden
-              className="fill-current"
-              height="24px"
-              viewBox="0 0 100 100"
-              width="24px"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="m3.5 67.75c-0.011719 1.125 0.58594 2.1719 1.5625 2.7344l43.375 24c0.94141 0.52344 2.0898 0.52344 3.0312 0l43.422-24c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-12-6.6406 12-6.6406c0.99609-0.55078 1.6133-1.5977 1.6133-2.7344s-0.61719-2.1836-1.6133-2.7344l-43.328-24c-0.94141-0.52344-2.0898-0.52344-3.0312 0l-43.422 24c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99609 0.55078-1.6133 1.5977-1.6133 2.7344s0.61719 2.1836 1.6133 2.7344l12.078 6.6406-12.078 6.6406c-0.99219 0.55078-1.6094 1.5977-1.6094 2.7344zm9.5781-37.5 36.922-20.422 36.922 20.422-11.922 6.6406-25 13.781-24.922-13.781zm10.484 31.703 25 13.781c0.94141 0.52344 2.0898 0.52344 3.0312 0l25-13.781 10.484 5.7969-37.078 20.422-36.922-20.422z" />
-            </svg>
-          </button>
-        )}
-
-        {layerControlsVisible && (
-          <button
-            aria-label={fillVisible ? "Hide overlay" : "Show overlay"}
-            onClick={() => setFillVisible((v) => !v)}
-            style={{
-              position: "absolute",
-              bottom: "40px",
-              right: "10px",
-              zIndex: 50,
-              background: "white",
-              border: "none",
-              borderRadius: "4px",
-              boxShadow: "0 0 0 2px rgba(0,0,0,0.1)",
-              width: "29px",
-              height: "29px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#333",
-              padding: 0,
-            }}
-            title={fillVisible ? "Hide overlay" : "Show overlay"}
-            type="button"
-          >
-            {fillVisible ? <IconLayersOn /> : <IconLayersOff />}
-          </button>
-        )}
         <MapTooltip />
-        {polygonFillVisible && (
-          <Legend
-            colorStops={scale}
-            label={
-              currentYear === -1
-                ? "Risk score"
-                : isCumulative
-                  ? `Total deforestation since ${CUMULATIVE_LOSS_START_YEAR} (km²)`
-                  : `Deforestation ${currentYear} (km²)`
-            }
-          />
-        )}
       </div>
     </div>
   );
