@@ -1,13 +1,13 @@
 import { maxYear } from "@/config/years";
 import styles from "../company.module.css";
 
-export type CompanyStatsGridProps = {
-  uniqueMills: number;
-  uniqueCountries: number;
+export interface CompanyStatsGridProps {
   averageCurrentRisk: number;
   forestLossSince2001: number;
   formatKm2: (v: number) => string;
-};
+  uniqueCountries: number;
+  uniqueMills: number;
+}
 
 /** Top stat cards on owner/group entity pages. */
 export function CompanyStatsGrid({

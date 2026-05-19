@@ -98,7 +98,19 @@ function BboxExplorerInner() {
             geoDataUrl="/data/mill-catchment.geojson"
             geoIdColumn="UML ID"
             noFlyMap
-            onMapMove={setViewState}
+            onMapMove={(e) => {
+              setViewState({
+                viewState: {
+                  latitude: e.viewState.latitude,
+                  longitude: e.viewState.longitude,
+                  zoom: e.viewState.zoom,
+                },
+                target: {
+                  _containerWidth: e.target.getContainer()?.clientWidth,
+                  _containerHeight: e.target.getContainer()?.clientHeight,
+                },
+              });
+            }}
           />
         </div>
         <StatsBlock stats={stats} />

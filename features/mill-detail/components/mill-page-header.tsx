@@ -1,15 +1,15 @@
 import Link from "next/link";
 import styles from "../mill.module.css";
 
-export type MillPageHeaderProps = {
-  millName: string;
+export interface MillPageHeaderProps {
   altName?: string | null;
-  parentCompany?: string;
-  groupName?: string;
-  province?: string;
   country?: string;
   formatTitle: (value: string) => string;
-};
+  groupName?: string;
+  millName: string;
+  parentCompany?: string;
+  province?: string;
+}
 
 export function MillPageHeader({
   millName,
@@ -20,10 +20,9 @@ export function MillPageHeader({
   country,
   formatTitle,
 }: MillPageHeaderProps) {
-  const hasParent = parentCompany && parentCompany.trim();
+  const hasParent = parentCompany?.trim();
   const hasGroup =
-    groupName &&
-    groupName.trim() &&
+    groupName?.trim() &&
     groupName.trim().toUpperCase() !== "UNKNOWN" &&
     groupName.trim() !== parentCompany?.trim();
 
@@ -48,9 +47,9 @@ export function MillPageHeader({
             Owned by{" "}
             <Link
               className={styles.metaLink}
-              href={`/owner/${encodeURIComponent(parentCompany)}`}
+              href={`/owner/${encodeURIComponent(parentCompany ?? "")}`}
             >
-              {formatTitle(parentCompany)}
+              {formatTitle(parentCompany ?? "")}
             </Link>
           </span>
         ) : null}
@@ -62,9 +61,9 @@ export function MillPageHeader({
               Group:{" "}
               <Link
                 className={styles.metaLink}
-                href={`/group/${encodeURIComponent(groupName)}`}
+                href={`/group/${encodeURIComponent(groupName ?? "")}`}
               >
-                {formatTitle(groupName)}
+                {formatTitle(groupName ?? "")}
               </Link>
             </span>
           </>

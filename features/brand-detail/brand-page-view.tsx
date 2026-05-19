@@ -22,23 +22,29 @@ import type { AnnualLossPoint, RankingEntry } from "./types";
 
 type BrandStats = BrandPrecomputedPayload["brandStats"];
 
-type Disclosure = { year: string; filename: string };
-type Download = { label: string; href: string };
+interface Disclosure {
+  filename: string;
+  year: string;
+}
+interface Download {
+  href: string;
+  label: string;
+}
 
-export type BrandPageViewProps = {
-  brand: string;
-  altName?: string;
-  externalLink: string;
-  rspoMemberSince: string;
-  disclosures: Disclosure[];
-  brandStats: BrandStats;
+export interface BrandPageViewProps {
   aboutContent: React.ReactNode;
-  ranking: RankingEntry[];
-  forestLossTimeseries: AnnualLossPoint[];
-  totalForestLoss: number;
-  downloads: Download[];
+  altName?: string;
+  brand: string;
+  brandStats: BrandStats;
   deforestationMap: React.ReactNode;
-};
+  disclosures: Disclosure[];
+  downloads: Download[];
+  externalLink: string;
+  forestLossTimeseries: AnnualLossPoint[];
+  ranking: RankingEntry[];
+  rspoMemberSince: string;
+  totalForestLoss: number;
+}
 
 // ── Helper functions ─────────────────────────────────────────────────────────
 
@@ -56,7 +62,7 @@ function formatKm2(v: number): string {
   return String(Math.round(v));
 }
 
-function scoreColor(score: number, theme: "dark" | "light"): string {
+function _scoreColor(score: number, theme: "dark" | "light"): string {
   if (score > 3.05) {
     return theme === "dark" ? "#F87171" : "#DC2626";
   }
@@ -66,7 +72,7 @@ function scoreColor(score: number, theme: "dark" | "light"): string {
   return theme === "dark" ? "#FDE047" : "#CA8A04";
 }
 
-function scoreBarClass(score: number): string {
+function _scoreBarClass(score: number): string {
   if (score > 3.05) {
     return styles.barRed;
   }
@@ -103,7 +109,7 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
 function IconSearch() {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={styles.filterIcon}
       fill="none"
       height="16"
@@ -124,7 +130,7 @@ function IconSearch() {
 function IconChevronDown({ open }: { open: boolean }) {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={`${styles.accordionChevron} ${open ? styles.accordionChevronOpen : ""}`}
       fill="none"
       height="16"
@@ -145,7 +151,7 @@ function IconChevronDown({ open }: { open: boolean }) {
 function IconExternal() {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={styles.linkIcon}
       fill="none"
       height="13"
@@ -182,7 +188,7 @@ function IconExternal() {
 function IconDownload() {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={styles.linkIcon}
       fill="none"
       height="13"
@@ -218,7 +224,13 @@ function IconDownload() {
 
 function IconSortBoth() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4-4 4 4M16 15l-4 4-4-4"
         stroke="currentColor"
@@ -231,7 +243,13 @@ function IconSortBoth() {
 }
 function IconSortUp() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 15l4-4 4 4"
         stroke="currentColor"
@@ -244,7 +262,13 @@ function IconSortUp() {
 }
 function IconSortDown() {
   return (
-    <svg fill="none" height="12" viewBox="0 0 24 24" width="12">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
       <path
         d="M8 9l4 4 4-4"
         stroke="currentColor"
@@ -303,7 +327,7 @@ function AnnualLossChart({ data }: { data: AnnualLossPoint[] }) {
 
   const maxVal = Math.max(...data.map((d) => d.annualKm2));
   const firstYear = data[0].year;
-  const lastYear = data[data.length - 1].year;
+  const lastYear = data.at(-1)?.year ?? firstYear;
   const midYear = Math.round((firstYear + lastYear) / 2);
 
   return (
@@ -343,7 +367,11 @@ function AnnualLossChart({ data }: { data: AnnualLossPoint[] }) {
 
 // ── Mill owners table ─────────────────────────────────────────────────────────
 
-type OwnerRow = { "Parent Company": string; Country: string; count: number };
+interface OwnerRow {
+  Country: string;
+  count: number;
+  "Parent Company": string;
+}
 type OwnerSortKey = "name" | "country" | "count";
 
 const OWNER_PAGE_SIZE = 20;
@@ -387,7 +415,7 @@ function MillOwnersTable({ owners }: { owners: OwnerRow[] }) {
 
   React.useEffect(() => {
     setPage(1);
-  }, [q, sortKey, sortDir]);
+  }, []);
 
   function handleSort(key: OwnerSortKey) {
     if (key === sortKey) {
@@ -477,7 +505,7 @@ function MillOwnersTable({ owners }: { owners: OwnerRow[] }) {
                   </td>
                   <td className={styles.tdArrow}>
                     <svg
-                      aria-hidden
+                      aria-hidden="true"
                       fill="none"
                       height="14"
                       viewBox="0 0 24 24"
@@ -515,7 +543,10 @@ function MillOwnersTable({ owners }: { owners: OwnerRow[] }) {
             </button>
             {pageNums.map((p, i) =>
               p === "..." ? (
-                <span className={styles.pageEllipsis} key={`e${i}`}>
+                <span
+                  className={styles.pageEllipsis}
+                  key={`ellipsis-${String(pageNums[i - 1])}-${String(pageNums[i + 1])}`}
+                >
                   …
                 </span>
               ) : (
@@ -546,14 +577,14 @@ function MillOwnersTable({ owners }: { owners: OwnerRow[] }) {
 
 // ── Mills table ───────────────────────────────────────────────────────────────
 
-type MillRow = {
-  "UML ID": string;
-  "Mill Name": string;
-  risk_score_current: number;
+interface MillRow {
   Country: string;
-  Province: string;
+  "Mill Name": string;
   "Parent Company": string;
-};
+  Province: string;
+  risk_score_current: number;
+  "UML ID": string;
+}
 
 type MillSortKey = "name" | "score" | "country" | "province" | "parent";
 
@@ -609,7 +640,7 @@ function MillsTable({ mills }: { mills: MillRow[] }) {
 
   React.useEffect(() => {
     setPage(1);
-  }, [q, sortKey, sortDir]);
+  }, []);
 
   function handleSort(key: MillSortKey) {
     if (key === sortKey) {
@@ -729,7 +760,7 @@ function MillsTable({ mills }: { mills: MillRow[] }) {
                     </td>
                     <td className={styles.tdArrow}>
                       <svg
-                        aria-hidden
+                        aria-hidden="true"
                         fill="none"
                         height="14"
                         viewBox="0 0 24 24"
@@ -768,7 +799,10 @@ function MillsTable({ mills }: { mills: MillRow[] }) {
             </button>
             {pageNums.map((p, i) =>
               p === "..." ? (
-                <span className={styles.pageEllipsis} key={`e${i}`}>
+                <span
+                  className={styles.pageEllipsis}
+                  key={`ellipsis-${String(pageNums[i - 1])}-${String(pageNums[i + 1])}`}
+                >
                   …
                 </span>
               ) : (
@@ -839,14 +873,14 @@ function BrandPageViewInner({
 }: BrandPageViewProps) {
   const { data: apiData } = useQuery<{
     owners: OwnerRow[];
-    umlInfo: Array<Record<string, unknown>>;
+    umlInfo: Record<string, unknown>[];
   }>({
     queryKey: ["data", `/api/brand/${brand}`],
     queryFn: () => fetch(`/api/brand/${brand}`).then((r) => r.json()),
   });
 
   const owners = (apiData?.owners ?? []) as OwnerRow[];
-  const umlInfo = (apiData?.umlInfo ?? []) as MillRow[];
+  const umlInfo = (apiData?.umlInfo ?? []) as unknown as MillRow[];
 
   const forestLossDisplay = `${formatKm2(totalForestLoss)} km²`;
 

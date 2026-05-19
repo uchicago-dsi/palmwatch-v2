@@ -3,18 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import type React from "react";
 import { Preloader } from "@/components/preloader";
-import { millInfoColumns } from "@/config/millInfo";
+import { millInfoColumns } from "@/config/mill-info";
 import type { UmlData } from "@/domain";
 import { useActiveUmlStore } from "@/hooks/use-active-uml-store";
 
 const MILL_INFO_SECTION_TITLE = "Mill Information";
 
-type InfoData = {
-  info: UmlData;
-};
+interface InfoData {
+  info?: UmlData[];
+}
 export const MillInfo: React.FC<{
   millOverride?: string;
-  dataOverride?: Array<Record<string, unknown>>;
+  dataOverride?: Record<string, unknown>[];
 }> = ({ millOverride, dataOverride }) => {
   const _uml = useActiveUmlStore((state) => state.currentUml);
   const uml = millOverride || _uml;
@@ -51,7 +51,7 @@ export const MillInfo: React.FC<{
       </div>
     );
   }
-  const info = ((data as any).info?.[0] as UmlData) || null;
+  const info = data?.info?.[0] ?? null;
 
   if (!info) {
     return (

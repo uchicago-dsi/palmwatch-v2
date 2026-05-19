@@ -26,17 +26,20 @@ import { CompanyStatsGrid } from "./components/company-stats-grid";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type CompanyPageViewProps = {
-  name: string;
-  type: "owner" | "group";
-  pageData: GroupOwnerPagePayload;
-  millsTyped: UmlData[];
+export interface CompanyPageViewProps {
   aboutContent?: React.ReactNode;
   /** Map composed by the route (`MillsDeforestationMap` + `QueryProvider`). */
   deforestationMap: React.ReactNode;
-};
+  millsTyped: UmlData[];
+  name: string;
+  pageData: GroupOwnerPagePayload;
+  type: "owner" | "group";
+}
 
-type CumulativePoint = { year: number; cumulativeKm2: number };
+interface CumulativePoint {
+  cumulativeKm2: number;
+  year: number;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -60,7 +63,7 @@ function formatKm2(v: number): string {
   return String(Math.round(v));
 }
 
-function scoreColor(score: number, theme: "dark" | "light"): string {
+function _scoreColor(score: number, theme: "dark" | "light"): string {
   if (score > 3.05) {
     return theme === "dark" ? "#F87171" : "#DC2626";
   }
@@ -70,7 +73,7 @@ function scoreColor(score: number, theme: "dark" | "light"): string {
   return theme === "dark" ? "#FDE047" : "#CA8A04";
 }
 
-function scoreBarClass(score: number): string {
+function _scoreBarClass(score: number): string {
   if (score > 3.05) {
     return styles.barRed;
   }
@@ -120,7 +123,7 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
 function IconSearch() {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={styles.filterIcon}
       fill="none"
       height="14"
@@ -140,7 +143,13 @@ function IconSearch() {
 
 function IconSortBoth() {
   return (
-    <svg fill="none" height="11" viewBox="0 0 24 24" width="11">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="11"
+      viewBox="0 0 24 24"
+      width="11"
+    >
       <path
         d="M8 9l4-4 4 4M16 15l-4 4-4-4"
         stroke="currentColor"
@@ -154,7 +163,13 @@ function IconSortBoth() {
 
 function IconSortUp() {
   return (
-    <svg fill="none" height="11" viewBox="0 0 24 24" width="11">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="11"
+      viewBox="0 0 24 24"
+      width="11"
+    >
       <path
         d="M8 15l4-4 4 4"
         stroke="currentColor"
@@ -168,7 +183,13 @@ function IconSortUp() {
 
 function IconSortDown() {
   return (
-    <svg fill="none" height="11" viewBox="0 0 24 24" width="11">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="11"
+      viewBox="0 0 24 24"
+      width="11"
+    >
       <path
         d="M8 9l4 4 4-4"
         stroke="currentColor"
@@ -206,9 +227,10 @@ function CumulativeChart({ data }: { data: CumulativePoint[] }) {
     return <div className={styles.chartBody} />;
   }
 
-  const maxVal = data[data.length - 1].cumulativeKm2;
+  const lastPoint = data.at(-1);
+  const maxVal = lastPoint?.cumulativeKm2 ?? 0;
   const firstYear = data[0].year;
-  const lastYear = data[data.length - 1].year;
+  const lastYear = lastPoint?.year ?? firstYear;
   const midYear = Math.round((firstYear + lastYear) / 2);
 
   return (
@@ -301,7 +323,7 @@ function AnnualLossChart({ mills }: { mills: UmlData[] }) {
 
   const maxVal = Math.max(...data.map((d) => d.loss), 0.01);
   const firstYear = allYearsSince2001[0];
-  const lastYear = allYearsSince2001[allYearsSince2001.length - 1];
+  const lastYear = allYearsSince2001.at(-1) ?? firstYear;
   const midYear = Math.round((firstYear + lastYear) / 2);
 
   return (
@@ -404,7 +426,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
 
   React.useEffect(() => {
     setPage(1);
-  }, [q, sortKey, sortDir]);
+  }, []);
 
   function handleSort(key: MillSortKey) {
     if (key === sortKey) {
@@ -534,7 +556,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                     </td>
                     <td className={styles.tdArrow}>
                       <svg
-                        aria-hidden
+                        aria-hidden="true"
                         fill="none"
                         height="13"
                         viewBox="0 0 24 24"
@@ -573,7 +595,10 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
             </button>
             {pageNums.map((p, i) =>
               p === "..." ? (
-                <span className={styles.pageEllipsis} key={`e${i}`}>
+                <span
+                  className={styles.pageEllipsis}
+                  key={`ellipsis-${String(pageNums[i - 1])}-${String(pageNums[i + 1])}`}
+                >
                   …
                 </span>
               ) : (
@@ -604,7 +629,11 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
 
 // ── Subsidiary owners table (groups only) ──────────────────────────────────────
 
-type OwnerRow = { name: string; millCount: number; countries: string };
+interface OwnerRow {
+  countries: string;
+  millCount: number;
+  name: string;
+}
 type OwnerSortKey = "name" | "mills" | "country";
 
 function SubsidiaryOwnersTable({ owners }: { owners: OwnerRow[] }) {
@@ -700,7 +729,7 @@ function SubsidiaryOwnersTable({ owners }: { owners: OwnerRow[] }) {
                   <td className={styles.tdMills}>{owner.millCount}</td>
                   <td className={styles.tdArrow}>
                     <svg
-                      aria-hidden
+                      aria-hidden="true"
                       fill="none"
                       height="13"
                       viewBox="0 0 24 24"
@@ -735,14 +764,8 @@ export function CompanyPageView({
   aboutContent,
   deforestationMap,
 }: CompanyPageViewProps) {
-  const { theme } = useTheme();
-  const {
-    brandUsage,
-    averageCurrentRisk,
-    uniqueMills,
-    uniqueCountries,
-    totalForestLoss,
-  } = pageData;
+  const { brandUsage, averageCurrentRisk, uniqueMills, uniqueCountries } =
+    pageData;
 
   const displayName = useMemo(() => toCompanyCase(name), [name]);
   const forestTimeseries = useMemo(
@@ -786,10 +809,11 @@ export function CompanyPageView({
       if (!owner) {
         continue;
       }
-      if (!ownerMap.has(owner)) {
-        ownerMap.set(owner, { millCount: 0, countries: new Set() });
+      let entry = ownerMap.get(owner);
+      if (!entry) {
+        entry = { millCount: 0, countries: new Set() };
+        ownerMap.set(owner, entry);
       }
-      const entry = ownerMap.get(owner)!;
       entry.millCount++;
       entry.countries.add(mill.Country);
     }

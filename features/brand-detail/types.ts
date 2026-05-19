@@ -1,9 +1,9 @@
-export type RankingEntry = {
-  consumer_brand: string;
+export interface RankingEntry {
   averageCurrentRisk: number;
-};
+  consumer_brand: string;
+}
 
-export type AnnualLossPoint = {
-  year: number;
+export interface AnnualLossPoint {
   annualKm2: number;
-};
+  year: number;
+}

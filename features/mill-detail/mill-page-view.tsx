@@ -14,17 +14,18 @@ import {
 import { useTheme } from "@/components/theme-provider";
 import { maxYear, yearRange } from "@/config/years";
 import type { UmlData } from "@/domain";
+import { umlRowNumber } from "@/lib/data-row";
 import type { MillPageModel } from "@/server/mill-page-data";
 import { MillPageHeader } from "./components/mill-page-header";
 import styles from "./mill.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type MillPageViewProps = {
-  model: MillPageModel;
+export interface MillPageViewProps {
   cmsContent?: React.ReactNode;
   deforestationMap: React.ReactNode;
-};
+  model: MillPageModel;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -65,7 +66,7 @@ function formatKm2(v: number): string {
   return v.toFixed(1);
 }
 
-function scoreColor(score: number, theme: "dark" | "light"): string {
+function _scoreColor(score: number, theme: "dark" | "light"): string {
   if (score > 3.05) {
     return theme === "dark" ? "#F87171" : "#DC2626";
   }
@@ -105,8 +106,7 @@ function AreaBreakdownCard({ entry }: { entry: UmlData }) {
   const totalForestLoss = useMemo(() => {
     let sum = 0;
     for (let y = 2001; y <= maxYear; y++) {
-      sum +=
-        Number((entry as Record<string, unknown>)[`treeloss_km_${y}`]) || 0;
+      sum += umlRowNumber(entry, `treeloss_km_${y}`);
     }
     return Math.min(sum, totalForestArea);
   }, [entry, totalForestArea]);
@@ -166,14 +166,26 @@ function AreaBreakdownCard({ entry }: { entry: UmlData }) {
 
 // ── Annual loss chart (2001–maxYear) ─────────────────────────────────────────
 
-function AnnualLossTooltip({ active, payload, label }: any) {
+interface AnnualLossTooltipProps {
+  active?: boolean;
+  label?: string;
+  payload?: Array<{
+    dataKey?: string;
+    name?: string;
+    stroke?: string;
+    strokeDasharray?: string;
+    value?: number;
+  }>;
+}
+
+function AnnualLossTooltip({ active, payload, label }: AnnualLossTooltipProps) {
   if (!(active && payload?.length)) {
     return null;
   }
   return (
     <div className={styles.chartTooltip}>
       <p className={styles.chartTooltipYear}>{label}</p>
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <div className={styles.chartTooltipRow} key={p.dataKey}>
           <span
             className={styles.chartTooltipSwatch}
@@ -209,9 +221,7 @@ function AnnualLossFullChart({
     () =>
       allYearsSince2001.map((year) => ({
         year,
-        loss:
-          Number((entry as Record<string, unknown>)[`treeloss_km_${year}`]) ||
-          0,
+        loss: umlRowNumber(entry, `treeloss_km_${year}`),
         median: medianRow ? (medianRow[`median${year}`] ?? null) : null,
       })),
     [entry, medianRow]
@@ -223,7 +233,7 @@ function AnnualLossFullChart({
     0.01
   );
   const firstYear = allYearsSince2001[0];
-  const lastYear = allYearsSince2001[allYearsSince2001.length - 1];
+  const lastYear = allYearsSince2001.at(-1) ?? firstYear;
   const midYear = Math.round((firstYear + lastYear) / 2);
 
   return (
@@ -309,6 +319,26 @@ function AnnualLossFullChart({
   );
 }
 
+function RecordFieldValue({
+  value,
+  href,
+}: {
+  value: string | null | undefined;
+  href?: string;
+}) {
+  if (!value) {
+    return <span className={styles.recordValue}>—</span>;
+  }
+  if (href) {
+    return (
+      <Link className={styles.recordLink} href={href}>
+        {value}
+      </Link>
+    );
+  }
+  return <span className={styles.recordValue}>{value}</span>;
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function MillPageView({
@@ -316,10 +346,25 @@ export function MillPageView({
   cmsContent,
   deforestationMap,
 }: MillPageViewProps) {
-  const { theme } = useTheme();
   const { millPayload, medianMill } = model;
   const entry = millPayload.info[0] as UmlData | undefined;
   const brands = millPayload.brands;
+
+  const cumulativeLoss2001 = useMemo(() => {
+    if (!entry) {
+      return 0;
+    }
+    let sum = 0;
+    for (let y = 2001; y <= maxYear; y++) {
+      sum += umlRowNumber(entry, `treeloss_km_${y}`);
+    }
+    return sum;
+  }, [entry]);
+
+  const normalizedBrands = useMemo(
+    () => brands.map((b) => ({ ...b, years: b.years.map(Number) })),
+    [brands]
+  );
 
   if (!entry) {
     return <div>Mill not found.</div>;
@@ -336,25 +381,9 @@ export function MillPageView({
     rspoStatus.toLowerCase().includes("certified") &&
     !rspoStatus.toLowerCase().includes("not");
 
-  // Cumulative loss 2001–maxYear
-  const cumulativeLoss2001 = useMemo(() => {
-    let sum = 0;
-    for (let y = 2001; y <= maxYear; y++) {
-      sum +=
-        Number((entry as Record<string, unknown>)[`treeloss_km_${y}`]) || 0;
-    }
-    return sum;
-  }, [entry]);
-
-  const normalizedBrands = useMemo(
-    () => brands.map((b) => ({ ...b, years: b.years.map(Number) })),
-    [brands]
-  );
-
-  const hasParent = parentCompany && parentCompany.trim();
-  const hasGroup =
-    groupName &&
-    groupName.trim() &&
+  const _hasParent = parentCompany?.trim();
+  const _hasGroup =
+    groupName?.trim() &&
     groupName.trim().toUpperCase() !== "UNKNOWN" &&
     groupName.trim() !== parentCompany?.trim();
 
@@ -569,17 +598,7 @@ export function MillPageView({
             }) => (
               <div className={styles.recordItem} key={label}>
                 <span className={styles.recordLabel}>{label}</span>
-                {value ? (
-                  href ? (
-                    <Link className={styles.recordLink} href={href}>
-                      {value}
-                    </Link>
-                  ) : (
-                    <span className={styles.recordValue}>{value}</span>
-                  )
-                ) : (
-                  <span className={styles.recordValue}>—</span>
-                )}
+                <RecordFieldValue href={href} value={value} />
               </div>
             )
           )}

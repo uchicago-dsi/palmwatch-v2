@@ -89,11 +89,11 @@ function RankingStrip({
   );
 }
 
-export type BrandPageScorecardProps = {
-  brand: string;
+export interface BrandPageScorecardProps {
   altName?: string;
+  brand: string;
   ranking: RankingEntry[];
-};
+}
 
 /** Brand breadcrumb, title, and ranking strip (section 1). */
 export function BrandPageScorecard({

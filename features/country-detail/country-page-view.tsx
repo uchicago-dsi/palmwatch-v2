@@ -19,15 +19,21 @@ import styles from "./country.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type CountryPageViewProps = {
+export interface CountryPageViewProps {
   country: string;
-  pageData: CountryPagePayload;
-  millsTyped: UmlData[];
   deforestationMap: React.ReactNode;
-};
+  millsTyped: UmlData[];
+  pageData: CountryPagePayload;
+}
 
-type CumulativePoint = { year: number; cumulativeKm2: number };
-type YearlyPoint = { year: number; annualKm2: number };
+interface CumulativePoint {
+  cumulativeKm2: number;
+  year: number;
+}
+interface YearlyPoint {
+  annualKm2: number;
+  year: number;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -124,7 +130,7 @@ function toTitleCase(str: string): string {
 function IconSearch() {
   return (
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={styles.filterIcon}
       fill="none"
       height="14"
@@ -144,7 +150,13 @@ function IconSearch() {
 
 function IconSortBoth() {
   return (
-    <svg fill="none" height="11" viewBox="0 0 24 24" width="11">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="11"
+      viewBox="0 0 24 24"
+      width="11"
+    >
       <path
         d="M8 9l4-4 4 4M16 15l-4 4-4-4"
         stroke="currentColor"
@@ -158,7 +170,13 @@ function IconSortBoth() {
 
 function IconSortUp() {
   return (
-    <svg fill="none" height="11" viewBox="0 0 24 24" width="11">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="11"
+      viewBox="0 0 24 24"
+      width="11"
+    >
       <path
         d="M8 15l4-4 4 4"
         stroke="currentColor"
@@ -172,7 +190,13 @@ function IconSortUp() {
 
 function IconSortDown() {
   return (
-    <svg fill="none" height="11" viewBox="0 0 24 24" width="11">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="11"
+      viewBox="0 0 24 24"
+      width="11"
+    >
       <path
         d="M8 9l4 4 4-4"
         stroke="currentColor"
@@ -210,9 +234,10 @@ function CumulativeChart({ data }: { data: CumulativePoint[] }) {
     return <div className={styles.chartBody} />;
   }
 
-  const maxVal = data[data.length - 1].cumulativeKm2;
+  const lastPoint = data.at(-1);
+  const maxVal = lastPoint?.cumulativeKm2 ?? 0;
   const firstYear = data[0].year;
-  const lastYear = data[data.length - 1].year;
+  const lastYear = lastPoint?.year ?? firstYear;
   const midYear = Math.round((firstYear + lastYear) / 2);
 
   return (
@@ -322,7 +347,7 @@ function YearlyChart({ data }: { data: YearlyPoint[] }) {
 
   const maxVal = Math.max(...data.map((d) => d.annualKm2), 1);
   const firstYear = data[0].year;
-  const lastYear = data[data.length - 1].year;
+  const lastYear = data.at(-1)?.year ?? firstYear;
   const midYear = Math.round((firstYear + lastYear) / 2);
 
   return (
@@ -380,7 +405,10 @@ function YearlyChart({ data }: { data: YearlyPoint[] }) {
 
 // ── Province bar chart ────────────────────────────────────────────────────────
 
-type ProvinceRow = { name: string; loss: number };
+interface ProvinceRow {
+  loss: number;
+  name: string;
+}
 
 const PROVINCE_LIMIT = 10;
 
@@ -407,7 +435,7 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
 
   const visibleRows = showAll ? allRows : allRows.slice(0, PROVINCE_LIMIT);
   const maxLoss = allRows[0].loss || 1;
-  const hiddenCount = allRows.length - PROVINCE_LIMIT;
+  const _hiddenCount = allRows.length - PROVINCE_LIMIT;
 
   return (
     <div className={styles.provinceCard}>
@@ -510,7 +538,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
 
   React.useEffect(() => {
     setPage(1);
-  }, [q, sortKey, sortDir]);
+  }, []);
 
   function handleSort(key: MillSortKey) {
     if (key === sortKey) {
@@ -638,7 +666,7 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
                     </td>
                     <td className={styles.tdArrow}>
                       <svg
-                        aria-hidden
+                        aria-hidden="true"
                         fill="none"
                         height="13"
                         viewBox="0 0 24 24"
@@ -677,7 +705,10 @@ function MillsTable({ mills }: { mills: UmlData[] }) {
             </button>
             {pageNums.map((p, i) =>
               p === "..." ? (
-                <span className={styles.pageEllipsis} key={`e${i}`}>
+                <span
+                  className={styles.pageEllipsis}
+                  key={`ellipsis-${String(pageNums[i - 1])}-${String(pageNums[i + 1])}`}
+                >
                   …
                 </span>
               ) : (
@@ -715,8 +746,7 @@ export function CountryPageView({
   deforestationMap,
 }: CountryPageViewProps) {
   const { theme } = useTheme();
-  const { brandUsage, averageCurrentRisk, uniqueMills, totalForestLoss } =
-    pageData;
+  const { brandUsage, averageCurrentRisk, uniqueMills } = pageData;
 
   const dotColor = scoreColor(averageCurrentRisk, theme);
 
