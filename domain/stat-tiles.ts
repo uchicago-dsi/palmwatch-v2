@@ -1,11 +1,11 @@
 import { maxYear } from "@/config/years";
 
-export type StatTile = {
-  title: string;
-  stat: string;
+export interface StatTile {
   className: string;
   description?: string;
-};
+  stat: string;
+  title: string;
+}
 
 const usFormatter = new Intl.NumberFormat("en-US", {});
 
