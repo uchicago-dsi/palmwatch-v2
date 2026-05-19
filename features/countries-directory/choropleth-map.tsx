@@ -3,8 +3,8 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import mapboxgl from "mapbox-gl";
 import React from "react";
 import { feature } from "topojson-client";
-import styles from "./countries.module.css";
-import type { CountryRow } from "./countries-client";
+import styles from "./countries-directory.module.css";
+import type { CountryRow } from "./countries-directory-view";
 
 export type IsoMap = Record<string, CountryRow>;
 

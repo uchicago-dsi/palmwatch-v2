@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useTheme } from "@/components/theme-provider";
 import type { IsoMap } from "./choropleth-map";
-import styles from "./countries.module.css";
+import styles from "./countries-directory.module.css";
 
 const ChoroplethMap = dynamic(() => import("./choropleth-map"), {
   ssr: false,
