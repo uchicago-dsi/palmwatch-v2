@@ -1,6 +1,5 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import React from "react";
 import {
@@ -16,20 +15,12 @@ import { useTheme } from "@/components/theme-provider";
 import { maxYear } from "@/config/years";
 import type { BrandPrecomputedPayload } from "@/domain/schemas/brand-precomputed";
 import styles from "./brand.module.css";
+import { BrandPageScorecard } from "./components/brand-page-scorecard";
+import type { AnnualLossPoint, RankingEntry } from "./types";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type BrandStats = BrandPrecomputedPayload["brandStats"];
-
-export type RankingEntry = {
-  consumer_brand: string;
-  averageCurrentRisk: number;
-};
-
-export type AnnualLossPoint = {
-  year: number;
-  annualKm2: number;
-};
 
 type Disclosure = { year: string; filename: string };
 type Download = { label: string; href: string };
@@ -46,6 +37,7 @@ export type BrandPageViewProps = {
   forestLossTimeseries: AnnualLossPoint[];
   totalForestLoss: number;
   downloads: Download[];
+  deforestationMap: React.ReactNode;
 };
 
 // ── Helper functions ─────────────────────────────────────────────────────────
@@ -279,84 +271,6 @@ function SortIcon({ active, dir }: { active: boolean; dir: "asc" | "desc" }) {
   );
 }
 
-// ── Ranking strip ─────────────────────────────────────────────────────────────
-
-function RankingStrip({
-  ranking,
-  currentBrand,
-}: {
-  ranking: RankingEntry[];
-  currentBrand: string;
-}) {
-  const { theme } = useTheme();
-  const scores = ranking.map((r) => r.averageCurrentRisk);
-  const minScore = Math.min(...scores);
-  const maxScore = Math.max(...scores);
-  const range = maxScore - minScore || 0.01;
-
-  const currentIdx = ranking.findIndex(
-    (r) => r.consumer_brand === currentBrand
-  );
-  const currentScore = ranking[currentIdx]?.averageCurrentRisk ?? scores[0];
-  const rank = currentIdx + 1;
-
-  const getXPct = (score: number) => ((score - minScore) / range) * 100;
-  const currentX = Math.max(2, Math.min(98, getXPct(currentScore)));
-  const dotColor = scoreColor(currentScore, theme);
-
-  return (
-    <div className={styles.rankingWrap}>
-      <div className={styles.rankingLabelRow}>
-        <div
-          className={styles.rankingScorePin}
-          style={{ left: `${currentX}%` }}
-        >
-          <span className={styles.rankingScoreText} style={{ color: dotColor }}>
-            {currentScore.toFixed(2)}
-          </span>
-        </div>
-      </div>
-
-      <div className={styles.rankingTrack}>
-        {ranking.map((r) => {
-          const isCurrent = r.consumer_brand === currentBrand;
-          const isMin = r.averageCurrentRisk === minScore;
-          const isMax = r.averageCurrentRisk === maxScore;
-          if (!(isCurrent || isMin || isMax)) {
-            return null;
-          }
-          const pos = Math.max(1, Math.min(99, getXPct(r.averageCurrentRisk)));
-          return (
-            <div
-              className={
-                isCurrent ? styles.rankingDotCurrent : styles.rankingDot
-              }
-              key={r.consumer_brand}
-              style={{
-                left: `${pos}%`,
-                ...(isCurrent ? { background: dotColor } : {}),
-              }}
-            />
-          );
-        })}
-      </div>
-
-      <div className={styles.rankingEndLabels}>
-        <span className={styles.rankingEndLabel}>Lower risk</span>
-        <span className={styles.rankingEndLabel}>Higher risk</span>
-      </div>
-
-      <div className={styles.rankingRankRow}>
-        <div className={styles.rankingRankPin} style={{ left: `${currentX}%` }}>
-          <span className={styles.rankingRankText}>
-            #{rank} of {ranking.length} brands
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Annual forest loss chart ──────────────────────────────────────────────────
 
 function AnnualLossTooltip({
@@ -426,13 +340,6 @@ function AnnualLossChart({ data }: { data: AnnualLossPoint[] }) {
     </ResponsiveContainer>
   );
 }
-
-// ── Dynamic map import ────────────────────────────────────────────────────────
-
-const BrandMapDynamic = dynamic(() => import("./brand-map"), {
-  ssr: false,
-  loading: () => <div className={styles.mapPlaceholder} />,
-});
 
 // ── Mill owners table ─────────────────────────────────────────────────────────
 
@@ -928,6 +835,7 @@ function BrandPageViewInner({
   forestLossTimeseries,
   totalForestLoss,
   downloads,
+  deforestationMap,
 }: BrandPageViewProps) {
   const { data: apiData } = useQuery<{
     owners: OwnerRow[];
@@ -954,28 +862,7 @@ function BrandPageViewInner({
 
   return (
     <div className={styles.page}>
-      {/* Section 1: Scorecard */}
-      <section>
-        <div className={styles.breadcrumb}>
-          <Link className={styles.breadcrumbLink} href="/brands">
-            Brands
-          </Link>
-          <span className={styles.breadcrumbSep}>/</span>
-          <span>{brand}</span>
-        </div>
-        <h1 className={styles.brandName}>
-          {brand}
-          {altName && <span className={styles.altName}>({altName})</span>}
-        </h1>
-
-        <div className={styles.rankingCard}>
-          <p className={styles.rankingTitle}>
-            Recent deforestation score — where {brand} falls among tracked
-            brands
-          </p>
-          <RankingStrip currentBrand={brand} ranking={ranking} />
-        </div>
-      </section>
+      <BrandPageScorecard altName={altName} brand={brand} ranking={ranking} />
 
       {/* Stat cards */}
       <div className={styles.statsGrid}>
@@ -990,9 +877,7 @@ function BrandPageViewInner({
       {/* Section 2: Visual story */}
       <div className={styles.visualGrid}>
         <div className={styles.mapCard}>
-          <div className={styles.mapFrame}>
-            <BrandMapDynamic brand={brand} />
-          </div>
+          <div className={styles.mapFrame}>{deforestationMap}</div>
         </div>
 
         <div className={styles.chartCard}>

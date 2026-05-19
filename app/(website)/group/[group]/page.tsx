@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
+import { MillsDeforestationMap } from "@/app/(website)/_shell/entity-deforestation-map";
 import pageStyles from "@/components/page-layout.module.css";
-import type { UmlData } from "@/domain";
 import { CompanyPageView } from "@/features/company-detail";
 import { precomputedSlug } from "@/lib/precomputed-slug";
-import { loadGroupPagePayload } from "@/lib/server/entity-page-data";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
+import { loadGroupPagePayload } from "@/server/entity-page-data";
 
 export const revalidate = 60;
 
@@ -25,8 +25,6 @@ export default async function Page({
   if (!pageData) {
     notFound();
   }
-
-  const millsTyped = pageData.mills as UmlData[];
 
   const aboutContent =
     groupInfo?.description || groupInfo?.content ? (
@@ -57,7 +55,10 @@ export default async function Page({
       <div className={pageStyles.pageInner}>
         <CompanyPageView
           aboutContent={aboutContent}
-          millsTyped={millsTyped}
+          deforestationMap={
+            <MillsDeforestationMap dataTable={pageData.mills} />
+          }
+          millsTyped={pageData.mills}
           name={group}
           pageData={pageData}
           type="group"

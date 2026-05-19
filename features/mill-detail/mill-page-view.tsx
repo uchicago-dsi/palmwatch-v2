@@ -1,5 +1,4 @@
 "use client";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import type React from "react";
 import { useMemo } from "react";
@@ -12,28 +11,19 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
-import { cumulativeLossColumn, maxYear, yearRange } from "@/config/years";
+import { maxYear, yearRange } from "@/config/years";
 import type { UmlData } from "@/domain";
-import type { MillPageModel } from "@/lib/server/mill-page-data";
+import type { MillPageModel } from "@/server/mill-page-data";
+import { MillPageHeader } from "./components/mill-page-header";
 import styles from "./mill.module.css";
-
-// ── Dynamic map ───────────────────────────────────────────────────────────────
-
-const PalmwatchMapDynamic = dynamic(
-  () =>
-    import("@/features/map/palmwatch-map").then((m) => ({
-      default: m.PalmwatchMap,
-    })),
-  { ssr: false, loading: () => <div className={styles.mapPlaceholder} /> }
-);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type MillPageViewProps = {
   model: MillPageModel;
   cmsContent?: React.ReactNode;
+  deforestationMap: React.ReactNode;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -177,7 +167,9 @@ function AreaBreakdownCard({ entry }: { entry: UmlData }) {
 // ── Annual loss chart (2001–maxYear) ─────────────────────────────────────────
 
 function AnnualLossTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
+  if (!(active && payload?.length)) {
+    return null;
+  }
   return (
     <div className={styles.chartTooltip}>
       <p className={styles.chartTooltipYear}>{label}</p>
@@ -192,7 +184,7 @@ function AnnualLossTooltip({ active, payload, label }: any) {
           />
           <span className={styles.chartTooltipLabel}>{p.name}</span>
           <span className={styles.chartTooltipValue}>
-            {p.value != null ? `${formatKm2(p.value)} km²` : "—"}
+            {p.value == null ? "—" : `${formatKm2(p.value)} km²`}
           </span>
         </div>
       ))}
@@ -209,7 +201,8 @@ function AnnualLossFullChart({
 }) {
   const { theme } = useTheme();
   const lineColor = theme === "dark" ? "#F09595" : "#E24B4A";
-  const medianColor = theme === "dark" ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)";
+  const medianColor =
+    theme === "dark" ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)";
   const medianRow = medianMill?.[0];
 
   const data = useMemo(
@@ -237,7 +230,10 @@ function AnnualLossFullChart({
     <div className={styles.chartWithLegend}>
       <div className={styles.chartLegend}>
         <span className={styles.chartLegendItem}>
-          <span className={styles.chartLegendLine} style={{ background: lineColor }} />
+          <span
+            className={styles.chartLegendLine}
+            style={{ background: lineColor }}
+          />
           This mill
         </span>
         {medianRow && (
@@ -315,7 +311,11 @@ function AnnualLossFullChart({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function MillPageView({ model, cmsContent }: MillPageViewProps) {
+export function MillPageView({
+  model,
+  cmsContent,
+  deforestationMap,
+}: MillPageViewProps) {
   const { theme } = useTheme();
   const { millPayload, medianMill } = model;
   const entry = millPayload.info[0] as UmlData | undefined;
@@ -360,60 +360,15 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
 
   return (
     <div className={styles.page}>
-      {/* Header */}
-      <div>
-        <nav className={styles.breadcrumb}>
-          <Link className={styles.breadcrumbLink} href="/mills">
-            Mills
-          </Link>
-          <span className={styles.breadcrumbSep}>/</span>
-          <span className={styles.breadcrumbCurrent}>{millName}</span>
-        </nav>
-
-        <h1 className={styles.millName}>{millName}</h1>
-        {altName && <p className={styles.altName}>Also known as {altName}</p>}
-
-        <div className={styles.metaRow}>
-          {/* Parent company */}
-          {hasParent && (
-            <>
-              <span>
-                Owned by{" "}
-                <Link
-                  className={styles.metaLink}
-                  href={`/owner/${encodeURIComponent(parentCompany)}`}
-                >
-                  {toTitleCase(parentCompany)}
-                </Link>
-              </span>
-            </>
-          )}
-
-          {/* Group */}
-          {hasGroup && (
-            <>
-              <span className={styles.metaSep}>·</span>
-              <span>
-                Group:{" "}
-                <Link
-                  className={styles.metaLink}
-                  href={`/group/${encodeURIComponent(groupName)}`}
-                >
-                  {toTitleCase(groupName)}
-                </Link>
-              </span>
-            </>
-          )}
-
-          {/* Location */}
-          {(province || country) && (
-            <>
-              <span className={styles.metaSep}>·</span>
-              <span>{[province, country].filter(Boolean).join(", ")}</span>
-            </>
-          )}
-        </div>
-      </div>
+      <MillPageHeader
+        altName={altName}
+        country={country}
+        formatTitle={toTitleCase}
+        groupName={groupName}
+        millName={millName}
+        parentCompany={parentCompany}
+        province={province}
+      />
 
       {/* Stat cards — row 1 */}
       <div className={styles.statsGrid}>
@@ -510,20 +465,7 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
         <p className={styles.chartTitle}>
           Mill deforestation map: Forest loss in km²
         </p>
-        <div className={styles.mapFrame}>
-          <QueryProvider>
-            <PalmwatchMapDynamic
-              choroplethColumn={cumulativeLossColumn}
-              choroplethScheme="cumulativeLoss"
-              dataIdColumn="UML ID"
-              dataTable={millPayload.info}
-              geoDataUrl="/data/mill-catchment.geojson"
-              geoIdColumn="UML ID"
-              noFlyMap={false}
-              showLayerStepper={true}
-            />
-          </QueryProvider>
-        </div>
+        <div className={styles.mapFrame}>{deforestationMap}</div>
       </div>
 
       {/* Brands sourcing matrix */}
@@ -606,7 +548,8 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
             { label: "RSPO status", value: entry["RSPO Status"] },
             {
               label: "RSPO type",
-              value: entry["RSPO Type"] != null ? String(entry["RSPO Type"]) : null,
+              value:
+                entry["RSPO Type"] == null ? null : String(entry["RSPO Type"]),
             },
             { label: "Confidence level", value: entry["Confidence level"] },
             {
@@ -614,22 +557,32 @@ export function MillPageView({ model, cmsContent }: MillPageViewProps) {
               value: entry["Date RSPO Certification Status"],
             },
             { label: "GPS coordinates", value: entry["GPS coordinates"] },
-          ].map(({ label, value, href }: { label: string; value: string | null | undefined; href?: string }) => (
-            <div className={styles.recordItem} key={label}>
-              <span className={styles.recordLabel}>{label}</span>
-              {value ? (
-                href ? (
-                  <Link className={styles.recordLink} href={href}>
-                    {value}
-                  </Link>
+          ].map(
+            ({
+              label,
+              value,
+              href,
+            }: {
+              label: string;
+              value: string | null | undefined;
+              href?: string;
+            }) => (
+              <div className={styles.recordItem} key={label}>
+                <span className={styles.recordLabel}>{label}</span>
+                {value ? (
+                  href ? (
+                    <Link className={styles.recordLink} href={href}>
+                      {value}
+                    </Link>
+                  ) : (
+                    <span className={styles.recordValue}>{value}</span>
+                  )
                 ) : (
-                  <span className={styles.recordValue}>{value}</span>
-                )
-              ) : (
-                <span className={styles.recordValue}>—</span>
-              )}
-            </div>
-          ))}
+                  <span className={styles.recordValue}>—</span>
+                )}
+              </div>
+            )
+          )}
         </div>
       </div>
     </div>

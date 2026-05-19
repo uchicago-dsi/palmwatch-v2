@@ -1,31 +1,16 @@
+import { BrandDeforestationMap } from "@/app/(website)/_shell/entity-deforestation-map";
 import pageStyles from "@/components/page-layout.module.css";
 import { getBrandDataDownloadLinks } from "@/config/brand-data-download-links";
-import { maxYear } from "@/config/years";
-import type { AnnualLossPoint, RankingEntry } from "@/features/brand-detail";
-import { BrandPageView } from "@/features/brand-detail";
-import { loadBrandPageModel } from "@/lib/server/brand-page-data";
-import { loadPrecomputedJson } from "@/lib/server/load-precomputed";
+import type { RankingEntry } from "@/features/brand-detail";
+import {
+  BrandPageView,
+  computeForestTimeseries,
+} from "@/features/brand-detail";
 import { PortableText } from "@/sanity/lib/components";
+import { loadBrandPageModel } from "@/server/brand-page-data";
+import { loadPrecomputedJson } from "@/server/load-precomputed";
 
 export const revalidate = 60;
-
-const CHART_START_YEAR = 2001;
-
-function computeForestTimeseries(
-  umlInfo: Array<Record<string, unknown>>
-): AnnualLossPoint[] {
-  const years: number[] = [];
-  for (let y = CHART_START_YEAR; y <= maxYear; y++) {
-    years.push(y);
-  }
-  return years.map((year) => {
-    const annual = umlInfo.reduce(
-      (sum, mill) => sum + (Number(mill[`treeloss_km_${year}`]) || 0),
-      0
-    );
-    return { year, annualKm2: Math.round(annual) };
-  });
-}
 
 export default async function Page({
   params,
@@ -65,9 +50,7 @@ export default async function Page({
   }));
 
   const forestLossTimeseries = brandPre.umlInfo
-    ? computeForestTimeseries(
-        brandPre.umlInfo as Array<Record<string, unknown>>
-      )
+    ? computeForestTimeseries(brandPre.umlInfo)
     : [];
 
   const totalForestLoss = forestLossTimeseries.reduce(
@@ -95,6 +78,7 @@ export default async function Page({
           altName={brandInfo.altName}
           brand={brand}
           brandStats={brandPre.brandStats}
+          deforestationMap={<BrandDeforestationMap brand={brand} />}
           disclosures={brandInfo.disclosures ?? []}
           downloads={getBrandDataDownloadLinks(brand)}
           externalLink={brandInfo.externalLink ?? ""}

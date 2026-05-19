@@ -297,8 +297,8 @@
   font-size: 0.875rem;
   color: hsl(var(--bc));
   text-decoration: underline;
-  text-underline-offset: 2px;
   text-decoration-color: hsl(var(--bc) / 0.3);
+  text-underline-offset: 2px;
   transition: text-decoration-color 100ms ease;
 }
 

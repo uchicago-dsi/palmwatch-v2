@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
+import { MillsDeforestationMap } from "@/app/(website)/_shell/entity-deforestation-map";
 import pageStyles from "@/components/page-layout.module.css";
-import type { UmlData } from "@/domain";
 import { CompanyPageView } from "@/features/company-detail";
 import { precomputedSlug } from "@/lib/precomputed-slug";
-import { loadOwnerPagePayload } from "@/lib/server/entity-page-data";
+import { loadOwnerPagePayload } from "@/server/entity-page-data";
 
 export const revalidate = 60;
 
@@ -18,13 +18,14 @@ export default async function Page({
   if (!pageData) {
     notFound();
   }
-  const millsTyped = pageData.mills as UmlData[];
-
   return (
     <main className={pageStyles.pageShell}>
       <div className={pageStyles.pageInner}>
         <CompanyPageView
-          millsTyped={millsTyped}
+          deforestationMap={
+            <MillsDeforestationMap dataTable={pageData.mills} />
+          }
+          millsTyped={pageData.mills}
           name={owner}
           pageData={pageData}
           type="owner"

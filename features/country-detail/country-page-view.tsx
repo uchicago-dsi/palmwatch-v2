@@ -1,5 +1,4 @@
 "use client";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import {
@@ -11,22 +10,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
-import { cumulativeLossColumn, maxYear, yearRange } from "@/config/years";
+import { maxYear, yearRange } from "@/config/years";
 import type { UmlData } from "@/domain";
 import type { CountryPagePayload } from "@/domain/schemas/entity-pages";
+import { CountryPageHeader } from "./components/country-page-header";
 import styles from "./country.module.css";
-
-// ── Dynamic map ───────────────────────────────────────────────────────────────
-
-const PalmwatchMapDynamic = dynamic(
-  () =>
-    import("@/features/map/palmwatch-map").then((m) => ({
-      default: m.PalmwatchMap,
-    })),
-  { ssr: false, loading: () => <div className={styles.mapPlaceholder} /> }
-);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -34,6 +23,7 @@ export type CountryPageViewProps = {
   country: string;
   pageData: CountryPagePayload;
   millsTyped: UmlData[];
+  deforestationMap: React.ReactNode;
 };
 
 type CumulativePoint = { year: number; cumulativeKm2: number };
@@ -306,7 +296,9 @@ function YearlyTooltip({
   payload?: { value: number }[];
   label?: number;
 }) {
-  if (!active || !payload || payload.length === 0) return null;
+  if (!(active && payload) || payload.length === 0) {
+    return null;
+  }
   const val = payload[0]?.value ?? 0;
   return (
     <div className={styles.chartTooltip}>
@@ -399,7 +391,9 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
     const map = new Map<string, number>();
     for (const mill of mills) {
       const prov = mill.Province?.trim();
-      if (!prov) continue;
+      if (!prov) {
+        continue;
+      }
       map.set(prov, (map.get(prov) ?? 0) + millTreelossSince2001(mill));
     }
     return [...map.entries()]
@@ -407,7 +401,9 @@ function ProvinceChart({ mills }: { mills: UmlData[] }) {
       .sort((a, b) => b.loss - a.loss);
   }, [mills]);
 
-  if (allRows.length < 3) return null;
+  if (allRows.length < 3) {
+    return null;
+  }
 
   const visibleRows = showAll ? allRows : allRows.slice(0, PROVINCE_LIMIT);
   const maxLoss = allRows[0].loss || 1;
@@ -716,6 +712,7 @@ export function CountryPageView({
   country,
   pageData,
   millsTyped,
+  deforestationMap,
 }: CountryPageViewProps) {
   const { theme } = useTheme();
   const { brandUsage, averageCurrentRisk, uniqueMills, totalForestLoss } =
@@ -757,17 +754,7 @@ export function CountryPageView({
 
   return (
     <div className={styles.page}>
-      {/* Header */}
-      <div>
-        <nav className={styles.breadcrumb}>
-          <Link className={styles.breadcrumbLink} href="/countries">
-            Countries
-          </Link>
-          <span className={styles.breadcrumbSep}>/</span>
-          <span>{country}</span>
-        </nav>
-        <h1 className={styles.countryName}>{country}</h1>
-      </div>
+      <CountryPageHeader country={country} />
 
       {/* Stat cards */}
       <div className={styles.statsGrid}>
@@ -820,19 +807,7 @@ export function CountryPageView({
         <p className={styles.chartTitle}>
           Mill deforestation map: Forest loss in km²
         </p>
-        <div className={styles.mapFrame}>
-          <QueryProvider>
-            <PalmwatchMapDynamic
-              choroplethColumn={cumulativeLossColumn}
-              choroplethScheme="cumulativeLoss"
-              dataIdColumn="UML ID"
-              dataTable={millsTyped}
-              geoDataUrl="/data/mill-catchment.geojson"
-              geoIdColumn="UML ID"
-              showLayerStepper={true}
-            />
-          </QueryProvider>
-        </div>
+        <div className={styles.mapFrame}>{deforestationMap}</div>
       </div>
 
       {/* Charts row */}

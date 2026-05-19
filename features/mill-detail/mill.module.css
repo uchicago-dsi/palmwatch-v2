@@ -372,12 +372,12 @@
 /* Chart tooltip */
 
 .chartTooltip {
+  min-width: 160px;
   padding: 8px 10px;
   background: hsl(var(--b1));
   border: 1px solid hsl(var(--bc) / 0.12);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 160px;
 }
 
 .chartTooltipYear {
@@ -471,8 +471,8 @@
   font-size: 0.875rem;
   color: hsl(var(--bc));
   text-decoration: underline;
-  text-underline-offset: 2px;
   text-decoration-color: hsl(var(--bc) / 0.3);
+  text-underline-offset: 2px;
   transition: text-decoration-color 100ms ease;
 }
 
@@ -533,7 +533,7 @@
   padding-right: 24px;
 }
 
-.recordItem:nth-last-child(-n+2) {
+.recordItem:nth-last-child(-n + 2) {
   border-bottom: none;
 }
 
@@ -560,10 +560,10 @@
 .recordLink {
   font-size: 0.875rem;
   color: hsl(var(--bc));
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-color: hsl(var(--bc) / 0.3);
   word-break: break-word;
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--bc) / 0.3);
+  text-underline-offset: 2px;
   transition: text-decoration-color 100ms ease;
 }
 

@@ -297,8 +297,8 @@
   font-size: 0.875rem;
   color: hsl(var(--bc));
   text-decoration: underline;
-  text-underline-offset: 2px;
   text-decoration-color: hsl(var(--bc) / 0.3);
+  text-underline-offset: 2px;
   transition: text-decoration-color 100ms ease;
 }
 
@@ -600,12 +600,12 @@
 /* ── Chart tooltip ───────────────────────────────────────────────────────────── */
 
 .chartTooltip {
+  min-width: 140px;
   padding: 8px 10px;
   background: hsl(var(--b1));
   border: 1px solid hsl(var(--bc) / 0.12);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 140px;
 }
 
 .chartTooltipYear {
@@ -643,8 +643,8 @@
   font-family: inherit;
   font-size: 0.75rem;
   color: hsl(var(--bc) / 0.45);
-  cursor: pointer;
   appearance: none;
+  cursor: pointer;
   background: transparent;
   border: none;
   transition: color 100ms ease;

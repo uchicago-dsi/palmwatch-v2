@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
+import { MillsDeforestationMap } from "@/app/(website)/_shell/entity-deforestation-map";
 import pageStyles from "@/components/page-layout.module.css";
 import { MillPageView } from "@/features/mill-detail";
-import { loadMillPageModel } from "@/lib/server/mill-page-data";
 import { PortableText } from "@/sanity/lib/components";
+import { loadMillPageModel } from "@/server/mill-page-data";
 
 export const revalidate = 60;
 
@@ -25,7 +26,16 @@ export default async function Page({
   return (
     <main className={pageStyles.pageShell}>
       <div className={pageStyles.pageInner}>
-        <MillPageView cmsContent={cmsContent} model={model} />
+        <MillPageView
+          cmsContent={cmsContent}
+          deforestationMap={
+            <MillsDeforestationMap
+              dataTable={model.millPayload.info}
+              noFlyMap={false}
+            />
+          }
+          model={model}
+        />
       </div>
     </main>
   );

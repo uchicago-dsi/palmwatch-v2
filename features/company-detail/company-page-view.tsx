@@ -1,5 +1,4 @@
 "use client";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import {
@@ -12,9 +11,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
-import { cumulativeLossColumn, maxYear, yearRange } from "@/config/years";
+import { maxYear, yearRange } from "@/config/years";
 
 const allYearsSince2001 = Array.from(
   { length: maxYear - 2001 + 1 },
@@ -24,16 +22,7 @@ const allYearsSince2001 = Array.from(
 import type { UmlData } from "@/domain";
 import type { GroupOwnerPagePayload } from "@/domain/schemas/entity-pages";
 import styles from "./company.module.css";
-
-// ── Dynamic imports ───────────────────────────────────────────────────────────
-
-const PalmwatchMapDynamic = dynamic(
-  () =>
-    import("@/features/map/palmwatch-map").then((m) => ({
-      default: m.PalmwatchMap,
-    })),
-  { ssr: false, loading: () => <div className={styles.mapPlaceholder} /> }
-);
+import { CompanyStatsGrid } from "./components/company-stats-grid";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -43,6 +32,8 @@ export type CompanyPageViewProps = {
   pageData: GroupOwnerPagePayload;
   millsTyped: UmlData[];
   aboutContent?: React.ReactNode;
+  /** Map composed by the route (`MillsDeforestationMap` + `QueryProvider`). */
+  deforestationMap: React.ReactNode;
 };
 
 type CumulativePoint = { year: number; cumulativeKm2: number };
@@ -742,6 +733,7 @@ export function CompanyPageView({
   pageData,
   millsTyped,
   aboutContent,
+  deforestationMap,
 }: CompanyPageViewProps) {
   const { theme } = useTheme();
   const {
@@ -831,60 +823,20 @@ export function CompanyPageView({
         </div>
       </div>
 
-      {/* Stat cards */}
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Mills</span>
-          <div className={styles.statValueRow}>
-            <span className={styles.statValue}>{uniqueMills}</span>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Countries</span>
-          <div className={styles.statValueRow}>
-            <span className={styles.statValue}>{uniqueCountries}</span>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>
-            Average recent deforestation score
-          </span>
-          <div className={styles.statValueRow}>
-            <span className={styles.statValue}>
-              {averageCurrentRisk.toFixed(2)}
-            </span>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>
-            Total forest loss (2001–{maxYear})
-          </span>
-          <div className={styles.statValueRow}>
-            <span className={styles.statValue}>
-              {formatKm2(forestLossSince2001)} km²
-            </span>
-          </div>
-        </div>
-      </div>
+      <CompanyStatsGrid
+        averageCurrentRisk={averageCurrentRisk}
+        forestLossSince2001={forestLossSince2001}
+        formatKm2={formatKm2}
+        uniqueCountries={uniqueCountries}
+        uniqueMills={uniqueMills}
+      />
 
       {/* Full-width deforestation map */}
       <div className={styles.mapCardFull}>
         <p className={styles.chartTitle}>
           Mill deforestation map: Forest loss in km²
         </p>
-        <div className={styles.mapFrameFull}>
-          <QueryProvider>
-            <PalmwatchMapDynamic
-              choroplethColumn={cumulativeLossColumn}
-              choroplethScheme="cumulativeLoss"
-              dataIdColumn="UML ID"
-              dataTable={millsTyped}
-              geoDataUrl="/data/mill-catchment.geojson"
-              geoIdColumn="UML ID"
-              showLayerStepper={true}
-            />
-          </QueryProvider>
-        </div>
+        <div className={styles.mapFrameFull}>{deforestationMap}</div>
       </div>
 
       {/* Cumulative + annual charts */}
