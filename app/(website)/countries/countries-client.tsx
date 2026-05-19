@@ -20,11 +20,20 @@ export type CountryRow = {
   isoCode: string; // ISO 3166-1 numeric as string, e.g. "360"
   count: number;
   pctForestLoss: number;
-  score: number; // (past + current + future) / 3
+  score: number;
+  pastRisk: number;
+  currentRisk: number;
+  futureRisk: number;
 };
 
 type StatCard = { label: string; value: string; text?: boolean };
-type SortKey = "name" | "count" | "pctForestLoss";
+type SortKey =
+  | "name"
+  | "count"
+  | "pctForestLoss"
+  | "pastRisk"
+  | "currentRisk"
+  | "futureRisk";
 type SortDir = "asc" | "desc";
 
 interface Props {
@@ -208,11 +217,41 @@ export function CountriesClient({ rows, stats }: Props) {
                   onClick={() => handleSort("pctForestLoss")}
                 >
                   <span className={styles.thInner}>
-                    Forest loss (2017–2025)
+                    Forest loss (2001–2025)
                     <SortIcon
                       active={sortKey === "pctForestLoss"}
                       dir={sortDir}
                     />
+                  </span>
+                </th>
+                <th
+                  className={`${styles.thScore} ${sortKey === "pastRisk" ? styles.thActive : ""}`}
+                  onClick={() => handleSort("pastRisk")}
+                >
+                  <span className={styles.thInner}>
+                    Avg past score
+                    <SortIcon active={sortKey === "pastRisk"} dir={sortDir} />
+                  </span>
+                </th>
+                <th
+                  className={`${styles.thScore} ${sortKey === "currentRisk" ? styles.thActive : ""}`}
+                  onClick={() => handleSort("currentRisk")}
+                >
+                  <span className={styles.thInner}>
+                    Avg recent score
+                    <SortIcon
+                      active={sortKey === "currentRisk"}
+                      dir={sortDir}
+                    />
+                  </span>
+                </th>
+                <th
+                  className={`${styles.thScore} ${sortKey === "futureRisk" ? styles.thActive : ""}`}
+                  onClick={() => handleSort("futureRisk")}
+                >
+                  <span className={styles.thInner}>
+                    Avg future score
+                    <SortIcon active={sortKey === "futureRisk"} dir={sortDir} />
                   </span>
                 </th>
                 <th className={styles.thArrow} />
@@ -240,6 +279,15 @@ export function CountriesClient({ rows, stats }: Props) {
                       </td>
                       <td className={styles.tdForest}>
                         {row.pctForestLoss.toFixed(1)}%
+                      </td>
+                      <td className={styles.tdScore}>
+                        {row.pastRisk.toFixed(2)}
+                      </td>
+                      <td className={styles.tdScore}>
+                        {row.currentRisk.toFixed(2)}
+                      </td>
+                      <td className={styles.tdScore}>
+                        {row.futureRisk.toFixed(2)}
                       </td>
                       <td className={styles.tdArrow}>
                         <svg

@@ -1,5 +1,9 @@
 import pageStyles from "@/components/page-layout.module.css";
-import { loadCountriesSummary } from "@/lib/server/aggregates-data";
+import { maxYear } from "@/config/years";
+import {
+  loadCountriesSummary,
+  loadMillSummaryStats,
+} from "@/lib/server/aggregates-data";
 import { CountriesClient, type CountryRow } from "./countries-client";
 
 export const revalidate = 60;
@@ -41,8 +45,21 @@ const NAME_TO_ISO: Record<string, string> = {
   "Sao Tome and Principe": "", // too small for 110m topology
 };
 
+function fmtKm2(v: number): string {
+  if (v >= 1_000_000) {
+    return `${(v / 1_000_000).toFixed(1)}M km²`;
+  }
+  if (v >= 1000) {
+    return `${Math.round(v / 1000).toLocaleString()}K km²`;
+  }
+  return `${Math.round(v).toLocaleString()} km²`;
+}
+
 export default async function Page() {
-  const countriesSummary = await loadCountriesSummary();
+  const [countriesSummary, millStats] = await Promise.all([
+    loadCountriesSummary(),
+    loadMillSummaryStats(),
+  ]);
 
   if (!countriesSummary) {
     return (
@@ -71,6 +88,9 @@ export default async function Page() {
     const count = (raw.count as number) ?? 0;
     const pctForestLoss = (raw.pctForestLoss as number) ?? 0;
     const score = (raw.currentRisk as number) ?? 0;
+    const pastRisk = (raw.pastRisk as number) ?? 0;
+    const currentRisk = (raw.currentRisk as number) ?? 0;
+    const futureRisk = (raw.futureRisk as number) ?? 0;
 
     totalMills += count;
 
@@ -81,20 +101,24 @@ export default async function Page() {
       count,
       pctForestLoss,
       score,
+      pastRisk,
+      currentRisk,
+      futureRisk,
     });
   }
 
   const topCountry = [...rows].sort((a, b) => b.count - a.count)[0];
-  const avgForestLoss =
-    rows.reduce((s, r) => s + r.pctForestLoss, 0) / rows.length;
 
   const stats = [
     { label: "Countries", value: rows.length.toLocaleString() },
     { label: "Total mills", value: totalMills.toLocaleString() },
     { label: "Top country", value: topCountry?.name ?? "—", text: true },
     {
-      label: "Avg forest loss (2017–2025)",
-      value: `${Math.round(avgForestLoss)}%`,
+      label: `Total forest loss (2001–${maxYear})`,
+      value:
+        millStats?.totalForestLoss == null
+          ? "—"
+          : fmtKm2(millStats.totalForestLoss),
     },
   ];
 

@@ -401,7 +401,8 @@
 
 .thScore {
   composes: th;
-  width: 180px;
+  width: 110px;
+  text-align: right;
 }
 
 .thArrow {
@@ -468,8 +469,12 @@
 }
 
 .tdScore {
-  width: 180px;
+  width: 110px;
   padding: 10px 12px;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.75);
+  text-align: right;
 }
 
 .tdArrow {
