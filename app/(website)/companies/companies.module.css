@@ -224,8 +224,8 @@
 
 .tableHeaderLeft {
   display: flex;
-  align-items: baseline;
   gap: 10px;
+  align-items: baseline;
 }
 
 .sectionTitle {

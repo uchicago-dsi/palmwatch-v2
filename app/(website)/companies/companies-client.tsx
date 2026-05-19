@@ -46,7 +46,9 @@ function getRowMode(company: CompanyEntry, filter: FilterType): RowMode {
 }
 
 function getSearchHref(company: CompanyEntry): string {
-  if (company.type === "both") return company.groupHref;
+  if (company.type === "both") {
+    return company.groupHref;
+  }
   return company.href;
 }
 
@@ -171,9 +173,7 @@ export function CompaniesClient({ companies, stats }: Props) {
   const searchResults = React.useMemo(
     () =>
       showResults
-        ? companies
-            .filter((c) => c.label.toLowerCase().includes(q))
-            .slice(0, 8)
+        ? companies.filter((c) => c.label.toLowerCase().includes(q)).slice(0, 8)
         : [],
     [companies, q, showResults]
   );
@@ -187,13 +187,19 @@ export function CompaniesClient({ companies, stats }: Props) {
   }, [filter, tableFilter, sortKey, sortDir]);
 
   React.useEffect(() => {
-    if (activeIdx < 0 || !resultsRef.current) return;
-    const item = resultsRef.current.children[activeIdx] as HTMLElement | undefined;
+    if (activeIdx < 0 || !resultsRef.current) {
+      return;
+    }
+    const item = resultsRef.current.children[activeIdx] as
+      | HTMLElement
+      | undefined;
     item?.scrollIntoView({ block: "nearest" });
   }, [activeIdx]);
 
   function handleSearchKeyDown(e: React.KeyboardEvent) {
-    if (!showResults || searchResults.length === 0) return;
+    if (!showResults || searchResults.length === 0) {
+      return;
+    }
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveIdx((i) => (i < searchResults.length - 1 ? i + 1 : 0));
@@ -525,7 +531,9 @@ export function CompaniesClient({ companies, stats }: Props) {
                   </span>
                 ) : (
                   <button
-                    className={n === page ? styles.pageNumActive : styles.pageNum}
+                    className={
+                      n === page ? styles.pageNumActive : styles.pageNum
+                    }
                     key={n}
                     onClick={() => setPage(n)}
                     type="button"

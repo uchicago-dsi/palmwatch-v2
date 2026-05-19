@@ -295,17 +295,15 @@
 
 .matrixBrandLink {
   font-size: 0.875rem;
-  font-weight: 500;
   color: hsl(var(--bc));
-  text-decoration: none;
-  transition: color 100ms ease;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: hsl(var(--bc) / 0.3);
+  transition: text-decoration-color 100ms ease;
 }
 
 .matrixBrandLink:hover {
-  color: hsl(var(--bc) / 0.65);
-  text-decoration: underline;
-  text-decoration-color: hsl(var(--bc) / 0.3);
-  text-underline-offset: 2px;
+  text-decoration-color: hsl(var(--bc) / 0.7);
 }
 
 .matrixCell {

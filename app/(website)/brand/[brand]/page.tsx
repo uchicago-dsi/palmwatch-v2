@@ -15,7 +15,9 @@ function computeForestTimeseries(
   umlInfo: Array<Record<string, unknown>>
 ): AnnualLossPoint[] {
   const years: number[] = [];
-  for (let y = CHART_START_YEAR; y <= maxYear; y++) years.push(y);
+  for (let y = CHART_START_YEAR; y <= maxYear; y++) {
+    years.push(y);
+  }
   return years.map((year) => {
     const annual = umlInfo.reduce(
       (sum, mill) => sum + (Number(mill[`treeloss_km_${year}`]) || 0),

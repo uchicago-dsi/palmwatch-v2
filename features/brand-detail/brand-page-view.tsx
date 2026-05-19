@@ -366,11 +366,15 @@ function AnnualLossTooltip({
   active?: boolean;
   payload?: { value: number }[];
 }) {
-  if (!active || !payload?.length) return null;
+  if (!(active && payload?.length)) {
+    return null;
+  }
   const value = payload[0].value;
   return (
     <div className={styles.chartTooltip}>
-      <span className={styles.chartTooltipVal}>{value.toLocaleString()} km²</span>
+      <span className={styles.chartTooltipVal}>
+        {value.toLocaleString()} km²
+      </span>
     </div>
   );
 }
@@ -390,10 +394,7 @@ function AnnualLossChart({ data }: { data: AnnualLossPoint[] }) {
 
   return (
     <ResponsiveContainer height="100%" width="100%">
-      <BarChart
-        data={data}
-        margin={{ top: 8, right: 16, left: 4, bottom: 0 }}
-      >
+      <BarChart data={data} margin={{ top: 8, right: 16, left: 4, bottom: 0 }}>
         <XAxis
           axisLine={{ stroke: "hsl(var(--bc) / 0.1)" }}
           dataKey="year"
@@ -751,7 +752,8 @@ function MillsTable({ mills }: { mills: MillRow[] }) {
                 onClick={() => handleSort("score")}
               >
                 <span className={styles.thInner}>
-                  Recent Deforestation Score <SortIcon active={sortKey === "score"} dir={sortDir} />
+                  Recent Deforestation Score{" "}
+                  <SortIcon active={sortKey === "score"} dir={sortDir} />
                 </span>
               </th>
               <th
@@ -996,7 +998,8 @@ function BrandPageViewInner({
         <div className={styles.chartCard}>
           <p className={styles.chartTitle}>Annual forest loss</p>
           <p className={styles.chartCaption}>
-            km² lost per year in {brand}&apos;s mill catchment areas, 2001–{maxYear}
+            km² lost per year in {brand}&apos;s mill catchment areas, 2001–
+            {maxYear}
           </p>
           <div className={styles.chartBody}>
             <AnnualLossChart data={forestLossTimeseries} />
