@@ -6,6 +6,29 @@ import { feature } from "topojson-client";
 import styles from "./countries-directory.module.css";
 import type { CountryRow } from "./countries-directory-view";
 
+/**
+ * world-110m polygons for these ISO ids span ~360° longitude; Mapbox draws
+ * horizontal seam lines across the map (Russia arctic edge, Fiji, Antarctica).
+ */
+const ANTIMERIDIAN_COUNTRY_IDS = new Set(["010", "242", "643"]);
+
+function ringLngSpan(ring: number[][]): number {
+  const lngs = ring.map((c) => c[0]);
+  return Math.max(...lngs) - Math.min(...lngs);
+}
+
+function spansAntimeridian(geometry: GeoJSON.Geometry): boolean {
+  if (geometry.type === "Polygon") {
+    return geometry.coordinates.some((ring) => ringLngSpan(ring) > 300);
+  }
+  if (geometry.type === "MultiPolygon") {
+    return geometry.coordinates.some((poly) =>
+      poly.some((ring) => ringLngSpan(ring) > 300)
+    );
+  }
+  return false;
+}
+
 export type IsoMap = Record<string, CountryRow>;
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
@@ -193,9 +216,9 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
     map.on("load", async () => {
       applyBrightness(map, themeRef.current);
 
-      // Hide all text/symbol layers from the basemap
+      // Hide label and line layers from the basemap (avoids graticule-like seams).
       for (const layer of map.getStyle().layers) {
-        if (layer.type === "symbol") {
+        if (layer.type === "symbol" || layer.type === "line") {
           map.setLayoutProperty(layer.id, "visibility", "none");
         }
       }
@@ -213,18 +236,29 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
         topoJson.objects.countries as Parameters<typeof feature>[1]
       ) as unknown as GeoJSON.FeatureCollection;
 
+      const clippedFeatures: GeoJSON.Feature[] = [];
       for (const f of geo.features) {
         const iso = f.id == null ? "" : String(f.id);
+        if (ANTIMERIDIAN_COUNTRY_IDS.has(iso) || spansAntimeridian(f.geometry)) {
+          continue;
+        }
         const row = isoMapRef.current[iso];
-        const props = f.properties as Record<string, unknown>;
-        props._iso = iso;
-        props._fillColor = row ? getColor(row.count) : "transparent";
-        props._hasData = row ? 1 : 0;
+        clippedFeatures.push({
+          type: "Feature",
+          id: f.id,
+          geometry: f.geometry,
+          properties: {
+            ...(f.properties as Record<string, unknown>),
+            _iso: iso,
+            _fillColor: row ? getColor(row.count) : "transparent",
+            _hasData: row ? 1 : 0,
+          },
+        });
       }
 
       map.addSource("countries", {
         type: "geojson",
-        data: geo,
+        data: { type: "FeatureCollection", features: clippedFeatures },
         generateId: true,
       });
 
