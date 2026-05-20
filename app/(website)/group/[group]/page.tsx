@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { MillsDeforestationMap } from "@/app/(website)/_shell/entity-deforestation-map";
 import pageStyles from "@/components/page-layout.module.css";
-import { CompanyPageView } from "@/features/company-detail";
+import { SupplierPageView } from "@/features/supplier-detail";
 import { precomputedSlug } from "@/lib/precomputed-slug";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
@@ -53,7 +53,7 @@ export default async function Page({
   return (
     <main className={pageStyles.pageShell}>
       <div className={pageStyles.pageInner}>
-        <CompanyPageView
+        <SupplierPageView
           aboutContent={aboutContent}
           deforestationMap={
             <MillsDeforestationMap dataTable={pageData.mills} />

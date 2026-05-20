@@ -1,0 +1,722 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-top: 1.5rem;
+}
+
+/* ── Breadcrumb ────────────────────────────────────────────────────────────── */
+
+.breadcrumb {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.8125rem;
+  color: hsl(var(--bc) / 0.5);
+}
+
+.breadcrumbLink {
+  color: hsl(var(--bc) / 0.5);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.breadcrumbLink:hover {
+  color: hsl(var(--bc) / 0.8);
+}
+
+.breadcrumbSep {
+  color: hsl(var(--bc) / 0.3);
+}
+
+.breadcrumbCurrent {
+  text-transform: uppercase;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.supplierName {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: hsl(var(--bc));
+  text-transform: uppercase;
+}
+
+.badgeOwner {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.6);
+  white-space: nowrap;
+  background: hsl(var(--b2));
+  border-radius: 6px;
+}
+
+.badgeGroup {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: #0c447c;
+  white-space: nowrap;
+  background: #e6f1fb;
+  border-radius: 6px;
+}
+
+:global([data-theme="dark"]) .badgeGroup {
+  color: #85b7eb;
+  background: rgba(12, 68, 124, 0.3);
+}
+
+/* ── Stat cards ─────────────────────────────────────────────────────────────── */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.statLabel {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.55);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.statValueRow {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: hsl(var(--bc));
+  letter-spacing: -0.01em;
+}
+
+.scoreDot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-top: 2px;
+  border-radius: 50%;
+}
+
+.statSublabel {
+  margin-top: 1px;
+  font-size: 0.6875rem;
+  color: hsl(var(--bc) / 0.4);
+}
+
+/* ── Visual grid (map + chart) ───────────────────────────────────────────────── */
+
+.visualGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .visualGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Map card */
+
+.mapCard {
+  overflow: hidden;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.mapFrame {
+  position: relative;
+  width: 100%;
+  height: 380px;
+}
+
+.mapPlaceholder {
+  width: 100%;
+  height: 380px;
+  background: hsl(var(--b2));
+}
+
+/* ── Charts row ──────────────────────────────────────────────────────────────── */
+
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Full-width map card */
+
+.mapCardFull {
+  padding: 20px;
+  overflow: hidden;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.mapFrameFull {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+}
+
+/* Chart card */
+
+.chartCard {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 380px;
+  padding: 20px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.chartTitle {
+  margin: 0 0 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.chartCaption {
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.45);
+}
+
+.chartBody {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Brands sourcing matrix ──────────────────────────────────────────────────── */
+
+.matrixCard {
+  padding: 20px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.matrixTitle {
+  margin: 0 0 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.matrixWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.matrixTable {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+}
+
+.matrixHeaderCell {
+  padding: 0 6px 8px;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.4);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.matrixHeaderBrand {
+  padding-bottom: 8px;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: hsl(var(--bc) / 0.4);
+  text-align: left;
+}
+
+.matrixRow {
+  border-top: 1px solid hsl(var(--bc) / 0.05);
+}
+
+.matrixBrandCell {
+  padding: 10px 12px 10px 0;
+  white-space: nowrap;
+}
+
+.matrixBrandLink {
+  font-size: 0.875rem;
+  color: hsl(var(--bc));
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--bc) / 0.3);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 100ms ease;
+}
+
+.matrixBrandLink:hover {
+  text-decoration-color: hsl(var(--bc) / 0.7);
+}
+
+.matrixCell {
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.matrixDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: hsl(var(--bc) / 0.65);
+  border-radius: 50%;
+}
+
+/* ── Section header ──────────────────────────────────────────────────────────── */
+
+.sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sectionTitle {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.sectionCount {
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.4);
+}
+
+.filterWrap {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 12px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.12);
+  border-radius: 8px;
+  transition: border-color 120ms ease;
+}
+
+.filterWrap:focus-within {
+  border-color: hsl(var(--bc) / 0.25);
+}
+
+.filterIcon {
+  flex-shrink: 0;
+  color: hsl(var(--bc) / 0.3);
+}
+
+.filterInput {
+  width: 220px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: hsl(var(--bc));
+  appearance: none;
+  outline: none;
+  background: transparent;
+  border: none;
+}
+
+.filterInput::placeholder {
+  color: hsl(var(--bc) / 0.35);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────────── */
+
+.tableWrap {
+  overflow: hidden;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead tr {
+  background: hsl(var(--b2));
+}
+
+.th {
+  padding: 10px 16px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: hsl(var(--bc) / 0.55);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid hsl(var(--bc) / 0.08);
+  transition: color 100ms ease;
+}
+
+.th:hover {
+  color: hsl(var(--bc) / 0.8);
+}
+
+.thActive {
+  color: hsl(var(--bc) / 0.8);
+}
+
+.thInner {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.thName {
+  composes: th;
+  width: auto;
+}
+.thScore {
+  composes: th;
+  width: 130px;
+}
+.thCountry {
+  composes: th;
+  width: 110px;
+}
+.thProvince {
+  composes: th;
+  width: 120px;
+}
+.thOwner {
+  composes: th;
+  width: 160px;
+}
+.thDist {
+  composes: th;
+  width: 120px;
+}
+.thParent {
+  composes: th;
+  width: 200px;
+}
+.thMills {
+  composes: th;
+  width: 80px;
+  text-align: right;
+}
+.thArrow {
+  composes: th;
+  width: 32px;
+  cursor: default;
+}
+.thArrow:hover {
+  color: hsl(var(--bc) / 0.55);
+}
+
+.tr {
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.tr:not(:last-child) {
+  border-bottom: 1px solid hsl(var(--bc) / 0.06);
+}
+
+.tr:hover {
+  background: hsl(var(--b2) / 0.5);
+}
+
+.td {
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  vertical-align: middle;
+  color: hsl(var(--bc));
+}
+
+.tdName {
+  composes: td;
+}
+.tdScore {
+  composes: td;
+}
+.tdCountry {
+  composes: td;
+  color: hsl(var(--bc) / 0.7);
+}
+.tdProvince {
+  composes: td;
+  color: hsl(var(--bc) / 0.7);
+}
+.tdDist {
+  composes: td;
+  color: hsl(var(--bc) / 0.7);
+}
+.tdParent {
+  composes: td;
+  color: hsl(var(--bc) / 0.7);
+}
+.tdOwner {
+  composes: td;
+}
+.tdMills {
+  composes: td;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.7);
+  text-align: right;
+}
+.tdArrow {
+  composes: td;
+  color: hsl(var(--bc) / 0.25);
+}
+
+.cellName {
+  font-weight: 500;
+  color: hsl(var(--bc));
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 100ms ease;
+}
+
+.cellName:hover {
+  color: hsl(var(--bc) / 0.65);
+}
+
+.scoreNum {
+  font-variant-numeric: tabular-nums;
+}
+
+.ownerLink {
+  font-weight: 500;
+  color: hsl(var(--bc));
+  text-decoration: none;
+  transition: color 100ms ease;
+}
+
+.ownerLink:hover {
+  color: hsl(var(--bc) / 0.65);
+}
+
+/* Score bar */
+
+.barWrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.barTrack {
+  flex-shrink: 0;
+  width: 40px;
+  height: 6px;
+  overflow: hidden;
+  background: hsl(var(--b3));
+  border-radius: 999px;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 200ms ease;
+}
+
+.barRed {
+  background: #dc2626;
+}
+.barAmber {
+  background: #ea580c;
+}
+.barTeal {
+  background: #ca8a04;
+}
+
+:global([data-theme="dark"]) .barRed {
+  background: #f87171;
+}
+:global([data-theme="dark"]) .barAmber {
+  background: #fb923c;
+}
+:global([data-theme="dark"]) .barTeal {
+  background: #fde047;
+}
+
+.barNum {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--bc) / 0.8);
+}
+
+.noResults {
+  padding: 24px 16px;
+  font-size: 0.875rem;
+  color: hsl(var(--bc) / 0.4);
+  text-align: center;
+}
+
+/* Sort icons */
+
+.sortIconInactive {
+  display: inline-flex;
+  color: hsl(var(--bc) / 0.3);
+}
+
+.sortIconActive {
+  display: inline-flex;
+  color: hsl(var(--bc) / 0.75);
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────────────── */
+
+.tableFooter {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-top: 1px solid hsl(var(--bc) / 0.08);
+}
+
+.paginationBtn {
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.6);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid hsl(var(--bc) / 0.12);
+  border-radius: 6px;
+  transition: all 100ms ease;
+}
+
+.paginationBtn:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.paginationBtn:not(:disabled):hover {
+  color: hsl(var(--bc));
+  border-color: hsl(var(--bc) / 0.25);
+}
+
+.pageNum {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.6);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  transition: all 100ms ease;
+}
+
+.pageNum:hover {
+  color: hsl(var(--bc));
+  border-color: hsl(var(--bc) / 0.12);
+}
+
+.pageNumActive {
+  composes: pageNum;
+  font-weight: 500;
+  color: hsl(var(--bc));
+  background: hsl(var(--b2));
+  border-color: hsl(var(--bc) / 0.12);
+}
+
+.pageEllipsis {
+  padding: 0 2px;
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.3);
+}
+
+/* ── About / CMS content ─────────────────────────────────────────────────────── */
+
+.aboutCard {
+  padding: 20px;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+
+.aboutTitle {
+  margin: 0 0 12px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: hsl(var(--bc));
+}
+
+.aboutBody {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: hsl(var(--bc) / 0.75);
+}
+
+.aboutBody p {
+  margin: 0 0 0.75em;
+}
+
+.aboutBody p:last-child {
+  margin-bottom: 0;
+}
+
+.aboutBody a {
+  color: hsl(var(--bc));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 100ms ease;
+}
+
+.aboutBody a:hover {
+  opacity: 0.65;
+}

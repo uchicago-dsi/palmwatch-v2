@@ -60,7 +60,7 @@ function isNavItemActive(pathname: string, itemPath: string): boolean {
       return pathname.startsWith("/brand/");
     case "/mills":
       return pathname.startsWith("/mill/");
-    case "/companies":
+    case "/suppliers":
       return pathname.startsWith("/owner/") || pathname.startsWith("/group/");
     case "/countries":
       return pathname.startsWith("/country/");

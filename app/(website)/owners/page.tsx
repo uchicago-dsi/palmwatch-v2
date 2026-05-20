@@ -18,7 +18,7 @@ export default async function Page() {
     <main className={pageStyles.pageShell}>
       <div className={pageStyles.pageInner}>
         <section className="prose flex max-w-none flex-col pb-4">
-          <h1 className="m-0 p-0">Mill Companies</h1>
+          <h1 className="m-0 p-0">Mill owners</h1>
           {!!landingPageContent?.content && (
             <div className="prose max-w-none">
               <PortableText value={landingPageContent.content} />
