@@ -864,12 +864,14 @@ export function CountryPageView({
       {/* Brands sourcing matrix */}
       {normalizedBrandUsage.length > 0 && (
         <div className={styles.matrixCard}>
-          <p className={styles.matrixTitle}>Brands sourcing from {country}</p>
+          <p className={styles.matrixTitle}>
+            Consumer brands sourcing from {country}
+          </p>
           <div className={styles.matrixWrap}>
             <table className={styles.matrixTable}>
               <thead>
                 <tr>
-                  <th className={styles.matrixHeaderBrand}>Brand</th>
+                  <th className={styles.matrixHeaderBrand}>Consumer brand</th>
                   {yearRange.map((year) => (
                     <th className={styles.matrixHeaderCell} key={year}>
                       {year}

@@ -13,7 +13,7 @@ const CircleSvg = () => (
 );
 
 export const BRAND_INFO_SECTION_TITLE =
-  "Consumer Brands Sourcing from This Mill";
+  "Consumer brands sourcing from this mill";
 
 const brandNameLinkClass =
   "capitalize font-medium text-[var(--site-nav-accent)] underline underline-offset-2 hover:opacity-90";
@@ -25,7 +25,7 @@ export const BrandInfo: React.FC<{ data: BrandData }> = ({ data }) => (
       <table className="table-pin-rows table">
         <thead>
           <tr>
-            <th className="pl-2">Brand</th>
+            <th className="pl-2">Consumer brand</th>
             {yearRange.map((year) => (
               <th key={year}>{year}</th>
             ))}

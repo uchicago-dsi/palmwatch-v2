@@ -7,7 +7,7 @@ export const MENU_ITEMS: Array<{
   description?: string;
 }> = [
   {
-    label: "Brands",
+    label: "Consumer brands",
     description:
       "The largest end users of palm oil and the estimated deforestation impact and risk of their supply chains",
     icon: (
@@ -31,14 +31,14 @@ export const MENU_ITEMS: Array<{
       "The local facilities that crush fruit to produce crude palm oil. Search below for specific mills and to learn more about their production and deforestation impact.",
   },
   {
-    label: "Companies",
+    label: "Suppliers",
     icon: (
       <path
         d="M10 95V25h30V10h20v15h30v70H65V70H35v25H10zm7-7h18v-18h30v18h18V32H60V17H40v15H17v56zm5-46h10v10H22zm16 0h10v10H38zm16 0h10v10H54zm16 0h10v10H70zm-48 18h10v10H22zm16 0h10v10H38zm16 0h10v10H54zm16 0h10v10H70z"
         fillRule="evenodd"
       />
     ),
-    path: "/companies",
+    path: "/suppliers",
     description:
       "The mill owners and corporate groups that operate palm oil mills supplying consumer brands. Search to learn more about their operations and supply chain links.",
   },

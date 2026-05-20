@@ -20,7 +20,7 @@ export default async function Page() {
   const brands = rankingBrands ?? [];
 
   const stats = [
-    { label: "Brands tracked", value: String(brands.length) },
+    { label: "Consumer brands tracked", value: String(brands.length) },
     {
       label: "Mills",
       value:

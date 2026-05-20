@@ -98,7 +98,7 @@ export default async function Home() {
                 <div className={landingStyles.featureIconWrap}>
                   <IconChart className={landingStyles.featureIcon} />
                 </div>
-                <h3>Track Brands&apos; Impact</h3>
+                <h3>Track consumer brands&apos; impact</h3>
                 <p>
                   Explore how consumer brands relate to deforestation through
                   the palm oil mills that they source from.
@@ -122,8 +122,8 @@ export default async function Home() {
                     Browse mills
                   </Link>
                   <span className={landingStyles.featureCtaSep}>·</span>
-                  <Link className={landingStyles.featureCta} href="/companies">
-                    View companies
+                  <Link className={landingStyles.featureCta} href="/suppliers">
+                    View suppliers
                   </Link>
                 </div>
               </article>

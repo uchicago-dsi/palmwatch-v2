@@ -105,7 +105,7 @@ export function BrandPageScorecard({
     <section>
       <div className={styles.breadcrumb}>
         <Link className={styles.breadcrumbLink} href="/brands">
-          Brands
+          Consumer brands
         </Link>
         <span className={styles.breadcrumbSep}>/</span>
         <span>{brand}</span>

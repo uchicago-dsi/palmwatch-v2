@@ -11,7 +11,12 @@ const MAX_RESULTS = 20;
 const MIN_QUERY_LEN = 3;
 
 /** Display order for grouped results (countries and brands first). */
-const GROUP_ORDER = ["Countries", "Brands", "Mills", "Companies"] as const;
+const GROUP_ORDER = [
+  "Countries",
+  "Consumer brands",
+  "Mills",
+  "Suppliers",
+] as const;
 
 type GroupLabel = (typeof GROUP_ORDER)[number];
 
@@ -38,8 +43,8 @@ function flattenSearchList(payload: SearchListPayload): NavSearchItem[] {
     items.push({
       label: entry.label,
       href: entry.href,
-      category: "Brand",
-      groupLabel: "Brands",
+      category: "Consumer brand",
+      groupLabel: "Consumer brands",
     });
   }
 
@@ -52,19 +57,19 @@ function flattenSearchList(payload: SearchListPayload): NavSearchItem[] {
     });
   }
 
-  const companiesByHref = new Map<string, NavSearchItem>();
+  const suppliersByHref = new Map<string, NavSearchItem>();
   for (const entry of [...payload["Mill Owners"], ...payload["Mill Groups"]]) {
-    companiesByHref.set(entry.href, {
+    suppliersByHref.set(entry.href, {
       label: entry.label,
       href: entry.href,
-      category: "Company",
-      groupLabel: "Companies",
+      category: "Supplier",
+      groupLabel: "Suppliers",
     });
   }
-  const companies = [...companiesByHref.values()].sort((a, b) =>
+  const suppliers = [...suppliersByHref.values()].sort((a, b) =>
     a.label.localeCompare(b.label)
   );
-  items.push(...companies);
+  items.push(...suppliers);
 
   return items;
 }

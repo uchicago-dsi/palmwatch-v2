@@ -8,7 +8,7 @@ export const getStatConfig = (
   const stats: Array<{ title: string; stat: string; className: string }> = [];
   if (brandCount !== null) {
     stats.push({
-      title: "Brands",
+      title: "Consumer brands",
       stat: formatter.format(brandCount),
       className: "text-error",
     });

@@ -86,7 +86,7 @@ export async function GET(
         {
           headers: {
             "Content-Type": "text/csv",
-            "Content-Disposition": `attachment; filename="${owner}-Brands-${timestamp}.csv"`,
+            "Content-Disposition": `attachment; filename="${owner}-Consumer-brands-${timestamp}.csv"`,
           },
         }
       );
