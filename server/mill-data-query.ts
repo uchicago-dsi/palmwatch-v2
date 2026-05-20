@@ -570,7 +570,9 @@ class MillDataQuery {
         averagePastRisk: (d: UmlData) =>
           op.round(op.mean(d.risk_score_past) * 100) / 100,
         totalForestLoss: (d: { _treelossMinToMax: number }) =>
-          op.round((op.sum as (column: unknown) => number)(d._treelossMinToMax)),
+          op.round(
+            (op.sum as (column: unknown) => number)(d._treelossMinToMax)
+          ),
         millCount: () => op.count(),
       })
       .orderby(desc("averageCurrentRisk"));
