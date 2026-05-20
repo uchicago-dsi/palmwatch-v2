@@ -47,11 +47,8 @@ const TRAILING_SLASH_REGEX = /\/$/;
 const TREELOSS_KM_YEAR_REGEX = /^treeloss_km_\d{4}$/;
 
 /** Arquero `op.sum` can yield null when a column is missing or all-null. */
-function finiteSum(column: string) {
-  return () => {
-    const value = op.sum(column);
-    return typeof value === "number" && Number.isFinite(value) ? value : 0;
-  };
+function asFiniteNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 class MillDataQuery {
@@ -212,10 +209,10 @@ class MillDataQuery {
     const timeseries = this.getQuantileTimeseries(data);
     const forestLossRows = arqueroObjects<{ totlaForestLoss: number }>(
       data.dedupe("UML ID").rollup({
-        totlaForestLoss: finiteSum("sum_of_treeloss_km"),
+        totlaForestLoss: () => op.sum("sum_of_treeloss_km"),
       })
     );
-    const totlaForestLoss = forestLossRows[0]?.totlaForestLoss ?? 0;
+    const totlaForestLoss = asFiniteNumber(forestLossRows[0]?.totlaForestLoss);
     return {
       ...summaryStats,
       brandUsage: arqueroObjects<BrandUsageRow>(brandUsage),
@@ -571,27 +568,36 @@ class MillDataQuery {
           op.round(op.mean(d.risk_score_future) * 100) / 100,
         averagePastRisk: (d: UmlData) =>
           op.round(op.mean(d.risk_score_past) * 100) / 100,
-        totalForestLoss: () => op.round(finiteSum("_treelossMinToMax")()),
+        totalForestLoss: () => op.round(op.sum("_treelossMinToMax")),
         millCount: () => op.count(),
       })
       .orderby(desc("averageCurrentRisk"));
-    return arqueroObjects<RankingBrandRow>(grouped);
+    return arqueroObjects<RankingBrandRow>(grouped).map((row) => ({
+      ...row,
+      totalForestLoss: asFiniteNumber(row.totalForestLoss),
+    }));
   }
   @cache("millSummaryStats")
   getMillSummaryStats(): MillSummaryStatsPayload {
-    const millStats = this.requireUml()
+    const millStatsRaw = this.requireUml()
       .dedupe("UML ID")
       .rollup({
         count: () => op.count(),
-        totalForestLoss: finiteSum("sum_of_treeloss_km"),
-        totalArea: finiteSum("km_area"),
-        totalForestArea: finiteSum("km_forest_area_00"),
+        totalForestLoss: () => op.sum("sum_of_treeloss_km"),
+        totalArea: () => op.sum("km_area"),
+        totalForestArea: () => op.sum("km_forest_area_00"),
       })
       .objects()[0] as {
       count: number;
-      totalForestLoss: number;
-      totalArea: number;
-      totalForestArea: number;
+      totalForestLoss: number | null;
+      totalArea: number | null;
+      totalForestArea: number | null;
+    };
+    const millStats = {
+      count: millStatsRaw.count,
+      totalForestLoss: asFiniteNumber(millStatsRaw.totalForestLoss),
+      totalArea: asFiniteNumber(millStatsRaw.totalArea),
+      totalForestArea: asFiniteNumber(millStatsRaw.totalForestArea),
     };
     const timeseries = this.getQuantileTimeseries(this.requireUml());
     const forestLossByYear = this.getForestLossByYear();
@@ -637,26 +643,16 @@ class MillDataQuery {
       .rollup({
         count: () => op.count(),
         totalForestLoss: () =>
-          op.round(finiteSum("_treeloss2001ToMax")() * 100) / 100,
-        totalArea: () => op.round(finiteSum("km_area")() * 100) / 100,
+          op.round(op.sum("_treeloss2001ToMax") * 100) / 100,
+        totalArea: () => op.round(op.sum("km_area") * 100) / 100,
         totalForestArea: () =>
-          op.round(finiteSum("km_forest_area_00")() * 100) / 100,
-        pctForestLoss: () => {
-          const loss = finiteSum("_treeloss2001ToMax")();
-          const forest = finiteSum("km_forest_area_00")();
-          if (!forest) {
-            return 0;
-          }
-          return op.round((loss / forest) * 1000) / 10;
-        },
-        pctForestLossString: () => {
-          const loss = finiteSum("_treeloss2001ToMax")();
-          const forest = finiteSum("km_forest_area_00")();
-          if (!forest) {
-            return "0 %";
-          }
-          return `${op.round((loss / forest) * 1000) / 10} %`;
-        },
+          op.round(op.sum("km_forest_area_00") * 100) / 100,
+        pctForestLoss: () =>
+          op.round(
+            (op.sum("_treeloss2001ToMax") / op.sum("km_forest_area_00")) * 1000
+          ) / 10,
+        pctForestLossString: () =>
+          `${op.round((op.sum("_treeloss2001ToMax") / op.sum("km_forest_area_00")) * 1000) / 10} %`,
         currentRisk: (d: UmlData) =>
           op.round(op.mean(d.risk_score_current) * 100) / 100,
         futureRisk: (d: UmlData) =>
@@ -666,7 +662,13 @@ class MillDataQuery {
       })
       .orderby(desc("count"));
     return {
-      countryStats: arqueroObjects<CountryStatRow>(countryStats),
+      countryStats: arqueroObjects<CountryStatRow>(countryStats).map((row) => ({
+        ...row,
+        totalForestLoss: asFiniteNumber(row.totalForestLoss),
+        totalArea: asFiniteNumber(row.totalArea),
+        totalForestArea: asFiniteNumber(row.totalForestArea),
+        pctForestLoss: asFiniteNumber(row.pctForestLoss),
+      })),
     };
   }
 
