@@ -239,7 +239,10 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
       const clippedFeatures: GeoJSON.Feature[] = [];
       for (const f of geo.features) {
         const iso = f.id == null ? "" : String(f.id);
-        if (ANTIMERIDIAN_COUNTRY_IDS.has(iso) || spansAntimeridian(f.geometry)) {
+        if (
+          ANTIMERIDIAN_COUNTRY_IDS.has(iso) ||
+          spansAntimeridian(f.geometry)
+        ) {
           continue;
         }
         const row = isoMapRef.current[iso];
