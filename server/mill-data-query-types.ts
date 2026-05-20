@@ -50,7 +50,7 @@ export interface RollupEntityPayload extends MillSummaryStats {
   brandUsage: BrandUsageRow[];
   mills: UmlData[];
   timeseries: LossTimeseriesRow[];
-  totalForestLoss: number;
+  totalForestLoss: number | null;
 }
 
 export interface UniqueCounts {
@@ -63,9 +63,9 @@ export interface UniqueCounts {
 
 export interface MillRollupTotals {
   count: number;
-  totalArea: number;
-  totalForestArea: number;
-  totalForestLoss: number;
+  totalArea: number | null;
+  totalForestArea: number | null;
+  totalForestLoss: number | null;
 }
 
 /** `aggregates/mill-summary-stats.json` shape from `getMillSummaryStats()`. */

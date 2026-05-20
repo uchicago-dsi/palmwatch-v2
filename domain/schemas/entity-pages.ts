@@ -15,7 +15,7 @@ export const groupOwnerPagePayloadSchema = z
     brandUsage: z.array(brandUsageRowSchema),
     averageCurrentRisk: z.number(),
     timeseries: z.array(z.record(z.unknown())),
-    totalForestLoss: z.number(),
+    totalForestLoss: z.number().nullable(),
   })
   .passthrough();
 
@@ -29,7 +29,7 @@ export const countryPagePayloadSchema = z
     brandUsage: z.array(brandUsageRowSchema),
     averageCurrentRisk: z.number(),
     timeseries: z.array(z.record(z.unknown())),
-    totalForestLoss: z.number(),
+    totalForestLoss: z.number().nullable(),
   })
   .passthrough();
 

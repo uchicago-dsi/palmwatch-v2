@@ -13,9 +13,9 @@ export const millSummaryStatsPayloadSchema = z
   .object({
     timeseries: z.array(z.record(z.unknown())),
     forestLossByYear: z.array(forestLossYearPointSchema).optional(),
-    totalForestArea: z.number(),
-    totalForestLoss: z.number(),
-    totalArea: z.number(),
+    totalForestArea: z.number().nullable(),
+    totalForestLoss: z.number().nullable(),
+    totalArea: z.number().nullable(),
     brandCount: z.number().nullable(),
     companyCount: z.number().nullable(),
     countryCount: z.number().nullable(),
@@ -34,7 +34,7 @@ const countryStatRowSchema = z
   .object({
     Country: z.string(),
     count: z.number(),
-    pctForestLoss: z.number(),
+    pctForestLoss: z.number().nullable(),
     pastRisk: z.number(),
     currentRisk: z.number(),
     futureRisk: z.number(),
@@ -57,7 +57,7 @@ const rankingBrandRowSchema = z.object({
   averageCurrentRisk: z.number(),
   averageFutureRisk: z.number(),
   averagePastRisk: z.number(),
-  totalForestLoss: z.number(),
+  totalForestLoss: z.number().nullable(),
   millCount: z.number(),
 });
 

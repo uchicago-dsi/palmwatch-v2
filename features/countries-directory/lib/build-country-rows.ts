@@ -86,7 +86,7 @@ export function buildCountryDirectoryModel(
 
     rows.push({
       name,
-      href: `/country/${name}`,
+      href: `/country/${encodeURIComponent(name)}`,
       isoCode: NAME_TO_ISO[name] ?? "",
       count,
       pctForestLoss,

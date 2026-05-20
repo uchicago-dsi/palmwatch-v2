@@ -152,7 +152,7 @@ export function BrandsClient({ brands, stats, disclaimer }: Props) {
       brands.map((b) => ({
         ...b,
         overallScore: computeOverall(b),
-        href: `/brand/${b.consumer_brand}`,
+        href: `/brand/${encodeURIComponent(b.consumer_brand)}`,
       })),
     [brands]
   );

@@ -54,9 +54,9 @@ export default async function Page() {
           millCount={millCount ?? 0}
           mills={millDirectory ?? []}
           rspoCertified={rspoCertified}
-          totalArea={totalArea}
-          totalForestArea={totalForestArea}
-          totalForestLoss={totalForestLoss}
+          totalArea={totalArea ?? 0}
+          totalForestArea={totalForestArea ?? 0}
+          totalForestLoss={totalForestLoss ?? 0}
         />
       </div>
     </main>
