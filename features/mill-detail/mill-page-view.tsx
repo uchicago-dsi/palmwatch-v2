@@ -370,6 +370,12 @@ export function MillPageView({
     return <div>Mill not found.</div>;
   }
 
+  const totalForestArea = Number(entry.km_forest_area_00) || 0;
+  const percentForestLost =
+    totalForestArea > 0
+      ? (Math.min(cumulativeLoss2001, totalForestArea) / totalForestArea) * 100
+      : null;
+
   const millName = toTitleCase(entry["Mill Name"]);
   const altName = entry["Alternative name"]?.trim() || null;
   const parentCompany = entry["Parent Company"]?.trim() ?? "";
@@ -413,14 +419,16 @@ export function MillPageView({
           </span>
         </div>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Catchment area</span>
+          <span className={styles.statLabel}>Percent forest loss</span>
           <div className={styles.statValueRow}>
             <span className={styles.statValue}>
-              {formatKm2(Number(entry.km_area))} km²
+              {percentForestLost === null
+                ? "—"
+                : `${percentForestLost.toFixed(1)}%`}
             </span>
           </div>
           <span className={styles.statSublabel}>
-            Overall area assigned to this mill
+            Share of forest area lost since 2001
           </span>
         </div>
         <div className={styles.statCard}>
