@@ -141,7 +141,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   const [fillVisible, setFillVisible] = useState(true);
 
   const syncZoomFromView = useCallback((z: number) => {
-    const rounded = Math.round(z);
+    const rounded = Math.floor(z);
     if (lastRoundedZoomRef.current === rounded) {
       return;
     }
