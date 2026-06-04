@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { DataProvider } from "@/components/data-provider";
 import { QueryProvider } from "@/components/query-provider";
-import { useTheme } from "@/components/theme-provider";
 import {
   cumulativeLossPctColumn,
   latestTreelossKmColumn,
@@ -21,11 +20,6 @@ const PalmwatchMapDynamic = dynamic(
     loading: MapPlaceholder,
   }
 );
-
-const LIGHT_STYLE = "mapbox://styles/mapbox/light-v11";
-const DARK_STYLE =
-  process.env.NEXT_PUBLIC_MAPBOX_STYLE ||
-  "mapbox://styles/dhalpern/cln0e32pu06ba01qxcgrp4gv9";
 
 export interface MillsDeforestationMapProps {
   dataTable: MapProps["dataTable"];
@@ -55,9 +49,6 @@ export function MillsDeforestationMap({
 
 /** Brand page map — loads mill catchment data via the brand API. */
 export function BrandDeforestationMap({ brand }: { brand: string }) {
-  const { theme } = useTheme();
-  const mapStyle = theme === "light" ? LIGHT_STYLE : DARK_STYLE;
-
   return (
     <QueryProvider>
       <DataProvider<{ umlInfo: MapProps["dataTable"] }>
@@ -71,7 +62,6 @@ export function BrandDeforestationMap({ brand }: { brand: string }) {
             dataTable={data.umlInfo}
             geoDataUrl="/data/mill-catchment.geojson"
             geoIdColumn="UML ID"
-            mapStyle={mapStyle}
             showClusters={true}
             showLayerStepper={true}
           />
