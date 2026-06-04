@@ -16,7 +16,7 @@ import { maxYear } from "@/config/years";
 import type { BrandPrecomputedPayload } from "@/domain/schemas/brand-precomputed";
 import styles from "./brand.module.css";
 import { BrandPageScorecard } from "./components/brand-page-scorecard";
-import type { AnnualLossPoint, RankingEntry } from "./types";
+import type { AnnualLossPoint } from "./types";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,7 +41,6 @@ export interface BrandPageViewProps {
   downloads: Download[];
   externalLink: string;
   forestLossTimeseries: AnnualLossPoint[];
-  ranking: RankingEntry[];
   rspoMemberSince: string;
   totalForestLoss: number;
 }
@@ -865,7 +864,6 @@ function BrandPageViewInner({
   disclosures,
   brandStats,
   aboutContent,
-  ranking,
   forestLossTimeseries,
   totalForestLoss,
   downloads,
@@ -896,7 +894,7 @@ function BrandPageViewInner({
 
   return (
     <div className={styles.page}>
-      <BrandPageScorecard altName={altName} brand={brand} ranking={ranking} />
+      <BrandPageScorecard altName={altName} brand={brand} />
 
       {/* Stat cards */}
       <div className={styles.statsGrid}>

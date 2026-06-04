@@ -1,15 +1,12 @@
 import { BrandDeforestationMap } from "@/app/(website)/_shell/entity-deforestation-map";
 import pageStyles from "@/components/page-layout.module.css";
 import { getBrandDataDownloadLinks } from "@/config/brand-data-download-links";
-import type { RankingEntry } from "@/features/brand-detail";
 import {
   BrandPageView,
   computeForestTimeseries,
 } from "@/features/brand-detail";
 import { PortableText } from "@/sanity/lib/components";
 import { loadBrandPageModel } from "@/server/brand-page-data";
-import { loadPrecomputedJson } from "@/server/load-precomputed";
-
 export const revalidate = 60;
 
 export default async function Page({
@@ -20,12 +17,7 @@ export default async function Page({
   const { brand: _brand } = await params;
   const brand = decodeURIComponent(_brand);
 
-  const [loaded, rankingRaw] = await Promise.all([
-    loadBrandPageModel(brand),
-    loadPrecomputedJson<RankingEntry[]>("aggregates/ranking-brands.json").catch(
-      () => [] as RankingEntry[]
-    ),
-  ]);
+  const loaded = await loadBrandPageModel(brand);
 
   if (!loaded.ok) {
     return (
@@ -43,11 +35,6 @@ export default async function Page({
 
   const { model } = loaded;
   const { brandPre, brandInfo } = model;
-
-  const ranking = rankingRaw.map((r) => ({
-    consumer_brand: r.consumer_brand,
-    averageCurrentRisk: r.averageCurrentRisk,
-  }));
 
   const forestLossTimeseries = brandPre.umlInfo
     ? computeForestTimeseries(brandPre.umlInfo)
@@ -83,7 +70,6 @@ export default async function Page({
           downloads={getBrandDataDownloadLinks(brand)}
           externalLink={brandInfo.externalLink ?? ""}
           forestLossTimeseries={forestLossTimeseries}
-          ranking={ranking}
           rspoMemberSince={brandInfo.rspoMemberSince ?? ""}
           totalForestLoss={totalForestLoss}
         />
