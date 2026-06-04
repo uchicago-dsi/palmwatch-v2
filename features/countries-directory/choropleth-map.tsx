@@ -107,6 +107,46 @@ function IconLayersOn() {
   );
 }
 
+function IconLegendMinimize() {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
+      <path
+        d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function IconLegendExpand() {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
+      <path
+        d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
 function IconLayersOff() {
   return (
     <svg
@@ -170,6 +210,7 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
   const mapInstanceRef = React.useRef<mapboxgl.Map | null>(null);
 
   const [fillVisible, setFillVisible] = React.useState(true);
+  const [legendExpanded, setLegendExpanded] = React.useState(true);
 
   // Create map once
   React.useEffect(() => {
@@ -418,18 +459,44 @@ export default function ChoroplethMap({ isoMap, onNavigate, theme }: Props) {
       >
         {fillVisible ? <IconLayersOn /> : <IconLayersOff />}
       </button>
-      <div className={styles.mapLegend}>
-        <div className={styles.mapLegendTitle}>Mills</div>
-        {MAP_LEGEND.map((item) => (
-          <div className={styles.mapLegendItem} key={item.label}>
-            <span
-              className={styles.mapLegendSwatch}
-              style={{ background: getColor(item.min) }}
-            />
-            <span className={styles.mapLegendLabel}>{item.label}</span>
+      {legendExpanded ? (
+        <div className={styles.mapLegend}>
+          <div className={styles.mapLegendHeader}>
+            <div className={styles.mapLegendTitle}>Mills</div>
+            <button
+              aria-label="Minimize legend"
+              className={styles.mapLegendToggle}
+              onClick={() => setLegendExpanded(false)}
+              title="Minimize legend"
+              type="button"
+            >
+              <IconLegendMinimize />
+            </button>
           </div>
-        ))}
-      </div>
+          {MAP_LEGEND.map((item) => (
+            <div className={styles.mapLegendItem} key={item.label}>
+              <span
+                className={styles.mapLegendSwatch}
+                style={{ background: getColor(item.min) }}
+              />
+              <span className={styles.mapLegendLabel}>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className={styles.mapLegendMin}>
+          <span className={styles.mapLegendTitle}>Mills</span>
+          <button
+            aria-label="Expand legend"
+            className={styles.mapLegendToggle}
+            onClick={() => setLegendExpanded(true)}
+            title="Expand legend"
+            type="button"
+          >
+            <IconLegendExpand />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
