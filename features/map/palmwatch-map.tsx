@@ -65,6 +65,48 @@ function applyThemeBrightness(map: MapboxGLMap, theme: "light" | "dark") {
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
+function IconLegendMinimize() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="flex-shrink-0 text-base-content/40"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
+      <path
+        d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function IconLegendExpand() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="flex-shrink-0 text-base-content/40"
+      fill="none"
+      height="12"
+      viewBox="0 0 24 24"
+      width="12"
+    >
+      <path
+        d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
 export interface MapViewport {
   latitude: number;
   longitude: number;
@@ -97,17 +139,61 @@ const SCORE_COLUMN: Record<ScoreType, string> = {
   future: "risk_score_future",
 };
 
-function layerDescription(
-  mode: LayerMode,
-  year: number,
-  score: ScoreType
-): string {
-  if (mode === "total") {
+function choroplethSchemeForColumn(
+  column: string
+): keyof typeof colorFunctions {
+  if (column.includes("score")) {
+    return "riskScore";
+  }
+  if (column === cumulativeLossPctColumn) {
+    return "cumulativeLossPct";
+  }
+  if (column === cumulativeLossColumn) {
+    return "cumulativeLoss";
+  }
+  return "forestLoss";
+}
+
+function layerModeFromColumn(column: string): LayerMode {
+  if (column.includes("score")) {
+    return "scores";
+  }
+  if (column === cumulativeLossPctColumn || column === cumulativeLossColumn) {
+    return "total";
+  }
+  return "byYear";
+}
+
+function yearFromTreelossColumn(column: string): number | null {
+  if (!column.startsWith("treeloss_km_")) {
+    return null;
+  }
+  const year = Number.parseInt(column.split("_")[2] ?? "", 10);
+  return Number.isFinite(year) ? year : null;
+}
+
+function scoreTypeFromColumn(column: string): ScoreType {
+  if (column === SCORE_COLUMN.past) {
+    return "past";
+  }
+  if (column === SCORE_COLUMN.future) {
+    return "future";
+  }
+  return "recent";
+}
+
+function layerDescriptionFromColumn(column: string): string {
+  if (column === cumulativeLossPctColumn) {
     return `Cumulative tree cover loss as % of forest area (${CUMULATIVE_LOSS_START_YEAR}–present)`;
   }
-  if (mode === "byYear") {
+  if (column === cumulativeLossColumn) {
+    return `Cumulative tree cover loss (${CUMULATIVE_LOSS_START_YEAR}–present)`;
+  }
+  const year = yearFromTreelossColumn(column);
+  if (year != null) {
     return `Forest loss in ${year}`;
   }
+  const score = scoreTypeFromColumn(column);
   if (score === "past") {
     return "Past deforestation score (2001–2019)";
   }
@@ -123,7 +209,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   geoIdColumn,
   dataIdColumn,
   choroplethColumn,
-  choroplethScheme,
+  choroplethScheme: _choroplethScheme,
   showLayerStepper,
   showGeocoder,
   onMapMove,
@@ -155,10 +241,12 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     latitude: number;
     zoom: number;
   } | null>(null);
-  const [currentChoroplethScheme, setCurrentChoroplethScheme] =
-    useState(choroplethScheme);
   const [currentChoroplethColumn, setCurrentChoroplethColumn] =
     useState(choroplethColumn);
+  const activeChoroplethScheme = choroplethSchemeForColumn(
+    currentChoroplethColumn
+  );
+  const activeLayerMode = layerModeFromColumn(currentChoroplethColumn);
   const isCumulative =
     currentChoroplethColumn === cumulativeLossColumn ||
     currentChoroplethColumn === cumulativeLossPctColumn;
@@ -171,11 +259,10 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   } else if (isCumulative) {
     _currentYear = -2;
   }
-  const [mode, setMode] = useState<LayerMode>("total");
   const [year, setYear] = useState(maxYear);
   const [scoreType, setScoreType] = useState<ScoreType>("recent");
-  const [legendOpen, setLegendOpen] = useState(true);
-  const { colorFunction, scale } = colorFunctions[currentChoroplethScheme];
+  const [layerPanelExpanded, setLayerPanelExpanded] = useState(true);
+  const { colorFunction, scale } = colorFunctions[activeChoroplethScheme];
   const setData = useTooltipStore((state) => state.setData);
   const setChoroplethColumnInTooltip = useTooltipStore(
     (state) => state.setChoroplethColumn
@@ -401,6 +488,17 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   }, [initialMapView?.zoom, syncZoomFromView]);
 
   useEffect(() => {
+    setCurrentChoroplethColumn(choroplethColumn);
+    const parsedYear = yearFromTreelossColumn(choroplethColumn);
+    if (parsedYear != null) {
+      setYear(parsedYear);
+    }
+    if (choroplethColumn.includes("score")) {
+      setScoreType(scoreTypeFromColumn(choroplethColumn));
+    }
+  }, [choroplethColumn]);
+
+  useEffect(() => {
     setChoroplethColumnInTooltip(currentChoroplethColumn);
   }, [currentChoroplethColumn, setChoroplethColumnInTooltip]);
 
@@ -492,7 +590,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         getFillColor: [
           dataDict,
           currentChoroplethColumn,
-          currentChoroplethScheme,
+          activeChoroplethScheme,
         ],
         getLineWidth: [activeUml],
         opacity: [fillOpacity],
@@ -531,13 +629,6 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     }),
   ];
   const handleVariable = (variable: string) => {
-    if (variable.includes("score")) {
-      setCurrentChoroplethScheme("riskScore");
-    } else if (variable === cumulativeLossPctColumn) {
-      setCurrentChoroplethScheme("cumulativeLossPct");
-    } else {
-      setCurrentChoroplethScheme("forestLoss");
-    }
     setCurrentChoroplethColumn(variable);
   };
 
@@ -674,161 +765,177 @@ export const PalmwatchMap: React.FC<MapProps> = ({
 
         {showLayerStepper && layerControlsVisible && (
           <div
-            className="pointer-events-auto absolute z-40 flex flex-col gap-2.5 rounded-xl border border-base-content/10 bg-base-100/95 px-3.5 py-3 shadow-md backdrop-blur-sm"
-            style={{ top: showGeocoder ? 58 : 12, left: 12, maxWidth: 300 }}
+            className="pointer-events-auto absolute z-40"
+            style={{ top: showGeocoder ? 58 : 12, left: 12 }}
           >
-            {/* Mode pills */}
-            <div className="flex gap-1.5">
-              {(
-                [
-                  { id: "total" as LayerMode, label: "Total loss" },
-                  { id: "byYear" as LayerMode, label: "By year" },
-                  { id: "scores" as LayerMode, label: "Risk scores" },
-                ] as const
-              ).map(({ id, label }) => (
-                <button
-                  className={`cursor-pointer rounded-full px-3 py-1 text-xs transition-all duration-150 ${
-                    mode === id
-                      ? "bg-base-content font-medium text-base-100"
-                      : "border border-base-content/10 bg-base-100 text-base-content/60 hover:border-base-content/20 hover:text-base-content"
-                  }`}
-                  key={id}
-                  onClick={() => {
-                    setMode(id);
-                    if (id === "total") {
-                      handleVariable(cumulativeLossPctColumn);
-                    } else if (id === "byYear") {
-                      handleVariable(`treeloss_km_${year}`);
-                    } else {
-                      handleVariable(SCORE_COLUMN[scoreType]);
-                    }
-                  }}
-                  type="button"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* By-year slider */}
-            {mode === "byYear" && (
-              <div className="flex items-center gap-2.5">
-                <input
-                  className="flex-1 accent-base-content"
-                  max={fullYearRange.at(-1)}
-                  min={fullYearRange[0]}
-                  onChange={(e) => {
-                    const y = Number(e.target.value);
-                    setYear(y);
-                    handleVariable(`treeloss_km_${y}`);
-                  }}
-                  step={1}
-                  type="range"
-                  value={year}
-                />
-                <span className="min-w-[36px] text-right font-medium text-[13px] text-base-content">
-                  {year}
-                </span>
-              </div>
-            )}
-
-            {/* Score type sub-pills */}
-            {mode === "scores" && (
-              <div className="flex gap-1">
-                {(
-                  [
-                    { id: "past" as ScoreType, label: "Past" },
-                    { id: "recent" as ScoreType, label: "Recent" },
-                    { id: "future" as ScoreType, label: "Future risk" },
-                  ] as const
-                ).map(({ id, label }) => (
-                  <button
-                    className={`cursor-pointer rounded-md px-2.5 py-0.5 text-[11px] transition-all duration-150 ${
-                      scoreType === id
-                        ? "bg-base-content font-medium text-base-100"
-                        : "border border-base-content/10 text-base-content/60 hover:border-base-content/20 hover:text-base-content"
-                    }`}
-                    key={id}
-                    onClick={() => {
-                      setScoreType(id);
-                      handleVariable(SCORE_COLUMN[id]);
-                    }}
-                    type="button"
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Description */}
-            <p className="m-0 text-[11px] text-base-content/40 leading-snug">
-              {fillVisible
-                ? layerDescription(mode, year, scoreType)
-                : "Overlay hidden"}
-            </p>
-
-            {/* Legend */}
-            <div className="border-base-content/10 border-t pt-2">
+            <div
+              className={`relative rounded-xl border border-base-content/10 bg-base-100/95 shadow-md backdrop-blur-sm ${
+                layerPanelExpanded
+                  ? "flex max-w-[300px] flex-col gap-2.5 px-3.5 py-3 pr-9"
+                  : "h-7 w-7"
+              }`}
+            >
               <button
-                className="flex w-full items-center justify-between gap-2"
-                onClick={() => setLegendOpen((o) => !o)}
+                aria-label={
+                  layerPanelExpanded
+                    ? "Minimize map controls"
+                    : "Expand map controls"
+                }
+                className={`flex cursor-pointer items-center justify-center rounded p-0.5 text-base-content/40 hover:bg-base-content/5 hover:text-base-content/60 ${
+                  layerPanelExpanded
+                    ? "absolute top-2 right-2"
+                    : "absolute inset-0"
+                }`}
+                onClick={() => setLayerPanelExpanded((o) => !o)}
+                title={
+                  layerPanelExpanded
+                    ? "Minimize map controls"
+                    : "Expand map controls"
+                }
                 type="button"
               >
-                <span className="font-medium text-[11px] text-base-content/50">
-                  Legend
-                </span>
-                <svg
-                  aria-hidden="true"
-                  className={`flex-shrink-0 text-base-content/40 transition-transform duration-150 ${legendOpen ? "" : "-rotate-90"}`}
-                  fill="none"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  width="10"
-                >
-                  <path
-                    d="M6 9l6 6 6-6"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.5"
-                  />
-                </svg>
+                {layerPanelExpanded ? (
+                  <IconLegendMinimize />
+                ) : (
+                  <IconLegendExpand />
+                )}
               </button>
-              {legendOpen && (
-                <div
-                  className={`mt-1.5 flex flex-col gap-1 transition-opacity ${fillVisible ? "opacity-100" : "opacity-30"}`}
-                >
-                  {scale.map((stop) => (
-                    <div className="flex items-center gap-2" key={stop.label}>
-                      <div
-                        className="h-2.5 w-2.5 flex-shrink-0 rounded-sm"
-                        style={{
-                          background: `rgb(${stop.color[0]},${stop.color[1]},${stop.color[2]})`,
+
+              {layerPanelExpanded ? (
+                <>
+                  {/* Mode pills */}
+                  <div className="flex gap-1.5">
+                    {(
+                      [
+                        { id: "total" as LayerMode, label: "Total loss" },
+                        { id: "byYear" as LayerMode, label: "By year" },
+                        { id: "scores" as LayerMode, label: "Risk scores" },
+                      ] as const
+                    ).map(({ id, label }) => (
+                      <button
+                        className={`cursor-pointer rounded-full px-3 py-1 text-xs transition-all duration-150 ${
+                          activeLayerMode === id
+                            ? "bg-base-content font-medium text-base-100"
+                            : "border border-base-content/10 bg-base-100 text-base-content/60 hover:border-base-content/20 hover:text-base-content"
+                        }`}
+                        key={id}
+                        onClick={() => {
+                          if (id === "total") {
+                            handleVariable(cumulativeLossPctColumn);
+                          } else if (id === "byYear") {
+                            handleVariable(`treeloss_km_${year}`);
+                          } else {
+                            handleVariable(SCORE_COLUMN[scoreType]);
+                          }
                         }}
+                        type="button"
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* By-year slider */}
+                  {activeLayerMode === "byYear" && (
+                    <div className="flex items-center gap-2.5">
+                      <input
+                        className="flex-1 accent-base-content"
+                        max={fullYearRange.at(-1)}
+                        min={fullYearRange[0]}
+                        onChange={(e) => {
+                          const y = Number(e.target.value);
+                          setYear(y);
+                          handleVariable(`treeloss_km_${y}`);
+                        }}
+                        step={1}
+                        type="range"
+                        value={year}
                       />
-                      <span className="text-[11px] text-base-content/60">
-                        {stop.label}
+                      <span className="min-w-[36px] text-right font-medium text-[13px] text-base-content">
+                        {year}
                       </span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  )}
 
-            {/* Overlay toggle */}
-            <div className="border-base-content/10 border-t pt-1.5">
-              <label className="flex cursor-pointer items-center gap-2">
-                <input
-                  checked={fillVisible}
-                  className="cursor-pointer"
-                  onChange={() => setFillVisible((v) => !v)}
-                  type="checkbox"
-                />
-                <span className="text-[11px] text-base-content/50">
-                  Show polygon overlay
-                </span>
-              </label>
+                  {/* Score type sub-pills */}
+                  {activeLayerMode === "scores" && (
+                    <div className="flex gap-1">
+                      {(
+                        [
+                          { id: "past" as ScoreType, label: "Past" },
+                          { id: "recent" as ScoreType, label: "Recent" },
+                          { id: "future" as ScoreType, label: "Future risk" },
+                        ] as const
+                      ).map(({ id, label }) => (
+                        <button
+                          className={`cursor-pointer rounded-md px-2.5 py-0.5 text-[11px] transition-all duration-150 ${
+                            scoreTypeFromColumn(currentChoroplethColumn) === id
+                              ? "bg-base-content font-medium text-base-100"
+                              : "border border-base-content/10 text-base-content/60 hover:border-base-content/20 hover:text-base-content"
+                          }`}
+                          key={id}
+                          onClick={() => {
+                            setScoreType(id);
+                            handleVariable(SCORE_COLUMN[id]);
+                          }}
+                          type="button"
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Description */}
+                  <p className="m-0 text-[11px] text-base-content/40 leading-snug">
+                    {fillVisible
+                      ? layerDescriptionFromColumn(currentChoroplethColumn)
+                      : "Overlay hidden"}
+                  </p>
+
+                  {/* Legend */}
+                  <div className="border-base-content/10 border-t pt-2">
+                    <span className="font-medium text-[11px] text-base-content/50">
+                      Legend
+                    </span>
+                    <div
+                      className={`mt-1.5 flex flex-col gap-1 transition-opacity ${fillVisible ? "opacity-100" : "opacity-30"}`}
+                    >
+                      {scale.map((stop) => (
+                        <div
+                          className="flex items-center gap-2"
+                          key={stop.label}
+                        >
+                          <div
+                            className="h-2.5 w-2.5 flex-shrink-0 rounded-sm"
+                            style={{
+                              background: `rgb(${stop.color[0]},${stop.color[1]},${stop.color[2]})`,
+                            }}
+                          />
+                          <span className="text-[11px] text-base-content/60">
+                            {stop.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Overlay toggle */}
+                  <div className="border-base-content/10 border-t pt-1.5">
+                    <label className="flex cursor-pointer items-center gap-2">
+                      <input
+                        checked={fillVisible}
+                        className="cursor-pointer"
+                        onChange={() => setFillVisible((v) => !v)}
+                        type="checkbox"
+                      />
+                      <span className="text-[11px] text-base-content/50">
+                        Show polygon overlay
+                      </span>
+                    </label>
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
         )}
