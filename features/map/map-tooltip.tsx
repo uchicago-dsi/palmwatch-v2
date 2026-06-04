@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import {
   cumulativeLossColumn,
+  cumulativeLossPctColumn,
   cumulativeYearRange,
   latestTreelossKmColumn,
 } from "@/config/years";
@@ -17,15 +18,27 @@ function formatKm2(val: number): string {
   return `${val.toFixed(1)} km²`;
 }
 
+function getCumulativeLossKm2(info: UmlData): number {
+  return cumulativeYearRange.reduce((sum, yr) => {
+    const val = umlRowField(info, `treeloss_km_${yr}`);
+    return sum + (typeof val === "number" ? val : 0);
+  }, 0);
+}
+
 function getForestLossValue(
   info: UmlData,
   choroplethColumn: string
 ): number | null {
+  if (choroplethColumn === cumulativeLossPctColumn) {
+    const forestArea = Number(info.km_forest_area_00) || 0;
+    if (forestArea <= 0) {
+      return 0;
+    }
+    const cumLoss = getCumulativeLossKm2(info);
+    return Math.min((cumLoss / forestArea) * 100, 100);
+  }
   if (choroplethColumn === cumulativeLossColumn) {
-    return cumulativeYearRange.reduce((sum, yr) => {
-      const val = umlRowField(info, `treeloss_km_${yr}`);
-      return sum + (typeof val === "number" ? val : 0);
-    }, 0);
+    return getCumulativeLossKm2(info);
   }
   if (choroplethColumn.startsWith("treeloss_km_")) {
     const val = umlRowField(info, choroplethColumn);
@@ -95,6 +108,7 @@ export const MapTooltip = () => {
   const millHref = `/mill/${encodeURIComponent(id)}`;
 
   const lossVal = getForestLossValue(info, choroplethColumn);
+  const isPctColumn = choroplethColumn === cumulativeLossPctColumn;
 
   const scoreRows = [
     { label: "Recent score", value: Number(info.risk_score_current) },
@@ -128,11 +142,13 @@ export const MapTooltip = () => {
       <div className="my-2 border-base-content/10 border-t" />
 
       {/* Layer value */}
-      {lossVal !== null && lossVal > 0 && (
+      {lossVal !== null && (isPctColumn || lossVal > 0) && (
         <div className="mb-1 flex items-center justify-between gap-6">
-          <span className="text-[11px] opacity-40">Forest loss</span>
+          <span className="text-[11px] opacity-40">
+            {isPctColumn ? "Forest loss (%)" : "Forest loss"}
+          </span>
           <span className="font-medium text-xs tabular-nums">
-            {formatKm2(lossVal)}
+            {isPctColumn ? `${lossVal.toFixed(1)}%` : formatKm2(lossVal)}
           </span>
         </div>
       )}

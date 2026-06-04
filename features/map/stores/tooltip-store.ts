@@ -1,6 +1,6 @@
 "use client";
 import { create } from "zustand";
-import { cumulativeLossColumn } from "@/config/years";
+import { cumulativeLossPctColumn } from "@/config/years";
 
 export interface TooltipStore {
   /** Matches PalmwatchMap coloring (year column or risk_score_*). */
@@ -20,7 +20,7 @@ export const useTooltipStore = create<TooltipStore>((set) => ({
   y: null,
   id: null,
   frozen: false,
-  choroplethColumn: cumulativeLossColumn,
+  choroplethColumn: cumulativeLossPctColumn,
   setData: (x: number | null, y: number | null, id: string | null) =>
     set({ x, y, id }),
   setChoroplethColumn: (column: string) => set({ choroplethColumn: column }),

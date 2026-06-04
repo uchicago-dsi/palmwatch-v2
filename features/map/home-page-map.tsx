@@ -1,7 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { cumulativeLossColumn } from "@/config/years";
+import { cumulativeLossPctColumn } from "@/config/years";
 import { PalmwatchMap, SATELLITE_MAP_STYLE } from "./palmwatch-map";
 import { useHomeViewportStore } from "./stores/home-viewport-store";
 
@@ -18,8 +18,8 @@ export const HomePageMap = () => {
         <p>Loading...</p>
       ) : (
         <PalmwatchMap
-          choroplethColumn={cumulativeLossColumn}
-          choroplethScheme="cumulativeLoss"
+          choroplethColumn={cumulativeLossPctColumn}
+          choroplethScheme="cumulativeLossPct"
           dataIdColumn="UML ID"
           dataTable={data ?? []}
           geoDataUrl="/data/mill-catchment.geojson"

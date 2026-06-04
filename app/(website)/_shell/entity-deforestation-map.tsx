@@ -4,7 +4,10 @@ import dynamic from "next/dynamic";
 import { DataProvider } from "@/components/data-provider";
 import { QueryProvider } from "@/components/query-provider";
 import { useTheme } from "@/components/theme-provider";
-import { cumulativeLossColumn, latestTreelossKmColumn } from "@/config/years";
+import {
+  cumulativeLossPctColumn,
+  latestTreelossKmColumn,
+} from "@/config/years";
 import type { MapProps } from "@/features/map";
 
 function MapPlaceholder() {
@@ -37,8 +40,8 @@ export function MillsDeforestationMap({
   return (
     <QueryProvider>
       <PalmwatchMapDynamic
-        choroplethColumn={cumulativeLossColumn}
-        choroplethScheme="cumulativeLoss"
+        choroplethColumn={cumulativeLossPctColumn}
+        choroplethScheme="cumulativeLossPct"
         dataIdColumn="UML ID"
         dataTable={dataTable}
         geoDataUrl="/data/mill-catchment.geojson"

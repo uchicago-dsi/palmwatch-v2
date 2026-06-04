@@ -29,6 +29,7 @@ import { DataProvider } from "@/components/data-provider";
 import {
   CUMULATIVE_LOSS_START_YEAR,
   cumulativeLossColumn,
+  cumulativeLossPctColumn,
   cumulativeYearRange,
   fullYearRange,
   maxYear,
@@ -102,7 +103,7 @@ function layerDescription(
   score: ScoreType
 ): string {
   if (mode === "total") {
-    return `Cumulative tree cover loss (${CUMULATIVE_LOSS_START_YEAR}–present)`;
+    return `Cumulative tree cover loss as % of forest area (${CUMULATIVE_LOSS_START_YEAR}–present)`;
   }
   if (mode === "byYear") {
     return `Forest loss in ${year}`;
@@ -158,7 +159,9 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     useState(choroplethScheme);
   const [currentChoroplethColumn, setCurrentChoroplethColumn] =
     useState(choroplethColumn);
-  const isCumulative = currentChoroplethColumn === cumulativeLossColumn;
+  const isCumulative =
+    currentChoroplethColumn === cumulativeLossColumn ||
+    currentChoroplethColumn === cumulativeLossPctColumn;
   let _currentYear = Number.parseInt(
     currentChoroplethColumn?.split("_")?.[2] ?? "",
     10
@@ -219,9 +222,12 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         (sum, yr) => sum + (Number(r[`treeloss_km_${yr}`]) || 0),
         0
       );
+      const forestArea = Number(r.km_forest_area_00) || 0;
+      const cumLossPct = forestArea > 0 ? (cumLoss / forestArea) * 100 : 0;
       dataDict[r[dataIdColumn] as string] = {
         ...r,
         [cumulativeLossColumn]: cumLoss,
+        [cumulativeLossPctColumn]: Math.min(cumLossPct, 100),
       };
     }
 
@@ -527,8 +533,8 @@ export const PalmwatchMap: React.FC<MapProps> = ({
   const handleVariable = (variable: string) => {
     if (variable.includes("score")) {
       setCurrentChoroplethScheme("riskScore");
-    } else if (variable === cumulativeLossColumn) {
-      setCurrentChoroplethScheme("cumulativeLoss");
+    } else if (variable === cumulativeLossPctColumn) {
+      setCurrentChoroplethScheme("cumulativeLossPct");
     } else {
       setCurrentChoroplethScheme("forestLoss");
     }
@@ -690,7 +696,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
                   onClick={() => {
                     setMode(id);
                     if (id === "total") {
-                      handleVariable(cumulativeLossColumn);
+                      handleVariable(cumulativeLossPctColumn);
                     } else if (id === "byYear") {
                       handleVariable(`treeloss_km_${year}`);
                     } else {

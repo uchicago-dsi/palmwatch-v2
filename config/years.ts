@@ -31,9 +31,13 @@ const cumulativeYearRange = Array.from(
 /** Synthetic column key added to each row at runtime (not in raw data). */
 const cumulativeLossColumn = "treeloss_km_cumulative";
 
+/** Synthetic column: cumulative loss as % of km_forest_area_00 (runtime only). */
+const cumulativeLossPctColumn = "treeloss_pct_cumulative";
+
 export {
   CUMULATIVE_LOSS_START_YEAR,
   cumulativeLossColumn,
+  cumulativeLossPctColumn,
   cumulativeYearRange,
   fullYearRange,
   fullYearRangeColumns,

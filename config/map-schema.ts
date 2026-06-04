@@ -31,6 +31,39 @@ export const forestLossColorBreaks = [
   },
 ];
 
+export const cumulativeLossPctColorBreaks = [
+  {
+    value: 20,
+    color: [255, 255, 178],
+    label: "0 – 20%",
+    tooltip: "",
+  },
+  {
+    value: 40,
+    color: [254, 204, 92],
+    label: "20 – 40%",
+    tooltip: "",
+  },
+  {
+    value: 60,
+    color: [253, 141, 60],
+    label: "40 – 60%",
+    tooltip: "",
+  },
+  {
+    value: 80,
+    color: [240, 59, 32],
+    label: "60 – 80%",
+    tooltip: "",
+  },
+  {
+    value: 101,
+    color: [189, 0, 38],
+    label: "80 – 100%",
+    tooltip: "",
+  },
+];
+
 export const cumulativeLossColorBreaks = [
   {
     value: 60,
