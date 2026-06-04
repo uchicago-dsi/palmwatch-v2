@@ -26,7 +26,6 @@ export interface CountryRow {
 
 interface StatCard {
   label: string;
-  text?: boolean;
   value: string;
 }
 type SortKey =
@@ -182,9 +181,7 @@ export function CountriesClient({ rows, stats }: Props) {
         {stats.map((s) => (
           <div className={styles.statCard} key={s.label}>
             <span className={styles.statLabel}>{s.label}</span>
-            <span className={s.text ? styles.statValueText : styles.statValue}>
-              {s.value}
-            </span>
+            <span className={styles.statValue}>{s.value}</span>
           </div>
         ))}
       </div>

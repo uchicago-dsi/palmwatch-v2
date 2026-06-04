@@ -182,11 +182,11 @@
   color: hsl(var(--bc) / 0.6);
 }
 
-/* ── Stat cards (4-up) ─────────────────────────────────────────────────────── */
+/* ── Stat cards (3-up) ─────────────────────────────────────────────────────── */
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
 
@@ -219,13 +219,6 @@
   line-height: 1.1;
   color: hsl(var(--bc));
   letter-spacing: -0.02em;
-}
-
-.statValueText {
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.1;
-  color: hsl(var(--bc));
 }
 
 /* ── Search ────────────────────────────────────────────────────────────────── */

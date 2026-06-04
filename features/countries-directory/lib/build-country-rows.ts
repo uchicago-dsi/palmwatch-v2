@@ -51,7 +51,6 @@ export function fmtKm2(v: number): string {
 
 export interface CountryDirectoryStat {
   label: string;
-  text?: boolean;
   value: string;
 }
 
@@ -97,12 +96,9 @@ export function buildCountryDirectoryModel(
     });
   }
 
-  const topCountry = [...rows].sort((a, b) => b.count - a.count)[0];
-
   const stats: CountryDirectoryStat[] = [
     { label: "Countries", value: rows.length.toLocaleString() },
     { label: "Total mills", value: totalMills.toLocaleString() },
-    { label: "Top country", value: topCountry?.name ?? "—", text: true },
     {
       label: `Global forest loss (2001–${maxYear})`,
       value: totalForestLoss == null ? "—" : fmtKm2(totalForestLoss),
