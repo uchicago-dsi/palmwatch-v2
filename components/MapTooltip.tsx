@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const TOOLTIP_CONFIG: Array<{
   label: string;
-  column: keyof UmlData | `treeloss_km_${number}`;
+  column: keyof UmlData;
 }> = [
   {
     label: "Mill Name",
@@ -21,7 +21,7 @@ const TOOLTIP_CONFIG: Array<{
   },
   {
     label: `Forest Loss ${maxYear} (km2)`,
-    column: `treeloss_km_${maxYear}`,
+    column: `treeloss_km_${maxYear}` as keyof UmlData,
   },
   {
     label: "Recent Deforestation Score",

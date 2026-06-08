@@ -69,6 +69,12 @@ export type UmlData = {
   treeloss_ha_2021: number;
   treeloss_km_2022: number;
   treeloss_ha_2022: number;
+  treeloss_km_2023: number;
+  treeloss_ha_2023: number;
+  treeloss_km_2024: number;
+  treeloss_ha_2024: number;
+  treeloss_km_2025: number;
+  treeloss_ha_2025: number;
   sum_of_treeloss_km: number;
   treeloss_sum_proportion_of_forest: number;
   remaining_proportion_of_forest: number;
