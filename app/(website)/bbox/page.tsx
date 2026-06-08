@@ -1,5 +1,6 @@
 "use client";
 
+import { latestTreelossKmColumn } from "@/config/years";
 import { PalmwatchMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
 import { QueryClient, useQuery } from "@tanstack/react-query";
@@ -90,7 +91,7 @@ function BboxInner() {
         dataTable={data?.mills || []}
         geoIdColumn="UML ID"
         dataIdColumn="UML ID"
-        choroplethColumn="treeloss_km_2022"
+        choroplethColumn={latestTreelossKmColumn}
         choroplethScheme="forestLoss"
         onMapMove={setViewState}
         noFlyMap

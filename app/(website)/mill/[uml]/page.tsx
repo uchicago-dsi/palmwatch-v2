@@ -10,7 +10,7 @@ import { MillInfo } from "@/components/MillInfo";
 import { getStats } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import { sumForestLoss } from "@/utils/sumForestloss";
-import { fullYearRange } from "@/config/years";
+import { fullYearRange, latestTreelossKmColumn } from "@/config/years";
 import { BarShareChartForests } from "@/components/BarShareChartForests";
 import cmsClient from "@/sanity/lib/client";
 import { PortableText } from "@/sanity/lib/components";
@@ -114,7 +114,7 @@ export default async function Page({ params }: { params: Promise<{ uml: string }
               dataTable={data}
               geoIdColumn="UML ID"
               dataIdColumn="UML ID"
-              choroplethColumn="treeloss_km_2022"
+              choroplethColumn={latestTreelossKmColumn}
               choroplethScheme="forestLoss"
             />
           </QueryProvider>

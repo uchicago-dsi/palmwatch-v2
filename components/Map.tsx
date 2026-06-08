@@ -19,7 +19,7 @@ import { Legend } from "./Legend";
 import { DataProvider } from "./DataProvider";
 import { useTooltipStore } from "@/stores/tooltipStore";
 import { MapTooltip } from "./MapTooltip";
-import { fullYearRange } from "@/config/years";
+import { fullYearRange, latestTreelossKmColumn } from "@/config/years";
 
 export type MapProps = {
   geoDataUrl: string;
@@ -222,7 +222,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
           <ul className="menu p-0 w-full rounded-box">
             <li>
               <button
-                onClick={() => handleVariable("treeloss_km_2022")}
+                onClick={() => handleVariable(latestTreelossKmColumn)}
                 className={`p-2 m-0 ${currentYear === -1 ? "" : "btn-active"}`}
               >
                 Deforestation By Year

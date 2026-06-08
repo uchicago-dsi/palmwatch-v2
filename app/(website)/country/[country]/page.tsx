@@ -1,4 +1,5 @@
 import React from "react";
+import { latestTreelossKmColumn } from "@/config/years";
 import queryClient from "@/utils/getMillData";
 import { BrandData, BrandInfo } from "@/components/BrandInfo";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
@@ -86,7 +87,7 @@ export default async function Page({
               dataTable={mills}
               geoIdColumn="UML ID"
               dataIdColumn="UML ID"
-              choroplethColumn="treeloss_km_2022"
+              choroplethColumn={latestTreelossKmColumn}
               choroplethScheme="forestLoss"
             />
           </QueryProvider>
