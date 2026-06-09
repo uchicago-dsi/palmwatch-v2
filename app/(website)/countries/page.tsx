@@ -22,7 +22,7 @@ export default async function Page() {
     <main className="mx-auto">
       <section className="prose flex flex-col py-4 max-w-none">
         <h1 className="p-0 m-0">Countries</h1>
-        {!!landingPageContent?.content && <p className="prose"><PortableText value={landingPageContent.content} /></p>}
+        {!!landingPageContent?.content && <PortableText value={landingPageContent.content} />}
         <InfoTable
           data={countryStats}
           columnMapping={{
@@ -44,11 +44,11 @@ export default async function Page() {
           rows={20}
         />
       </section>
-      <p className="prose my-4">
+      <div className="prose my-4">
         {!!landingPageContent?.disclaimer && (
           <PortableText value={landingPageContent.disclaimer} />
         )}
-      </p>
+      </div>
     </main>
   );
 }
