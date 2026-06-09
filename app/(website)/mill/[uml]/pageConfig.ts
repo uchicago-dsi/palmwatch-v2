@@ -1,15 +1,16 @@
 export const getStats = (
-  deforestation2022: number | string | null,
+  latestForestLoss: number | string | null,
+  latestYear: number,
   currentRisk: number | string | null,
   pastRisk: number | string | null,
   futureRisk: number | string | null,
 ) => {
   const formatter = new Intl.NumberFormat("en-US", {});
   const stats = [];
-  if (deforestation2022 !== null) {
+  if (latestForestLoss !== null) {
     stats.push({
-      title: "Forest Loss KM2 (2022)",
-      stat: formatter.format(+deforestation2022),
+      title: `Forest Loss KM2 (${latestYear})`,
+      stat: formatter.format(+latestForestLoss),
       className: "text-error",
     });
   }
