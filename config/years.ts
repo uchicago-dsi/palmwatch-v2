@@ -18,6 +18,11 @@ const fullYearRangeColumns = fullYearRange.map((y) => `treeloss_km_${y}`);
 /** Default choropleth / "latest year" column for maps and stats. */
 const latestTreelossKmColumn = `treeloss_km_${maxYear}`;
 
+/** Risk scores are calculated from the last two disclosure years in year_meta. */
+const riskScoreWindowStart =
+  yearRange.length >= 2 ? yearRange[yearRange.length - 2]! : maxYear;
+const riskScoreWindowEnd = maxYear;
+
 export {
   TREE_LOSS_START_YEAR,
   yearRange,
@@ -26,4 +31,6 @@ export {
   latestTreelossKmColumn,
   minYear,
   maxYear,
+  riskScoreWindowStart,
+  riskScoreWindowEnd,
 };

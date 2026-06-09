@@ -1,4 +1,4 @@
-import { minYear, maxYear } from "@/config/years";
+import { riskScoreWindowStart, riskScoreWindowEnd } from "@/config/years";
 
 export const getStats = (
   averageCurrentRisk: number | null,
@@ -14,7 +14,7 @@ export const getStats = (
       title: "Average Recent Deforestation Score",
       stat: formatter.format(averageCurrentRisk),
       className: "text-error",
-      description: `Mean Recent Deforestation Score of mills used by this brand (${minYear}-${maxYear})`,
+      description: `Mean Recent Deforestation Score of mills used by this brand (${riskScoreWindowStart}-${riskScoreWindowEnd})`,
     });
   }
   if (uniqueMills !== null) {
