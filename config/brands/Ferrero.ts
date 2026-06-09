@@ -33,6 +33,10 @@ export const Ferrero: BrandSchema = {
     {
       year: '2021',
       filename: "disclosures/ferrero/2021H1_ferrero.pdf",
+    },
+    {
+      year: '2025',
+      filename: "disclosures/ferrero/2025_ferrero.pdf",
     }
   ],
 };

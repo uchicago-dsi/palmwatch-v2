@@ -16,6 +16,10 @@ export const Mars: BrandSchema = {
     {
       year: '2021',
       filename: "disclosures/mars/2021H1_mars.pdf",
+    },
+    {
+      year: '2024',
+      filename: "disclosures/mars/2024H1_mars.pdf",
     }
   ],
 };

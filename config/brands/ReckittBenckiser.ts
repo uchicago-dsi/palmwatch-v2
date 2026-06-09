@@ -20,5 +20,9 @@ export const ReckittBenckiser: BrandSchema = {
     {
       year: '2021',
       filename: "disclosures/reckitt-benckiser/2021_reckitt_benckiser.pdf",
+    },
+    {
+      year: '2023',
+      filename: "disclosures/reckitt-benckiser/2023_reckitt_benckiser.pdf",
     }],
 };

@@ -21,6 +21,14 @@ export const ProcterAndGamble: BrandSchema = {
     {
       year: '2021',
       filename: "disclosures/procter-gamble/2021_procter___gamble.pdf",
+    },
+    {
+      year: '2026 (1/2)',
+      filename: "disclosures/procter-gamble/H12026_procter_gamble.pdf",
+    },
+    {
+      year: '2026 (2/2)',
+      filename: "disclosures/procter-gamble/H22026_procter_gamble.pdf",
     }
   ],
 };
