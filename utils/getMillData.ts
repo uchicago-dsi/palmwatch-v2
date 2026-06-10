@@ -7,21 +7,21 @@ function buildTreelossRollups() {
   const sumAllYears = Object.fromEntries(
     fullYearRange.map((year) => [
       `sum${year}`,
-      (d: any) => op.sum(d[`treeloss_km_${year}`]),
+      op.sum(`treeloss_km_${year}`),
     ])
   );
 
   const medianAllYears = Object.fromEntries(
     fullYearRange.map((year) => [
       `median${year}`,
-      (d: any) => op.median(d[`treeloss_km_${year}`]),
+      op.median(`treeloss_km_${year}`),
     ])
   );
 
   const meanAllSums = Object.fromEntries(
     fullYearRange.map((year) => [
       `mean${year}`,
-      (d: any) => op.mean(d[`sum${year}`]),
+      op.mean(`sum${year}`),
     ])
   );
 
