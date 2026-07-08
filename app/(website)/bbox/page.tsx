@@ -1,3 +1,14 @@
+/**
+ * Bounding-box explorer page.
+ *
+ * Renders an interactive map of palm oil mills. As the user pans or zooms, the
+ * visible viewport is translated into a geographic bounding box (the inner 60%
+ * of the map, from 20% to 80% of each axis) and sent to `/api/bbox`. The API
+ * returns every mill within those bounds, which is used to render the map
+ * choropleth, a summary StatsBlock (mill count, countries, average recent
+ * deforestation score, total forest loss), and a detailed InfoTable of the
+ * mills currently in view.
+ */
 "use client";
 
 import { latestTreelossKmColumn } from "@/config/years";
