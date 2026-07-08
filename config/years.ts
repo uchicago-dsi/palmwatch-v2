@@ -19,6 +19,16 @@ const TREE_LOSS_START_YEAR = 2001;
 const yearRange = [...(_yearRange as number[])].sort((a, b) => a - b);
 
 /**
+ * Inclusive start year of brand–mill association (sourcing) data. Brands only
+ * began reporting mill sourcing in 2017, so brand/mill sourcing tables should
+ * not show earlier (always-empty) year columns.
+ */
+const BRAND_MILL_START_YEAR = 2017;
+
+/** Years for brand–mill sourcing tables: 2017 through the latest data year. */
+const brandMillYearRange = yearRange.filter((y) => y >= BRAND_MILL_START_YEAR);
+
+/**
  * `minYear`/`maxYear` are the first/last tree-loss years in the data. The
  * fallback to `TREE_LOSS_START_YEAR` only applies to the degenerate case of an
  * empty `year_meta.json`; it keeps downstream ranges/columns well-formed rather
@@ -42,7 +52,9 @@ const riskScoreWindowEnd = maxYear;
 
 export {
   TREE_LOSS_START_YEAR,
+  BRAND_MILL_START_YEAR,
   yearRange,
+  brandMillYearRange,
   fullYearRange,
   fullYearRangeColumns,
   latestTreelossKmColumn,
