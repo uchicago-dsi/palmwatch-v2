@@ -8,7 +8,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "engines": {
     "node": ">=22.12.0"
@@ -64,7 +66,9 @@
     "zustand": "4.4.1"
   },
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@types/ms": "0.7.31",
+    "prettier": "^3.9.4",
     "turbo": "1.9.3"
   },
   "resolutions": {

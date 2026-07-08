@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+dist
+pnpm-lock.yaml
+
+# Generated / large data assets
+public/data
+public/disclosures
+utils/data
+utils/data_by_mill.ts
