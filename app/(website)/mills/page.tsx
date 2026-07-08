@@ -5,7 +5,7 @@ import React from "react";
 import { basicStatsConfig, forestStatsConfig, rspoStatsConfig } from "./pageConfig";
 import { StatsBlock } from "@/components/StatsBlock";
 import cmsClient from "@/sanity/lib/client";
-import { PortableText } from "@/sanity/lib/components";
+import { RichText } from "@/sanity/lib/components";
 import path from "path";
 
 export const revalidate = 60;
@@ -52,7 +52,7 @@ export default async function Page() {
     <main className="mx-auto">
       <section className="prose flex flex-col py-4 max-w-none">
         <h1 className="p-0 m-0">Mills</h1>
-        {!!landingPageContent?.content && <PortableText value={landingPageContent.content} />}
+        <RichText value={landingPageContent?.content} />
         <StatsBlock stats={basicStats} />
         <hr className="py-0 my-0" />
         <StatsBlock stats={rspoStats} />
@@ -73,9 +73,7 @@ export default async function Page() {
         />
       </div>
       <div className="prose my-4">
-        {!!landingPageContent?.disclaimer && (
-          <PortableText value={landingPageContent.disclaimer} />
-        )}
+        <RichText value={landingPageContent?.disclaimer} />
       </div>
     </main>
   );
