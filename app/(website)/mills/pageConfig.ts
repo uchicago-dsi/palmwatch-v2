@@ -66,7 +66,7 @@ export const forestStatsConfig = (
     if (totalForestArea !== null) {
       stats.push({
         title: "Percent Forest Loss",
-        stat: formatter.format((totalArea - totalForestArea)/totalForestArea*100) + "%",
+        stat: formatter.format(Math.round(totalForestLoss/totalForestArea*1000)/10) + "%",
         className: "",
       });
     }
