@@ -41,7 +41,14 @@ class MillDataQuery {
       loadArrow(`${basePath}/companies.arrow`, { columns: all() }),
     ]);
 
-    this.uml = uml;
+    // Normalize Country: source data contains stray leading/trailing
+    // whitespace (e.g. " Malaysia", "Liberia ") that would otherwise be
+    // grouped as distinct countries.
+    this.uml = uml.derive({
+      Country: escape((d: UmlData) =>
+        typeof d["Country"] === "string" ? d["Country"].trim() : d["Country"]
+      ),
+    });
     this.companies = companies;
     this.initialized = true;
   }
