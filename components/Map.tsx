@@ -46,6 +46,7 @@ export const PalmwatchMap: React.FC<MapProps> = ({
 }) => {
   const mapRef = React.useRef<typeof Map>(null);
   const [zoom, setZoom] = useState(0);
+  const [iconAtlas, setIconAtlas] = useState<HTMLImageElement | null>(null);
   const [currentChoroplethScheme, setCurrentChoroplethScheme] =
     useState(choroplethScheme);
   const [currentChoroplethColumn, setCurrentChoroplethColumn] =
@@ -109,7 +110,21 @@ export const PalmwatchMap: React.FC<MapProps> = ({
       },
       dataDict,
     };
-  }, [data, dataTable]);
+  }, [data, dataTable, dataIdColumn, geoIdColumn, isError, isLoading]);
+
+  useEffect(() => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => setIconAtlas(img);
+    img.src = "/icons/pin.png";
+  }, []);
+
+  useEffect(() => {
+    if (initialMapView?.zoom != null) {
+      setZoom(Math.round(initialMapView.zoom));
+    }
+  }, [initialMapView?.zoom]);
+
   useEffect(() => {
     // @ts-ignore
     !noFlyMap && mapRef?.current?.flyTo({
@@ -121,6 +136,18 @@ export const PalmwatchMap: React.FC<MapProps> = ({
     initialMapView?.longitude,
     initialMapView?.zoom,
   ]);
+
+  const millMarkerFeatures = useMemo(() => {
+    if (!data?.features || !dataDict) {
+      return [];
+    }
+
+    return data.features.filter((feature) => {
+      const id = feature.properties?.[geoIdColumn] as string;
+      const row = dataDict[id] as Record<string, unknown> | undefined;
+      return row?.Latitude != null && row?.Longitude != null;
+    });
+  }, [data, dataDict, geoIdColumn]);
 
   const layers = [
     new GeoJsonLayer({
@@ -158,35 +185,42 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         getLineWidth: [activeUml],
       },
     }),
-    
-    new IconLayer({
-      id: "mill-point",
-      beforeId: "tunnel-minor-case",
-      data: data?.features || [],
-      getPosition: (d) => {
-        const data = dataDict?.[d.properties![geoIdColumn] as string] as any;
-        return [data?.Longitude || 0, data?.Latitude || 0];
-      },
-      iconAtlas: "/icons/pin.png",
-      iconMapping: {
-        marker: { x: 0, y: 0, width: 128, height: 128, mask: true },
-      },
-      getSize: 5000,
-      getIcon: (d) => "marker",
-      sizeUnits: "meters",
-      sizeMinPixels: 20,
-      sizeMaxPixels: 50,
-      pickable: false,
-      visible: zoom > 5,
-      opacity: 0.8,
-      getColor: [0, 0, 0, 255],
-      updateTriggers: {
-        visible: zoom,
-        getColor: [dataDict],
-        getPosition: [dataDict],
-        getFillColor: [currentChoroplethColumn, currentChoroplethScheme],
-      },
-    }),
+    ...(iconAtlas
+      ? [
+          new IconLayer({
+            id: "mill-point",
+            beforeId: "tunnel-minor-case",
+            data: millMarkerFeatures,
+            getPosition: (d) => {
+              const row = dataDict?.[
+                d.properties![geoIdColumn] as string
+              ] as Record<string, unknown>;
+              return [
+                Number(row.Longitude),
+                Number(row.Latitude),
+              ];
+            },
+            iconAtlas,
+            iconMapping: {
+              marker: { x: 0, y: 0, width: 128, height: 128, mask: true },
+            },
+            getSize: 5000,
+            getIcon: () => "marker",
+            sizeUnits: "meters",
+            sizeMinPixels: 20,
+            sizeMaxPixels: 50,
+            pickable: false,
+            visible: zoom > 5,
+            opacity: 0.8,
+            getColor: [0, 0, 0, 255],
+            updateTriggers: {
+              visible: zoom,
+              getColor: [dataDict],
+              getPosition: [dataDict],
+            },
+          }),
+        ]
+      : []),
   ];
   const incrementYear = () => {
     const index = fullYearRange.indexOf(currentYear);
@@ -305,6 +339,9 @@ export const PalmwatchMap: React.FC<MapProps> = ({
         <Map
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
           mapStyle="mapbox://styles/dhalpern/cln0e32pu06ba01qxcgrp4gv9"
+          onLoad={(e) => {
+            setZoom(Math.round(e.target.getZoom()));
+          }}
           onMoveEnd={(e) => {
             setZoom(Math.round(e.viewState.zoom));
             onMapMove && onMapMove(e);
