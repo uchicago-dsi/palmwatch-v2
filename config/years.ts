@@ -16,7 +16,7 @@ import { range } from "@/utils/range";
 const TREE_LOSS_START_YEAR = 2001;
 
 /** Tree-loss years present in the data, sorted ascending. */
-const yearRange = [...(_yearRange as number[])].sort((a, b) => a - b);
+const treeLossYearRange = [...(_yearRange as number[])].sort((a, b) => a - b);
 
 /**
  * Inclusive start year of brand–mill association (sourcing) data. Brands only
@@ -26,7 +26,9 @@ const yearRange = [...(_yearRange as number[])].sort((a, b) => a - b);
 const BRAND_MILL_START_YEAR = 2017;
 
 /** Years for brand–mill sourcing tables: 2017 through the latest data year. */
-const brandMillYearRange = yearRange.filter((y) => y >= BRAND_MILL_START_YEAR);
+const brandMillYearRange = treeLossYearRange.filter(
+  (y) => y >= BRAND_MILL_START_YEAR
+);
 
 /**
  * `minYear`/`maxYear` are the first/last tree-loss years in the data. The
@@ -34,8 +36,12 @@ const brandMillYearRange = yearRange.filter((y) => y >= BRAND_MILL_START_YEAR);
  * empty `year_meta.json`; it keeps downstream ranges/columns well-formed rather
  * than producing `NaN`.
  */
-const minYear = yearRange.length ? Math.min(...yearRange) : TREE_LOSS_START_YEAR;
-const maxYear = yearRange.length ? Math.max(...yearRange) : TREE_LOSS_START_YEAR;
+const minYear = treeLossYearRange.length
+  ? Math.min(...treeLossYearRange)
+  : TREE_LOSS_START_YEAR;
+const maxYear = treeLossYearRange.length
+  ? Math.max(...treeLossYearRange)
+  : TREE_LOSS_START_YEAR;
 
 /** Tree-loss years for map layers and charts: start year through max year. */
 const fullYearRange = range(TREE_LOSS_START_YEAR, maxYear + 1);
@@ -47,13 +53,15 @@ const latestTreelossKmColumn = `treeloss_km_${maxYear}`;
 
 /** Risk scores are calculated from the last two disclosure years in year_meta. */
 const riskScoreWindowStart =
-  yearRange.length >= 2 ? yearRange[yearRange.length - 2]! : maxYear;
+  treeLossYearRange.length >= 2
+    ? treeLossYearRange[treeLossYearRange.length - 2]!
+    : maxYear;
 const riskScoreWindowEnd = maxYear;
 
 export {
   TREE_LOSS_START_YEAR,
   BRAND_MILL_START_YEAR,
-  yearRange,
+  treeLossYearRange,
   brandMillYearRange,
   fullYearRange,
   fullYearRangeColumns,

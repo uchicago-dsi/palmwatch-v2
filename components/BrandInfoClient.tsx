@@ -2,7 +2,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useActiveUmlStore } from "@/stores/activeUml";
-import { maxYear, minYear, yearRange } from "@/config/years";
+import { maxYear, minYear } from "@/config/years";
 import { BrandData, BrandInfo } from "./BrandInfo";
 import { Preloader } from "./Preloader";
 
