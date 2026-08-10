@@ -1,5 +1,5 @@
 import React from "react";
-import { yearRange } from "@/config/years";
+import { brandMillYearRange } from "@/config/years";
 import { IconLink } from "./IconLink";
 
 export type BrandData = Array<{
@@ -22,7 +22,7 @@ export const BrandInfo: React.FC<{ data: BrandData }> = ({ data }) => {
           <thead>
             <tr>
               <th className="px-2">Brand</th>
-              {yearRange.map((year) => (
+              {brandMillYearRange.map((year) => (
                 <th key={year}>{year}</th>
               ))}
             </tr>
@@ -36,7 +36,7 @@ export const BrandInfo: React.FC<{ data: BrandData }> = ({ data }) => {
                       label={brand.consumer_brand}
                       />
                   </td>
-                  {yearRange.map((year) => (
+                  {brandMillYearRange.map((year) => (
                     <td key={year}>{brand.years.includes(year) ? <CircleSvg/> : null}</td>
                   ))}
                 </>

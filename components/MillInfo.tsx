@@ -2,7 +2,6 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useActiveUmlStore } from "@/stores/activeUml";
-import { yearRange } from "@/config/years";
 import { UmlData } from "@/utils/dataTypes";
 import { millInfoColumns } from "@/config/millInfo";
 import { Preloader } from "./Preloader";

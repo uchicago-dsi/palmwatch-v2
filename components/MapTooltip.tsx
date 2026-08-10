@@ -1,3 +1,4 @@
+import { maxYear } from "@/config/years";
 import { useTooltipStore } from "@/stores/tooltipStore";
 import { UmlData } from "@/utils/dataTypes";
 import { useQuery } from "@tanstack/react-query";
@@ -19,8 +20,8 @@ const TOOLTIP_CONFIG: Array<{
     column: "Country",
   },
   {
-    label: "Forest Loss 2022 (km2)",
-    column: "treeloss_km_2022",
+    label: `Forest Loss ${maxYear} (km2)`,
+    column: `treeloss_km_${maxYear}` as keyof UmlData,
   },
   {
     label: "Recent Deforestation Score",

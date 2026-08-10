@@ -48,3 +48,10 @@ export const PortableText: React.FC<{value: any}> = ({value}) => {
   // @ts-ignore
   return <OgPortableText value={value} components={myPortableTextComponents}/>
 }
+
+// Renders Portable Text only when there is content, so callers don't have to
+// repeat the null/undefined/empty check at every usage site.
+export const RichText: React.FC<{ value?: any }> = ({ value }) => {
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
+  return <PortableText value={value} />;
+};

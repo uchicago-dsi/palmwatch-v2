@@ -1,4 +1,5 @@
 import React from "react";
+import { latestTreelossKmColumn } from "@/config/years";
 import { ServerIqr } from "@/components/IqrOverTimeLineChart";
 import { ServerMap } from "@/components/Map";
 import { QueryProvider } from "@/components/QueryProvider";
@@ -67,7 +68,7 @@ export default async function Page({ params }: { params: Promise<{ brand: string
                 dataTable={[]}
                 geoIdColumn="UML ID"
                 dataIdColumn="UML ID"
-                choroplethColumn="treeloss_km_2022"
+                choroplethColumn={latestTreelossKmColumn}
                 choroplethScheme="forestLoss"
               />
             </div>

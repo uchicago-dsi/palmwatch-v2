@@ -42,5 +42,9 @@ export const ColgatePalmolive: BrandSchema = {
       year: "2021 (2/2)",
       filename: "disclosures/colgate-palmolive/2021H2_colgate_palmolive.pdf",
     },
+    {
+      year: "2024",
+      filename: "disclosures/colgate-palmolive/2024_colgate_palmolive.pdf",
+    },
   ],
 };

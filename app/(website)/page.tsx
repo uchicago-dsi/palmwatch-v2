@@ -4,7 +4,7 @@ import { BrandInfoClient } from "@/components/BrandInfoClient";
 import Link from "next/link";
 import { ScrollToButton } from "@/components/ScrollToButton";
 import cmsClient from "@/sanity/lib/client";
-import { PortableText, urlFor } from "@/sanity/lib/components";
+import { PortableText, RichText, urlFor } from "@/sanity/lib/components";
 import { HomePageMap } from "@/components/HomePageMap";
 
 export const revalidate = 60;
@@ -103,7 +103,7 @@ export default async function Home() {
         className="bg-base-200 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg mx-auto w-[90%] relative block"
       >
         <div className="prose p-4 max-w-none">
-          {!!mapDescription?.length && <PortableText value={mapDescription} />}
+          <RichText value={mapDescription} />
         </div>
         <QueryProvider>
           <HomePageMap />

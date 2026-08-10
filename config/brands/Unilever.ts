@@ -20,6 +20,10 @@ export const Unilever: BrandSchema = {
     {
       year: '2021',
       filename: "disclosures/unilver/2021.pdf",
+    },
+    {
+      year: '2024',
+      filename: "disclosures/unilever/2024_unilever.pdf",
     }
   ],
 };

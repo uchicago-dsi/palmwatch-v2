@@ -18,5 +18,9 @@ export const FrieslandCampina: BrandSchema = {
 {
   year: '2022',
   filename: "disclosures/friesland-campina/2022_friesland_campina.pdf",
+},
+{
+  year: '2024',
+  filename: "disclosures/friesland-campina/2024_friesland_campina.pdf",
 }],
 };

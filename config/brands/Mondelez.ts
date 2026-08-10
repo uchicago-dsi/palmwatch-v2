@@ -25,5 +25,9 @@ export const Mondelez: BrandSchema = {
       year: "2021",
       filename: "disclosures/mondelez/2021_mondelez.pdf",
     },
+    {
+      year: "2024",
+      filename: "disclosures/mondelez/2024_mondelez.pdf",
+    },
   ],
 };

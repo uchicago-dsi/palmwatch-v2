@@ -24,6 +24,10 @@ export const PepsiCo: BrandSchema = {
     {
       year: '2021',
       filename: "disclosures/pepsico/2021_pepsico.pdf",
+    },
+    {
+      year: '2024',
+      filename: "disclosures/pepsico/2024_pepsico.pdf",
     }
   ],
 };

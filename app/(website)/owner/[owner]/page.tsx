@@ -1,4 +1,5 @@
 import React from "react";
+import { latestTreelossKmColumn, maxYear } from "@/config/years";
 import queryClient from "@/utils/getMillData";
 import { BrandData, BrandInfo } from "@/components/BrandInfo";
 import { IqrOverTime } from "@/components/IqrOverTimeLineChart";
@@ -59,7 +60,7 @@ export default async function Page({
       </div>
       <div className="my-4 p-4 bg-base/30 shadow-xl ring-1 ring-gray-900/5 rounded-lg w-full">
         <h3 className="text-xl my-4 font-bold">
-          Palm Oil Mill Deforestation Map: Forest Loss in KM2 (2022)
+          Palm Oil Mill Deforestation Map: Forest Loss in KM2 ({maxYear})
         </h3>
         <div className="relative h-[60vh] w-full">
           <QueryProvider>
@@ -68,7 +69,7 @@ export default async function Page({
               dataTable={mills}
               geoIdColumn="UML ID"
               dataIdColumn="UML ID"
-              choroplethColumn="treeloss_km_2022"
+              choroplethColumn={latestTreelossKmColumn}
               choroplethScheme="forestLoss"
             />
           </QueryProvider>

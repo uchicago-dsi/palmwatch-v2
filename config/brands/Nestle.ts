@@ -21,5 +21,9 @@ export const Nestle: BrandSchema = {
       year: '2020',
       filename: "disclosures/nestle/2020H1_nestle.pdf",
     },
+    {
+      year: '2025',
+      filename: "disclosures/nestle/2025_nestle.pdf",
+    },
   ],
 };
